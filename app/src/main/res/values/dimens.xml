@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="spinner_dropdown_item_height">48dp</dimen>
+    <dimen name="spinner_item_left_right_padding">16dp</dimen>
+    <dimen name="divider_padding">16dp</dimen>
+</resources>

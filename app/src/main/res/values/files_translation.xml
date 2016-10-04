@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="translation_for_files_ru" translatable = "false">
+        <item>Площадь</item>
+        <item>Расстояние</item>
+        <item>Энергия</item>
+        <item>Информация</item>
+        <item>Мощность</item>
+        <item>Давление</item>
+        <item>Время</item>
+        <item>Скорость</item>
+        <item>Объём</item>
+        <item>Масса</item>
+    </string-array>
+</resources>
