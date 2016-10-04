@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.LinkedHashMap;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -101,5 +102,31 @@ public class InMemoryConvertersRepositoryTest {
 
         // check Api was called once
         verify(mServiceApi).getLastConverter(any(ConvertersServiceApi.ConverterServiceCallback.class));
+    }
+
+    @Test
+    public void lastPositionChanging() {
+        // retrieve first converter
+        mRepository.getConverter(CONVERTERS_TYPES[0], mGetConverterCallback);
+        verify(mServiceApi).getConverter(eq(CONVERTERS_TYPES[0]), mCaptor.capture());
+        mCaptor.getValue().onLoaded(new Converter(CONVERTERS_TYPES[0], new LinkedHashMap<String, Double>()));
+
+        int startPos = mRepository.mLastPos;
+
+        // retrieve first converter
+        mRepository.getConverter(CONVERTERS_TYPES[1], mGetConverterCallback);
+        verify(mServiceApi).getConverter(eq(CONVERTERS_TYPES[1]), mCaptor.capture());
+        mCaptor.getValue().onLoaded(new Converter(CONVERTERS_TYPES[1], new LinkedHashMap<String, Double>()));
+
+        assertNotEquals(startPos, mRepository.mLastPos);
+
+        startPos = mRepository.mLastPos;
+
+        // both converter already caching
+
+        // retrieve first converter again
+        mRepository.getConverter(CONVERTERS_TYPES[0], mGetConverterCallback);
+
+        assertNotEquals(startPos, mRepository.mLastPos);
     }
 }

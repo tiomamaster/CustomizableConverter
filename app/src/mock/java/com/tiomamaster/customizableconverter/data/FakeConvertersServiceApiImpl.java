@@ -27,6 +27,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
                 units.put("Unit" + i + j, ((double) i + 1 + j*5));
             }
             Converter test = new Converter("Fake converter" + j, units);
+            test.setLastUnitPosition(new Random().nextInt(test.getUnits().size()));
             CONVERTERS.put(test.getName(), test);
         }
     }

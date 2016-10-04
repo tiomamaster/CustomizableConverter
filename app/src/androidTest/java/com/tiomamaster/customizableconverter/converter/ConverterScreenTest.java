@@ -185,7 +185,8 @@ public class ConverterScreenTest {
         onData(is(instanceOf(String.class))).atPosition(2).perform(click());
 
         // check spinner units selected 0 item(or saved item - not impl yet)
-        Assert.assertEquals(0, mFragment.mSpinnerUnits.getSelectedItemPosition());
+        Assert.assertEquals(mFragment.mCurConverter.getLastUnitPosition(),
+                mFragment.mSpinnerUnits.getSelectedItemPosition());
 
         // check edit text is empty(or have saved text - not impl yet)
         onView(withId(R.id.quantity)).check(matches(withText("")));

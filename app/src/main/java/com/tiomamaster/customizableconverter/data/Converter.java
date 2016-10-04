@@ -29,7 +29,7 @@ public class Converter {
 
     private int mOrderPosition;
 
-    private int mLastUnit;
+    private int mLastUnitPosition;
 
     @Nullable
     private String mLastQuantity;
@@ -42,7 +42,7 @@ public class Converter {
         mName = name;
         mErrors = errors;
         mOrderPosition = orderPosition;
-        mLastUnit = lastUnit;
+        mLastUnitPosition = lastUnit;
         mLastQuantity = lastQuantity;
     }
 
@@ -54,24 +54,6 @@ public class Converter {
 
     public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units) {
         this(name, units, null, count++, 0, "");
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Converter converter = (Converter) o;
-        return mOrderPosition == converter.mOrderPosition &&
-                mLastUnit == converter.mLastUnit &&
-                Objects.equal(mName, converter.mName) &&
-                Objects.equal(mUnits, converter.mUnits) &&
-                Objects.equal(mErrors, converter.mErrors) &&
-                Objects.equal(mLastQuantity, converter.mLastQuantity);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(mName, mUnits, mErrors, mOrderPosition, mLastUnit, mLastQuantity);
     }
 
     @NonNull
@@ -133,16 +115,12 @@ public class Converter {
         mOrderPosition = orderPosition;
     }
 
-    public void setLastUnit(int mLastUnit) {
-        this.mLastUnit = mLastUnit;
+    public int getLastUnitPosition() {
+        return mLastUnitPosition;
     }
 
-    public void setLastQuantity(String mLastQuantity) {
-        this.mLastQuantity = mLastQuantity;
-    }
-
-    public int getLastUnit() {
-        return mLastUnit;
+    public void setLastUnitPosition(int mLastUnit) {
+        this.mLastUnitPosition = mLastUnit;
     }
 
     public String getLastQuantity() {
@@ -150,4 +128,9 @@ public class Converter {
             return "";
         return mLastQuantity;
     }
+
+    public void setLastQuantity(String mLastQuantity) {
+        this.mLastQuantity = mLastQuantity;
+    }
+
 }

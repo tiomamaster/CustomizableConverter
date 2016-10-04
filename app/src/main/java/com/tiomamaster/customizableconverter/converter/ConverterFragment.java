@@ -203,14 +203,16 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                     mSpinnerUnits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            convert(((CheckedTextView) view).getText().toString(), mQuantity.getText().toString());
                             mSpinnerUnitsSelection = position;
+
+                            // save last selected unit position in converter
+                            mCurConverter.setLastUnitPosition(position);
+
+                            convert(((CheckedTextView) view).getText().toString(), mQuantity.getText().toString());
                         }
 
                         @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
-
-                        }
+                        public void onNothingSelected(AdapterView<?> parent) {}
                     });
                 }
                 return false;
@@ -228,19 +230,19 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                     mQuantity.setFocusableInTouchMode(true);
                     mQuantity.addTextChangedListener(new TextWatcher() {
                         @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                        }
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                         @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                        }
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
                         @Override
                         public void afterTextChanged(Editable s) {
                             if (s.length() != 0 && mSpinnerUnits.getSelectedItem() != null) {
                                 mQuantityText = s.toString();
+
+                                // save last entered quantity in converter
+                                mCurConverter.setLastQuantity(s.toString());
+
                                 convert(mSpinnerUnits.getSelectedItem().toString(), mQuantityText);
                             }
                         }
@@ -293,7 +295,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mActionsListener.loadConverter(mParentActivity.mSpinConvTypes.getSelectedItem().toString());
     }
 
-    // TODO in converter add last selected unit and quantity text
     @Override
     public void showConverter(@NonNull Converter converter) {
         checkNotNull(converter);
@@ -306,12 +307,12 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         for (String s : converter.getAllUnitsName()) {
             mUnitsAdapter.add(s);
         }
-        // set selection if rotate occurred
-        mSpinnerUnits.setSelection(mSpinnerUnitsSelection);
+        // set last selection
+        mSpinnerUnits.setSelection(converter.getLastUnitPosition());
 
-        // clear edit text
+        // set last quantity text
         if (mQuantity != null) {
-            mQuantity.setText(mQuantityText);
+            mQuantity.setText(converter.getLastQuantity());
         }
 
         // clear recycler view conversion result
@@ -323,7 +324,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
 
         // show conversion result
-        convert(mSpinnerUnits.getSelectedItem().toString(), mQuantityText);
+        convert(mSpinnerUnits.getSelectedItem().toString(), mCurConverter.getLastQuantity());
     }
 
     /**

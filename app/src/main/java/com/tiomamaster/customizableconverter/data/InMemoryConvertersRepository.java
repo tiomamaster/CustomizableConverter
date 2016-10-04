@@ -16,7 +16,8 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     private final ConvertersServiceApi mConvertersServiceApi;
 
-    private int mLastPos;
+    @VisibleForTesting
+    int mLastPos;
 
     private String mLastConverterName;
 
@@ -66,6 +67,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         checkNotNull(name);
         if (mCachedConverters != null && mCachedConverters.containsKey(name)) {
             callback.onConverterLoaded(mCachedConverters.get(name));
+            mLastPos = mCachedConverters.get(name).getOrderPosition();
             return;
         }
 
