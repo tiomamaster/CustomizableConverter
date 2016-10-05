@@ -3,8 +3,10 @@ package com.tiomamaster.customizableconverter.converter;
 
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
+import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
+import android.support.test.espresso.core.deps.guava.base.Strings;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
@@ -18,6 +20,7 @@ import com.tiomamaster.customizableconverter.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,14 +29,20 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.pressBack;
+import static android.support.test.espresso.action.ViewActions.clearText;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
 import static android.support.test.espresso.matcher.ViewMatchers.hasImeAction;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withSpinnerText;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -44,6 +53,8 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Artyom on 19.07.2016.
@@ -51,7 +62,7 @@ import static org.hamcrest.Matchers.not;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ConverterScreenTest {
-
+//TODO test for hide soft input when change converter
     @Rule
     public ActivityTestRule<ConverterActivity> mActivityRule = new ActivityTestRule<>(
             ConverterActivity.class);
@@ -94,7 +105,7 @@ public class ConverterScreenTest {
 
         // quantity edit text type text
         String typedText = "9999.879";
-        onView(withId(R.id.quantity)).perform(typeText(typedText));
+        onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(typedText));
 
         // recycler view
         int count = mFragment.mConversionResult.getAdapter().getItemCount();
@@ -109,7 +120,7 @@ public class ConverterScreenTest {
         onView(withId(R.id.quantity)).check(matches(withText(typedText)));
 
         // recycler view
-        Assert.assertEquals(count, mFragment.mConversionResult.getAdapter().getItemCount());
+        assertEquals(count, mFragment.mConversionResult.getAdapter().getItemCount());
     }
 
     @Test
@@ -139,7 +150,7 @@ public class ConverterScreenTest {
         String from = mFragment.mSpinnerUnits.getSelectedItem().toString();
 
         // Type text into EditText
-        onView(withId(R.id.quantity)).perform(typeText(String.valueOf(quantity)));
+        onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(String.valueOf(quantity)));
 
         // Get the result from the converter
         String[][] expected = mFragment.mCurConverter.convertAllExt(quantity, from);
@@ -158,48 +169,6 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void textViewResultVisibilityTest() {
-        // check text invisible
-        onView(withId(R.id.resultText)).
-                check(matches(withEffectiveVisibility(ViewMatchers.Visibility.INVISIBLE)));
-
-        // type text for conversion
-        onView(withId(R.id.quantity)).perform(typeText("1"));
-
-        // check text visible
-        onView(withId(R.id.resultText)).
-                check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
-    }
-
-    @Test
-    public void selectAnotherConverterTest() {
-        // type text to show result
-        onView(withId(R.id.quantity)).perform(typeText("987.987"));
-
-        // select item on spinner units above 0
-        onView(withId(R.id.spinner_units)).perform(click());
-        onData(is(instanceOf(String.class))).atPosition(1).perform(click());
-
-        // select another type of converter
-        onView(withId(R.id.spinner_conv_types)).perform(click());
-        onData(is(instanceOf(String.class))).atPosition(2).perform(click());
-
-        // check spinner units selected 0 item(or saved item - not impl yet)
-        Assert.assertEquals(mFragment.mCurConverter.getLastUnitPosition(),
-                mFragment.mSpinnerUnits.getSelectedItemPosition());
-
-        // check edit text is empty(or have saved text - not impl yet)
-        onView(withId(R.id.quantity)).check(matches(withText("")));
-
-        // check text view result is invisible(or no if state was saved - not impl yet)
-        onView(withId(R.id.resultText)).
-                check(matches(withEffectiveVisibility(ViewMatchers.Visibility.INVISIBLE)));
-
-        // check recycler result is empty, only header view presented(or load saved result - no impl yet)
-        Assert.assertEquals(1, mFragment.mConversionResult.getAdapter().getItemCount());
-    }
-
-    @Test
     public void closeSoftKeyboardWhenScrollTest() {
         // input text to show keyboard
         onView(withId(R.id.quantity)).perform(typeText("900"));
@@ -212,6 +181,43 @@ public class ConverterScreenTest {
 
         // check soft keyboard is hidden
         Assert.assertFalse(mFragment.imm.isActive());
+    }
+
+    @Test
+    public void saveConverterStateTest() {
+        int converterPos = 2;
+        int anotherConverterPos = 3;
+        int unitPosition = 3;
+        String quantityText = "54.02164";
+
+        // select converter
+        ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_conv_types));
+        spinnerConverterTypes.perform(click());
+        onData(is(instanceOf(String.class))).atPosition(converterPos).perform(click());
+
+        // select unit
+        onView(withId(R.id.spinner_units)).perform(click());
+        onData(is(instanceOf(String.class))).atPosition(unitPosition).perform(click());
+
+        // input quantity
+        onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(quantityText));
+
+        // select another converter
+        spinnerConverterTypes.perform(click());
+        onData(is(instanceOf(String.class))).atPosition(anotherConverterPos).perform(click());
+
+        // select converter again and check it state
+        spinnerConverterTypes.perform(click());
+        onData(is(instanceOf(String.class))).atPosition(converterPos).perform(click());
+        // spinner units state
+        assertEquals(unitPosition, mFragment.mSpinnerUnits.getSelectedItemPosition());
+        // quantity edit text state
+        onView(withId(R.id.quantity)).check(matches(withText(quantityText)));
+        // check text view result is visible
+        onView(withId(R.id.resultText)).
+                check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
+        // result is shown
+        assertTrue(mFragment.mConversionResult.getAdapter().getItemCount() > 1);
     }
 
     private void checkRecyclerView(String[][] expected) {
@@ -228,7 +234,7 @@ public class ConverterScreenTest {
 
     private void rotateScreenAndCheckIt() {
         mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        Assert.assertEquals(mActivity.getRequestedOrientation(),
+        assertEquals(mActivity.getRequestedOrientation(),
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 

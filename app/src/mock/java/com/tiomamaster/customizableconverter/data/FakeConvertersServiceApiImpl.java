@@ -28,6 +28,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
             }
             Converter test = new Converter("Fake converter" + j, units);
             test.setLastUnitPosition(new Random().nextInt(test.getUnits().size()));
+            test.setLastQuantity("123456789.0987654321");
             CONVERTERS.put(test.getName(), test);
         }
     }

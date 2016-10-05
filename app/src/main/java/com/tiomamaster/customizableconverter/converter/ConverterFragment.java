@@ -51,13 +51,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @VisibleForTesting
     Spinner mSpinnerUnits;
-    private String mSpinSelKey = "spin_sel";
-    private int mSpinnerUnitsSelection;
     private ArrayAdapter<String> mUnitsAdapter;
 
     private EditText mQuantity;
-    private String mQuantityKey = "quantity_text";
-    private String mQuantityText;
 
     private TextView mResultText;
 
@@ -78,13 +74,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(mSpinSelKey, mSpinnerUnits.getSelectedItemPosition());
-        outState.putString(mQuantityKey, mQuantity.getText().toString());
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setRetainInstance(true);
@@ -95,11 +84,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 provideConvertersRepository(mParentActivity.getApplicationContext()), this);
 
         imm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-
-        if (savedInstanceState != null) {
-            mSpinnerUnitsSelection = savedInstanceState.getInt(mSpinSelKey);
-            mQuantityText = savedInstanceState.getString(mQuantityKey);
-        }
 
         // create adapter here because need context
         mUnitsAdapter = new MySpinnerAdapter(mParentActivity, Color.BLACK,
@@ -135,13 +119,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 mQuantity.setFocusableInTouchMode(false);
 
                 // hide soft keyboard when scroll
-                //Find the currently focused view, so we can grab the correct window token from it.
-                View view = mParentActivity.getCurrentFocus();
-                //If no view currently has focus, create a new one, just so we can grab a window token from it
-                if (view == null) {
-                    view = new View(mParentActivity);
-                }
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                hideSoftInput();
             }
 
             @Override
@@ -203,8 +181,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                     mSpinnerUnits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            mSpinnerUnitsSelection = position;
-
                             // save last selected unit position in converter
                             mCurConverter.setLastUnitPosition(position);
 
@@ -238,12 +214,10 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                         @Override
                         public void afterTextChanged(Editable s) {
                             if (s.length() != 0 && mSpinnerUnits.getSelectedItem() != null) {
-                                mQuantityText = s.toString();
-
                                 // save last entered quantity in converter
                                 mCurConverter.setLastQuantity(s.toString());
 
-                                convert(mSpinnerUnits.getSelectedItem().toString(), mQuantityText);
+                                convert(mSpinnerUnits.getSelectedItem().toString(), s.toString());
                             }
                         }
                     });
@@ -255,6 +229,16 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mResultText = (TextView) mRecyclerViewHeader.findViewById(R.id.resultText);
 
         return root;
+    }
+
+     void hideSoftInput() {
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = mParentActivity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(mParentActivity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     // Convert from selected in Spinner unit and quantity in EditText
@@ -313,6 +297,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         // set last quantity text
         if (mQuantity != null) {
             mQuantity.setText(converter.getLastQuantity());
+            mQuantity.setFocusableInTouchMode(false);
+            mQuantity.clearFocus();
         }
 
         // clear recycler view conversion result
@@ -324,15 +310,14 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
 
         // show conversion result
-        convert(mSpinnerUnits.getSelectedItem().toString(), mCurConverter.getLastQuantity());
+        convert(mSpinnerUnits.getSelectedItem().toString(), converter.getLastQuantity());
     }
 
     /**
      * Handle selection of spinner converters types
      */
     void spinnerSelected(String selection) {
-        mQuantityText = "";
-        mSpinnerUnitsSelection = 0;
+        mConversionResult.setVisibility(View.GONE);
         mActionsListener.loadConverter(selection);
     }
 
@@ -369,7 +354,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 notifyItemRangeInserted(1, mDataSet.length);
             } else {
                 mDataSet = newData;
-                notifyItemRangeChanged(1, mDataSet.length);
+                // because notifyItemInserted() cause bug inside recycler view
+                notifyDataSetChanged();
             }
         }
 

@@ -69,6 +69,9 @@ public class ConverterActivity extends AppCompatActivity {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         ((ConverterFragment) getSupportFragmentManager().
+                                findFragmentByTag(mConverterFragmentTag)).hideSoftInput();
+
+                        ((ConverterFragment) getSupportFragmentManager().
                                 findFragmentByTag(mConverterFragmentTag)).
                                 spinnerSelected(((TextView) view).getText().toString());
 
@@ -114,6 +117,8 @@ public class ConverterActivity extends AppCompatActivity {
 
         mSpinConvTypes.setVisibility(View.VISIBLE);
 
+        // clear adapter and inflate it
+        mConvertersAdapter.clear();
         for (String s : convertersTypes) {
             mConvertersAdapter.add(s);
         }
