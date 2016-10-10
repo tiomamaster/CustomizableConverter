@@ -10,13 +10,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.AutoScrollHelper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.SuperscriptSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,7 +52,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     Converter mCurConverter;
 
     @VisibleForTesting
-    InputMethodManager imm;
+    InputMethodManager mImm;
 
     @VisibleForTesting
     Spinner mSpinnerUnits;
@@ -65,8 +70,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     private View mRecyclerViewHeader;
 
-    public ConverterFragment() {
-    }
+    public ConverterFragment() {}
 
     public static ConverterFragment newInstance() {
         return new ConverterFragment();
@@ -83,7 +87,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mActionsListener = new ConverterPresenter(Injection.
                 provideConvertersRepository(mParentActivity.getApplicationContext()), this);
 
-        imm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 
         // create adapter here because need context
         mUnitsAdapter = new MySpinnerAdapter(mParentActivity, Color.BLACK,
@@ -238,14 +242,14 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         if (view == null) {
             view = new View(mParentActivity);
         }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     // Convert from selected in Spinner unit and quantity in EditText
     // to all possible units in this type of converter and set they to RecyclerView
     private void convert(String from, String quantity) {
         if (TextUtils.isEmpty(quantity)) return;
-        mResultAdapter.setDataSet(mCurConverter.convertAllExt(Double.parseDouble(quantity), from));
+        mResultAdapter.setDataSet(mCurConverter.convertAllExtFormatted(Double.parseDouble(quantity), from));
         mResultText.setVisibility(View.VISIBLE);
     }
 
@@ -284,8 +288,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         checkNotNull(converter);
         mCurConverter = converter;
 
-        mConversionResult.setVisibility(View.VISIBLE);
-
         // clear spinner units and set new data
         mUnitsAdapter.clear();
         for (String s : converter.getAllUnitsName()) {
@@ -311,6 +313,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         // show conversion result
         convert(mSpinnerUnits.getSelectedItem().toString(), converter.getLastQuantity());
+
+        mConversionResult.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -389,7 +393,18 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             if (holder instanceof VHItem) {
                 if (mDataSet != null) {
                     ((VHItem) holder).mUnitName.setText(mDataSet[position - 1][0]);
-                    ((VHItem) holder).mResult.setText(mDataSet[position - 1][1]);
+
+                    if (mDataSet[position - 1][1].contains("×")) {
+                        // format text to show power
+                        String result = mDataSet[position - 1][1];
+                        int start = result.indexOf('×') + 3;
+                        int end = result.length();
+                        SpannableStringBuilder ssb = new SpannableStringBuilder(result);
+                        ssb.setSpan(new SuperscriptSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        ssb.setSpan(new RelativeSizeSpan(0.75f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        ((VHItem) holder).mResult.setText(ssb);
+                    } else
+                        ((VHItem) holder).mResult.setText(mDataSet[position - 1][1]);
                 }
             } else if (holder instanceof VHHeader) {
                 mQuantity.requestFocus();

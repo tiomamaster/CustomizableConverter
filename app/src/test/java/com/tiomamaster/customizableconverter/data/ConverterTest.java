@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -39,7 +40,7 @@ public class ConverterTest {
         for (int i = 0; i < unitsName.length; i++) {
             units.put(unitsName[i], unitsValue[i]);
         }
-        converter = new Converter("Test", units, null);
+        converter = new Converter("Test", units);
     }
 
     @Test
@@ -60,15 +61,31 @@ public class ConverterTest {
     }
 
     @Test
-    public void convertAllTest() {
+    public void convertAllExtTest() {
         String from = unitsName[1];
         double quantity = 5.2225;
         String expectedNames[] = converter.getAllUnitsName();
         double[] expectedResults = converter.convertAll(quantity, from);
-        String[][] actual = converter.convertAllExt(quantity,from);
+        String[][] actual = converter.convertAllExt(quantity, from);
         for (int i = 0; i < actual.length; i++) {
             assertEquals(expectedNames[i], actual[i][0]);
             assertEquals(String.valueOf(expectedResults[i]), actual[i][1]);
+        }
+    }
+
+    @Test
+    public void convertAllExtFormattedTest() {
+        String from = unitsName[1];
+        double quantity = 5.2225;
+        String expectedNames[] = converter.getAllUnitsName();
+        double[] expectedResults = converter.convertAll(quantity, from);
+        String[][] actual = converter.convertAllExtFormatted(quantity, from);
+
+        // check result not contains from unit
+        assertEquals(expectedResults.length - 1, actual.length);
+        assertEquals(expectedNames.length - 1, actual.length);
+        for (String[] anActual : actual) {
+            assertNotEquals(from, anActual[0]);
         }
     }
 

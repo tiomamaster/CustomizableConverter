@@ -3,8 +3,8 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.common.base.Objects;
-
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -34,6 +34,11 @@ public class Converter {
     @Nullable
     private String mLastQuantity;
 
+    private DecimalFormat mDecimalFormat;
+    private boolean isStandardFormOfNumber = false;
+    private int mGroupingSize = 3;
+    private int mMaximumFractionDigits = 10;
+
     public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
                      @Nullable String errors, int orderPosition, int lastUnit, @Nullable String lastQuantity) {
         checkNotNull(name);
@@ -44,12 +49,20 @@ public class Converter {
         mOrderPosition = orderPosition;
         mLastUnitPosition = lastUnit;
         mLastQuantity = lastQuantity;
+
+        mDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+        if (isStandardFormOfNumber) {
+            mDecimalFormat.applyPattern("0.0E0");
+            DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
+            decimalFormatSymbols.setExponentSeparator("×10");
+            mDecimalFormat.setDecimalFormatSymbols(decimalFormatSymbols);
+        }
+        mDecimalFormat.setGroupingSize(mGroupingSize);
+        mDecimalFormat.setMaximumFractionDigits(mMaximumFractionDigits);
     }
 
-    public Converter(@NonNull String mName, @NonNull LinkedHashMap<String, Double> mUnits, String mErrors) {
-        this.mName = mName;
-        this.mUnits = mUnits;
-        this.mErrors = mErrors;
+    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units, String errors) {
+        this(name, units, errors, count++, 0, "");
     }
 
     public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units) {
@@ -93,6 +106,29 @@ public class Converter {
         for (int i = 0; i < result.length; i++) {
             result[i][0] = to[i];
             result[i][1] = String.valueOf(results[i]);
+        }
+        return result;
+    }
+
+    /**
+     * @return
+     * String[][] excepting the unit from
+     * <br>[i][0] - unit name,
+     * <br>[i][1] - formatted conversion result.
+     */
+    @NonNull
+    public String[][] convertAllExtFormatted(double quantity, String from) {
+        String[][] result = new String[mUnits.size() - 1][2];
+        String[] to = getAllUnitsName();
+        double[] results = convertAll(quantity, from);
+
+        for (int j = 0, i = 0; i < result.length + 1; i++) {
+            if (from.equals(to[i])) {
+                j++;
+                continue;
+            }
+            result[i - j][0] = to[i];
+            result[i - j][1] = mDecimalFormat.format(results[i]);
         }
         return result;
     }

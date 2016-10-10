@@ -3,10 +3,8 @@ package com.tiomamaster.customizableconverter.converter;
 
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
-import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
-import android.support.test.espresso.core.deps.guava.base.Strings;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
@@ -20,7 +18,6 @@ import com.tiomamaster.customizableconverter.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,20 +26,15 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.clearText;
 import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
 import static android.support.test.espresso.matcher.ViewMatchers.hasImeAction;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withSpinnerText;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ConverterScreenTest {
-//TODO test for hide soft input when change converter
     @Rule
     public ActivityTestRule<ConverterActivity> mActivityRule = new ActivityTestRule<>(
             ConverterActivity.class);
@@ -153,13 +144,13 @@ public class ConverterScreenTest {
         onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(String.valueOf(quantity)));
 
         // Get the result from the converter
-        String[][] expected = mFragment.mCurConverter.convertAllExt(quantity, from);
+        String[][] expected = mFragment.mCurConverter.convertAllExtFormatted(quantity, from);
 
         checkRecyclerView(expected);
 
         from = mFragment.mSpinnerUnits.getAdapter().getItem(1).toString();
 
-        expected = mFragment.mCurConverter.convertAllExt(quantity, from);
+        expected = mFragment.mCurConverter.convertAllExtFormatted(quantity, from);
 
         // Select another unit
         onView(withId(R.id.spinner_units)).perform(click());
@@ -174,13 +165,13 @@ public class ConverterScreenTest {
         onView(withId(R.id.quantity)).perform(typeText("900"));
 
         // check soft keyboard is being shown
-        Assert.assertTrue(mFragment.imm.isActive());
+        Assert.assertTrue(mFragment.mImm.isActive());
 
         // scroll
         onView(withId(R.id.conversion_result)).perform(RecyclerViewActions.actionOnItemAtPosition(7, click()));
 
         // check soft keyboard is hidden
-        Assert.assertFalse(mFragment.imm.isActive());
+        Assert.assertFalse(mFragment.mImm.isActive());
     }
 
     @Test
@@ -218,6 +209,24 @@ public class ConverterScreenTest {
                 check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
         // result is shown
         assertTrue(mFragment.mConversionResult.getAdapter().getItemCount() > 1);
+    }
+
+    @Test
+    public void hideSoftInputWhenConverterChangeTest() {
+        // select converter
+        ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_conv_types));
+        spinnerConverterTypes.perform(click());
+        onData(is(instanceOf(String.class))).atPosition(0).perform(click());
+
+        // touch edit text to show soft input
+        onView(withId(R.id.quantity)).perform(typeText("1"));
+
+        // select another converter
+        spinnerConverterTypes.perform(click());
+        onData(is(instanceOf(String.class))).atPosition(1).perform(click());
+
+        // check the keyboard is invisible
+        assertTrue(mFragment.mImm.isActive());
     }
 
     private void checkRecyclerView(String[][] expected) {
