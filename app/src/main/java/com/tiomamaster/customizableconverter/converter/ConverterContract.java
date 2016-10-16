@@ -11,7 +11,7 @@ import static android.R.attr.name;
 /**
  * Created by Artyom on 14.07.2016.
  */
-public interface ConverterContract {
+interface ConverterContract {
 
     interface View {
 

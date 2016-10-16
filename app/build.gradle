@@ -34,8 +34,8 @@ android {
 
 dependencies {
     // App's dependencies, including test
+    compile "com.android.support:preference-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
-    compile "com.android.support:cardview-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:recyclerview-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:support-v4:$rootProject.ext.supportLibraryVersion"
@@ -58,7 +58,6 @@ dependencies {
     androidTestCompile "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     androidTestCompile "com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion"
     androidTestCompile "com.android.support.test.espresso:espresso-intents:$rootProject.ext.espressoVersion"
-    compile 'org.jetbrains:annotations-java5:15.0'
 }
 
 configurations.all {

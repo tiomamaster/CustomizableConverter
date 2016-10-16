@@ -15,7 +15,7 @@ import com.tiomamaster.customizableconverter.R;
 /**
  * Created by Artyom on 29.07.2016.
  */
-public class MySpinnerAdapter extends ArrayAdapter<String> {
+class MySpinnerAdapter extends ArrayAdapter<String> {
 
     private LayoutInflater mInflater;
 

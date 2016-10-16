@@ -16,8 +16,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.RelativeSizeSpan;

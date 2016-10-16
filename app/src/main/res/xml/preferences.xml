@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:title="@string/pref_title_language"
+        android:summary="@string/pref_summary_language"
+        android:dialogTitle="@string/pref_dialog_title_language"
+        android:key="pref_language"
+        android:defaultValue="en"
+        android:entries="@array/pref_lang_entries"
+        android:entryValues="@array/pref_lang_entryValues"
+        android:persistent="true"
+        android:layout="@layout/preference_list_item"/>
+
+    <EditTextPreference
+        android:title="@string/pref_title_grouping_size"
+        android:key="pref_grouping_size"
+        android:inputType="number"
+        android:dialogMessage="@string/pref_dialog_message_grouping_size"
+        android:defaultValue="3"
+        android:persistent="true"
+        android:layout="@layout/preference_list_item"
+        android:dialogLayout="@layout/preference_dialog_edit_text" />
+
+    <EditTextPreference
+        android:title="@string/pref_title_precision"
+        android:key="pref_precision"
+        android:inputType="number"
+        android:dialogMessage="@string/pref_dialog_message_precision"
+        android:defaultValue=""
+        android:persistent="true"
+        android:layout="@layout/preference_list_item"
+        android:dialogLayout="@layout/preference_dialog_edit_text" />
+
+    <SwitchPreferenceCompat
+        android:title="@string/pref_title_standard_form"
+        android:key="pref_standard_form"
+        android:defaultValue="false"
+        android:persistent="true"
+        android:layout="@layout/preference_list_item" />
+
+</PreferenceScreen>

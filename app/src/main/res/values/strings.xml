@@ -3,4 +3,13 @@
     <string name="convert_from">Convert from:</string>
     <string name="in_quantity">In quantity:</string>
     <string name="result">Result:</string>
+    <string name="settings">Settings</string>
+    <string name="pref_title_language">Language</string>
+    <string name="pref_summary_language">Change the application language</string>
+    <string name="pref_dialog_title_language">Select language</string>
+    <string name="pref_title_precision">Precision</string>
+    <string name="pref_dialog_message_precision">The number of decimal digits</string>
+    <string name="pref_title_grouping_size">Grouping size</string>
+    <string name="pref_dialog_message_grouping_size">The amount of numbers in groups</string>
+    <string name="pref_title_standard_form">Standard form</string>
 </resources>
