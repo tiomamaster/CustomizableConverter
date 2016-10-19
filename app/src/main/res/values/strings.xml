@@ -4,6 +4,7 @@
     <string name="in_quantity">In quantity:</string>
     <string name="result">Result:</string>
     <string name="settings">Settings</string>
+    <string name="pref_title_customize">Customize converters</string>
     <string name="pref_title_language">Language</string>
     <string name="pref_summary_language">Change the application language</string>
     <string name="pref_dialog_title_language">Select language</string>

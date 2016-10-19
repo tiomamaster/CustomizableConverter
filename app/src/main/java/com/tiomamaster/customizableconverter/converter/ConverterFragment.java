@@ -1,6 +1,7 @@
 package com.tiomamaster.customizableconverter.converter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -21,6 +22,9 @@ import android.text.TextWatcher;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +40,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Converter;
+import com.tiomamaster.customizableconverter.settings.SettingsActivity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -78,7 +83,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setRetainInstance(true);
 
         mParentActivity = (ConverterActivity) getActivity();
 
@@ -93,6 +97,23 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 getResources().getDimensionPixelSize(R.dimen.spinner_dropdown_item_height),
                 mSpinnerUnits);
         mSpinnerUnits.setAdapter(mUnitsAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                mActionsListener.openSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -230,6 +251,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mResultText = (TextView) mRecyclerViewHeader.findViewById(R.id.resultText);
 
+        setHasOptionsMenu(true);
+        setRetainInstance(true);
+
         return root;
     }
 
@@ -313,6 +337,11 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         convert(mSpinnerUnits.getSelectedItem().toString(), converter.getLastQuantity());
 
         mConversionResult.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showSettingsUi() {
+        startActivity(new Intent(getContext(), SettingsActivity.class));
     }
 
     /**

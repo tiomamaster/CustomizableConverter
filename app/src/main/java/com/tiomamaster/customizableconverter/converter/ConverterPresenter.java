@@ -55,4 +55,9 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
             }
         });
     }
+
+    @Override
+    public void openSettings() {
+        mConverterView.showSettingsUi();
+    }
 }

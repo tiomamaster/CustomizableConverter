@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.tiomamaster.customizableconverter.R;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.tiomamaster.customizableconverter.R.id.toolbar;
 
 /**
  * Created by Artyom on 14.07.2016.
@@ -35,15 +37,16 @@ public class ConverterActivity extends AppCompatActivity {
     private String mSpinSelKey = "spin_sel";
     private int mSpinnerSelection;
 
-    private Toolbar toolbar;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_converter);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
 
         mSpinConvTypes = (Spinner) findViewById(R.id.spinner_conv_types);
         mSpinConvTypes.setVisibility(View.GONE);
@@ -113,7 +116,7 @@ public class ConverterActivity extends AppCompatActivity {
     public void initSpinner(@NonNull String[] convertersTypes) {
         checkNotNull(convertersTypes);
 
-        toolbar.setTitle("");
+        actionBar.setTitle("");
 
         mSpinConvTypes.setVisibility(View.VISIBLE);
 

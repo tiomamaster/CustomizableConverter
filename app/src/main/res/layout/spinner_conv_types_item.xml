@@ -2,9 +2,9 @@
 <android.support.v7.widget.AppCompatCheckedTextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="?android:attr/spinnerDropDownItemStyle"
-    android:singleLine="true"
     android:layout_width="match_parent"
     android:layout_height="@dimen/spinner_dropdown_item_height"
     android:ellipsize="marquee"
     android:gravity="center_vertical|center_horizontal"
-    android:textSize="16sp" />
+    android:textSize="16sp"
+    android:maxLines="1" />

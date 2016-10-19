@@ -18,7 +18,7 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/settings"
-            android:theme="@style/Base.AppTheme">
+            android:theme="@style/AppTheme.OverlapSystemBar">
             <intent-filter>
                 <action android:name="android.intent.action.SETTINGS"/>
             </intent-filter>

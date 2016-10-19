@@ -72,4 +72,11 @@ public class ConverterPresenterTest {
 
         verify(mView).showConverter(converter);
     }
+
+    @Test
+    public void openSettingsTest() {
+        mPresenter.openSettings();
+
+        verify(mView).showSettingsUi();
+    }
 }

@@ -20,6 +20,8 @@ interface ConverterContract {
         void showConvertersTypes(@NonNull String[] converters, int selection);
 
         void showConverter(@NonNull Converter converter);
+
+        void showSettingsUi();
     }
 
     interface UserActionListener {
@@ -27,5 +29,7 @@ interface ConverterContract {
         void loadConvertersTypes();
 
         void loadConverter(@NonNull String name);
+
+        void openSettings();
     }
 }
