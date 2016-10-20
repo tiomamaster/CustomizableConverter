@@ -26,5 +26,4 @@
             android:inputType="number" />
 
     </LinearLayout>
-
 </ScrollView>

@@ -170,7 +170,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 int right = parent.getWidth() - left;
 
                 int childCount = parent.getChildCount();
-                for (int i = 1; i < childCount; i++) {
+                for (int i = 1; i < childCount - 1; i++) {
                     View child = parent.getChildAt(i);
 
                     RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();

@@ -105,11 +105,11 @@ public class ConverterActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-    private void initFragment(Fragment converterFragment) {
+    private void initFragment(Fragment fragment) {
         // Add the ConverterFragment to the layout
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.contentFrame, converterFragment, mConverterFragmentTag);
+        transaction.add(R.id.contentFrame, fragment, mConverterFragmentTag);
         transaction.commit();
     }
 
