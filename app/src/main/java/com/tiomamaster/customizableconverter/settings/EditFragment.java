@@ -13,12 +13,11 @@ import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.R;
-import com.tiomamaster.customizableconverter.converter.ConverterFragment;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -26,7 +25,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by Artyom on 20.10.2016.
  */
 
-public class EditFragment extends Fragment {
+public class EditFragment extends Fragment implements SettingsContract.EditView{
+
+    private SettingsContract.UserActionListener mPresenter;
+
+    private SettingsActivity mParentActivity;
 
     public EditFragment() {}
 
@@ -75,7 +78,38 @@ public class EditFragment extends Fragment {
                 }
             }
         });
+
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
+
         return root;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mPresenter.handleHomePressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void setPresenter(@NonNull SettingsContract.UserActionListener presenter) {
+        mPresenter = checkNotNull(presenter);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mParentActivity = (SettingsActivity) getActivity();
+    }
+
+    @Override
+    public void showEditor() {
+        mParentActivity.showFragment(this);
     }
 
     private class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {

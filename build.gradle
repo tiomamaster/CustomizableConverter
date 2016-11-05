@@ -27,10 +27,10 @@ ext {
     minSdkVersion = 10
     targetSdkVersion = 24
     compileSdkVersion = 24
-    buildToolsVersion = '24.0.3'
+    buildToolsVersion = '25.0.0'
 
     // App dependencies
-    supportLibraryVersion = '24.2.1'
+    supportLibraryVersion = '25.0.0'
     guavaVersion = '18.0'
     glideVersion = '3.6.1'
     junitVersion = '4.12'

@@ -2,8 +2,7 @@ package com.tiomamaster.customizableconverter;
 
 import android.content.Context;
 
-import com.tiomamaster.customizableconverter.data.Converter;
-import com.tiomamaster.customizableconverter.data.ConverterRepositories;
+import com.tiomamaster.customizableconverter.data.Repositories;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 import com.tiomamaster.customizableconverter.data.FakeConvertersServiceApiImpl;
 
@@ -13,6 +12,6 @@ import com.tiomamaster.customizableconverter.data.FakeConvertersServiceApiImpl;
 public class Injection {
 
     public static ConvertersRepository provideConvertersRepository(Context c) {
-        return ConverterRepositories.getInMemoryRepoInstance(new FakeConvertersServiceApiImpl());
+        return Repositories.getInMemoryRepoInstance(new FakeConvertersServiceApiImpl());
     }
 }

@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -24,6 +25,9 @@ public class Converter {
     @NonNull
     private final LinkedHashMap<String, Double> mUnits;
 
+    @NonNull
+    private final SettingsRepository mSettingsRepo;
+
     @Nullable
     private final String mErrors;
 
@@ -35,16 +39,16 @@ public class Converter {
     private String mLastQuantity;
 
     private DecimalFormat mDecimalFormat;
-    private boolean isStandardFormOfNumber = false;
     private int mGroupingSize = 3;
     private int mMaximumFractionDigits = 10;
+    private boolean isStandardFormOfNumber = false;
 
     public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
-                     @Nullable String errors, int orderPosition, int lastUnit, @Nullable String lastQuantity) {
-        checkNotNull(name);
-        checkNotNull(units);
-        mUnits = units;
-        mName = name;
+                     @NonNull SettingsRepository settingsRepository, @Nullable String errors,
+                     int orderPosition, int lastUnit, @Nullable String lastQuantity) {
+        mName = checkNotNull(name, "name cannot be null");
+        mUnits = checkNotNull(units, "units cannot be null");
+        mSettingsRepo = checkNotNull(settingsRepository, "settingsRepository cannot be null");
         mErrors = errors;
         mOrderPosition = orderPosition;
         mLastUnitPosition = lastUnit;
@@ -61,12 +65,14 @@ public class Converter {
         mDecimalFormat.setMaximumFractionDigits(mMaximumFractionDigits);
     }
 
-    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units, String errors) {
-        this(name, units, errors, count++, 0, "");
+    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
+                     @NonNull SettingsRepository settingsRepository, String errors) {
+        this(name, units, settingsRepository, errors, count++, 0, "");
     }
 
-    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units) {
-        this(name, units, null, count++, 0, "");
+    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
+                     @NonNull SettingsRepository settingsRepository) {
+        this(name, units, settingsRepository, null, count++, 0, "");
     }
 
     @NonNull
