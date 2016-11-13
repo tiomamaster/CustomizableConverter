@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.data;
 
+import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 
@@ -18,7 +19,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     private static int convertersCount = 6;
     private static int unitsCount = 17;
 
-    private final static Handler H = new Handler();
+    private static final Handler H = new Handler();
 
     static {
         for (int j = 0; j < convertersCount; j ++) {
@@ -31,6 +32,14 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
             test.setLastQuantity("123456789.0987654321");
             CONVERTERS.put(test.getName(), test);
         }
+    }
+
+    public FakeConvertersServiceApiImpl(Context context) {
+
+        // set listener only for one converter instance
+        Repositories.getInMemoryRepoInstance(context).
+                setOnSettingsChangeListener(CONVERTERS.get("Fake converter0").
+                        getOnSettingsChangeListener());
     }
 
     @Override

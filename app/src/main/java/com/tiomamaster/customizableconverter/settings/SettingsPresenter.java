@@ -55,6 +55,8 @@ class SettingsPresenter implements SettingsContract.UserActionListener {
         state = State.SETTINGS;
 
         mSettingsView.showSettings(mSettingsRepo.getSummaries());
+
+        mSettingsView.enableGrSizeOption(!mSettingsRepo.getResultView());
     }
 
     @Override
@@ -65,21 +67,24 @@ class SettingsPresenter implements SettingsContract.UserActionListener {
 
     @Override
     public void handleLanguageChanged(String newVal) {
-
+        mSettingsRepo.setNewLanguage(newVal);
     }
 
     @Override
     public void handleGroupingSizeChanged(String newVal) {
-
+        mSettingsRepo.setNewGroupingSize(Integer.parseInt(newVal));
     }
 
     @Override
     public void handlePrecisionChanged(String newVal) {
-
+        mSettingsRepo.setNewPrecision(Integer.parseInt(newVal));
     }
 
     @Override
-    public void handleStandardFormChanged(boolean newVal) {
+    public void handleResultViewChanged(boolean newVal) {
 
+        mSettingsView.enableGrSizeOption(!newVal);
+
+        mSettingsRepo.setNewResultView(newVal);
     }
 }

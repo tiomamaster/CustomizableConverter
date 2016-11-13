@@ -6,5 +6,22 @@ package com.tiomamaster.customizableconverter.data;
 
 public interface SettingsRepository {
 
-    public String[] getSummaries();
+    interface OnSettingsChangeListener{
+
+        void onSettingsChange(int grSize, int maxFrDigits, boolean stForm);
+    }
+
+    String[] getSummaries();
+
+    void setNewLanguage(String newVal);
+
+    void setNewGroupingSize(int newVal);
+
+    void setNewPrecision(int newVal);
+
+    void setNewResultView(boolean newVal);
+
+    boolean getResultView();
+
+    void setOnSettingsChangeListener(OnSettingsChangeListener listener);
 }

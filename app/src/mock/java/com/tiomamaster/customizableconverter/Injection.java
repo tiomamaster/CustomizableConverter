@@ -12,6 +12,6 @@ import com.tiomamaster.customizableconverter.data.FakeConvertersServiceApiImpl;
 public class Injection {
 
     public static ConvertersRepository provideConvertersRepository(Context c) {
-        return Repositories.getInMemoryRepoInstance(new FakeConvertersServiceApiImpl());
+        return Repositories.getInMemoryRepoInstance(new FakeConvertersServiceApiImpl(c));
     }
 }

@@ -19,6 +19,8 @@ interface SettingsContract {
         void closeSettings();
 
         void showSettings(String[] summaries);
+
+        void enableGrSizeOption(boolean enable);
     }
 
     interface EditView extends View {
@@ -40,6 +42,6 @@ interface SettingsContract {
 
         void handlePrecisionChanged(String newVal);
 
-        void handleStandardFormChanged(boolean newVal);
+        void handleResultViewChanged(boolean newVal);
     }
 }

@@ -90,6 +90,28 @@ public class ConverterTest {
     }
 
     @Test
+    public void changeSettings_CheckConversionResult() {
+
+        // try to get standard form
+        converter.onSettingsChange(3, 5, true);
+        String[][] actual = converter.convertAllExtFormatted(5, unitsName[0]);
+
+        // check conversion result contains ×10 in each string
+        for (String[] anActual : actual) {
+            assertTrue(anActual[1].contains("×10"));
+        }
+
+        // try to get default view of result
+        converter.onSettingsChange(3, 5, false);
+        actual = converter.convertAllExtFormatted(5, unitsName[0]);
+
+        // check conversion result not contains ×10
+        for (String[] anActual : actual) {
+            assertFalse(anActual[1].contains("×10"));
+        }
+    }
+
+    @Test
     public void getAllUnitsTest() {
         assertArrayEquals(unitsName, converter.getAllUnitsName());
     }

@@ -7,14 +7,13 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by Artyom on 14.07.2016.
  */
-public class Converter {
+public class Converter implements SettingsRepository.OnSettingsChangeListener {
 
     // counter for default ordering
     private static int count;
@@ -24,9 +23,6 @@ public class Converter {
 
     @NonNull
     private final LinkedHashMap<String, Double> mUnits;
-
-    @NonNull
-    private final SettingsRepository mSettingsRepo;
 
     @Nullable
     private final String mErrors;
@@ -38,41 +34,26 @@ public class Converter {
     @Nullable
     private String mLastQuantity;
 
-    private DecimalFormat mDecimalFormat;
-    private int mGroupingSize = 3;
-    private int mMaximumFractionDigits = 10;
-    private boolean isStandardFormOfNumber = false;
+    private static  DecimalFormat decimalFormat;
 
     public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
-                     @NonNull SettingsRepository settingsRepository, @Nullable String errors,
-                     int orderPosition, int lastUnit, @Nullable String lastQuantity) {
+                     @Nullable String errors, int orderPosition, int lastUnit,
+                     @Nullable String lastQuantity) {
         mName = checkNotNull(name, "name cannot be null");
         mUnits = checkNotNull(units, "units cannot be null");
-        mSettingsRepo = checkNotNull(settingsRepository, "settingsRepository cannot be null");
         mErrors = errors;
         mOrderPosition = orderPosition;
         mLastUnitPosition = lastUnit;
         mLastQuantity = lastQuantity;
-
-        mDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
-        if (isStandardFormOfNumber) {
-            mDecimalFormat.applyPattern("0.0E0");
-            DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
-            decimalFormatSymbols.setExponentSeparator("×10");
-            mDecimalFormat.setDecimalFormatSymbols(decimalFormatSymbols);
-        }
-        mDecimalFormat.setGroupingSize(mGroupingSize);
-        mDecimalFormat.setMaximumFractionDigits(mMaximumFractionDigits);
+        decimalFormat = (DecimalFormat) DecimalFormat.getInstance();
     }
 
-    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
-                     @NonNull SettingsRepository settingsRepository, String errors) {
-        this(name, units, settingsRepository, errors, count++, 0, "");
+    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units, String errors) {
+        this(name, units, errors, count++, 0, "");
     }
 
-    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units,
-                     @NonNull SettingsRepository settingsRepository) {
-        this(name, units, settingsRepository, null, count++, 0, "");
+    public Converter(@NonNull String name, @NonNull LinkedHashMap<String, Double> units) {
+        this(name, units, null, count++, 0, "");
     }
 
     @NonNull
@@ -134,9 +115,28 @@ public class Converter {
                 continue;
             }
             result[i - j][0] = to[i];
-            result[i - j][1] = mDecimalFormat.format(results[i]);
+            result[i - j][1] = decimalFormat.format(results[i]);
         }
         return result;
+    }
+
+    @Override
+    public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm) {
+        if (stForm) {
+            decimalFormat.applyPattern("0.0E0");
+            DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
+            decimalFormatSymbols.setExponentSeparator("×10");
+            decimalFormat.setDecimalFormatSymbols(decimalFormatSymbols);
+        } else {
+            // apply default pattern
+            decimalFormat.applyPattern("#,##0.###");
+        }
+        decimalFormat.setGroupingSize(grSize);
+        decimalFormat.setMaximumFractionDigits(maxFrDigits);
+    }
+
+    SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
+        return this;
     }
 
     @NonNull
@@ -174,5 +174,4 @@ public class Converter {
     public void setLastQuantity(String mLastQuantity) {
         this.mLastQuantity = mLastQuantity;
     }
-
 }

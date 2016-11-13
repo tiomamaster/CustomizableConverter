@@ -82,27 +82,23 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
             // grouping size changed
             case 2:
-                preference.setSummary(preference.getSharedPreferences().
-                        getString("pref_grouping_size", "") + " " +
-                        getResources().
-                                getString(R.string.pref_summary_grouping_size));
+                preference.setSummary(newValue + " " + getResources().
+                        getString(R.string.pref_summary_grouping_size));
 
                 mPresenter.handleGroupingSizeChanged((String) newValue);
                 break;
 
             // precision changed
             case 3:
-                preference.setSummary(preference.getSharedPreferences().
-                        getString("pref_precision", "") + " " +
-                        getResources().
-                                getString(R.string.pref_summary_precision));
+                preference.setSummary(newValue + " " + getResources().
+                        getString(R.string.pref_summary_precision));
 
                 mPresenter.handlePrecisionChanged((String) newValue);
                 break;
 
             // standard form changed
             case 4:
-                mPresenter.handleStandardFormChanged((Boolean) newValue);
+                mPresenter.handleResultViewChanged((Boolean) newValue);
                 break;
         }
         return true;
@@ -122,7 +118,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             mParentActivity.showFragment(this);
         }
 
-        @Override
+    @Override
+    public void enableGrSizeOption(boolean enable) {
+        getPreferenceScreen().getPreference(2).setEnabled(enable);
+    }
+
+    @Override
         public void setPresenter (@NonNull SettingsContract.UserActionListener presenter){
             mPresenter = checkNotNull(presenter);
         }

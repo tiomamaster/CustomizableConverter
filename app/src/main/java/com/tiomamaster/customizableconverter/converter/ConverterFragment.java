@@ -300,8 +300,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         // inflate spinner using converters types
         mParentActivity.initSpinner(converters, selection);
 
-        // show first converter,
-        // further must be last converter with which user worked before close the application
+        // show last selected converter
         mActionsListener.loadConverter(mParentActivity.mSpinConvTypes.getSelectedItem().toString());
     }
 
@@ -385,7 +384,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 notifyItemRangeInserted(1, mDataSet.length);
             } else {
                 mDataSet = newData;
-                // because notifyItemInserted() cause bug inside recycler view
+                // because notifyItemChanged() cause bug inside recycler view
                 notifyDataSetChanged();
             }
         }
