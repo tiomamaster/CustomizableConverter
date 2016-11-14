@@ -22,6 +22,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     private SettingsActivity mParentActivity;
 
+    private boolean isFirstCall = true;
+
     public SettingsFragment() {
     }
 
@@ -57,7 +59,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
         mParentActivity = (SettingsActivity) getActivity();
 
-        mPresenter.loadSettings();
+        if (isFirstCall) {
+            isFirstCall = false;
+            mPresenter.loadSettings();
+        }
     }
 
     @Override
