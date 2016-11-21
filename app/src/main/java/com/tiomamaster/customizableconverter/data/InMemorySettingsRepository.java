@@ -37,9 +37,9 @@ public class InMemorySettingsRepository implements SettingsRepository {
         mContext = checkNotNull(c, "need Context");
         mPrefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        mLanguage = mPrefs.getString("pref_language", "");
-        mGrSize = Integer.parseInt(mPrefs.getString("pref_grouping_size", ""));
-        mPrecision = Integer.parseInt(mPrefs.getString("pref_precision", ""));
+        mLanguage = mPrefs.getString("pref_language", "en");
+        mGrSize = Integer.parseInt(mPrefs.getString("pref_grouping_size", "3"));
+        mPrecision = Integer.parseInt(mPrefs.getString("pref_precision", "5"));
         isStandardForm = mPrefs.getBoolean("pref_standard_form", false);
     }
 

@@ -152,37 +152,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         });
 
         // draw divider between items
-        mConversionResult.addItemDecoration(new RecyclerView.ItemDecoration() {
-
-            private final int[] ATTRS = new int[]{android.R.attr.listDivider};
-
-            private Drawable mDivider;
-
-            {
-                TypedArray styledAttributes = getActivity().obtainStyledAttributes(ATTRS);
-                mDivider = styledAttributes.getDrawable(0);
-                styledAttributes.recycle();
-            }
-
-            @Override
-            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-                int left = getResources().getDimensionPixelSize(R.dimen.divider_padding);
-                int right = parent.getWidth() - left;
-
-                int childCount = parent.getChildCount();
-                for (int i = 1; i < childCount - 1; i++) {
-                    View child = parent.getChildAt(i);
-
-                    RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
-
-                    int top = child.getBottom() + params.bottomMargin;
-                    int bottom = top + mDivider.getIntrinsicHeight();
-
-                    mDivider.setBounds(left, top, right, bottom);
-                    mDivider.draw(c);
-                }
-            }
-        });
+        mConversionResult.addItemDecoration(new Divider(getActivity(), 1));
 
         mConversionResult.setVisibility(View.INVISIBLE);
 

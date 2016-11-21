@@ -3,7 +3,6 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     }
 
     @Override
-    public void getConvertersTypes(@NonNull final LoadConvertersTypesCallback callback) {
+    public void getEnabledConvertersTypes(@NonNull final LoadEnabledConvertersTypesCallback callback) {
         if (mFirstCall) {
             mConvertersServiceApi.getLastConverter(new ConvertersServiceApi.ConverterServiceCallback<Converter>() {
                 @Override
@@ -50,7 +49,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             return;
         }
 
-        mConvertersServiceApi.getAllConvertersTypes(new ConvertersServiceApi.ConverterServiceCallback<String[]>() {
+        mConvertersServiceApi.getEnabledConvertersTypes(new ConvertersServiceApi.ConverterServiceCallback<String[]>() {
             @Override
             public void onLoaded(@NonNull String[] converters) {
                 checkNotNull(converters);
@@ -60,6 +59,12 @@ class InMemoryConvertersRepository implements ConvertersRepository {
                 callback.onConvertersTypesLoaded(converters, mLastPos);
             }
         });
+    }
+
+    // TODO
+    @Override
+    public void getAllConverterTypes(@NonNull LoadAllConvertersTypesCallback callback) {
+
     }
 
     @Override

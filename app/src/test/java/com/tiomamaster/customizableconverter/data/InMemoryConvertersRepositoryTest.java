@@ -1,8 +1,5 @@
 package com.tiomamaster.customizableconverter.data;
 
-import android.content.Context;
-import android.widget.TextView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,10 +13,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 
 /**
@@ -38,7 +33,7 @@ public class InMemoryConvertersRepositoryTest {
     private Converter mConverter;
 
     @Mock
-    private ConvertersRepository.LoadConvertersTypesCallback mLoadConvertersTypesCallback;
+    private ConvertersRepository.LoadEnabledConvertersTypesCallback mLoadConvertersTypesCallback;
 
     @Mock
     private ConvertersRepository.GetConverterCallback mGetConverterCallback;
@@ -53,19 +48,19 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getConvertersTypes_repositoryCachesAfterFirstApiCall() {
+    public void getEnabledConvertersTypes_repositoryCachesAfterFirstApiCall() {
         // first call to the repository
-        mRepository.getConvertersTypes(mLoadConvertersTypesCallback);
+        mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
 
         // verify that service api was called enables repository caching
-        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
+        verify(mServiceApi).getEnabledConvertersTypes(mCaptor.capture());
         mCaptor.getValue().onLoaded(CONVERTERS_TYPES);
 
         // second call to repository
-        mRepository.getConvertersTypes(mLoadConvertersTypesCallback);
+        mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
 
         // check Api was called once
-        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.ConverterServiceCallback.class));
+        verify(mServiceApi).getEnabledConvertersTypes(any(ConvertersServiceApi.ConverterServiceCallback.class));
     }
 
     @Test
@@ -87,7 +82,7 @@ public class InMemoryConvertersRepositoryTest {
     @Test
     public void getLastConverter_AlwaysCallOnce() {
         // several calls
-        mRepository.getConvertersTypes(mLoadConvertersTypesCallback);
+        mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
 
         // verify that service api was called enables repository caching
         verify(mServiceApi).getLastConverter(mCaptor.capture());
@@ -97,8 +92,8 @@ public class InMemoryConvertersRepositoryTest {
         assertNotNull(mRepository.mCachedConverters);
         assertNotNull(mRepository.mCachedConverters.get(CONVERTERS_TYPES[0]));
 
-        mRepository.getConvertersTypes(mLoadConvertersTypesCallback);
-        mRepository.getConvertersTypes(mLoadConvertersTypesCallback);
+        mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
+        mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
 
         // check Api was called once
         verify(mServiceApi).getLastConverter(any(ConvertersServiceApi.ConverterServiceCallback.class));

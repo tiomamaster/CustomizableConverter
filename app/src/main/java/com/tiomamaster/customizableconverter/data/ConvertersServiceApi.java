@@ -1,7 +1,9 @@
 package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +16,9 @@ public interface ConvertersServiceApi {
         void onLoaded(@NonNull T converters);
     }
 
-    void getAllConvertersTypes(@NonNull ConverterServiceCallback<String[]> callback);
+    void getEnabledConvertersTypes(@NonNull ConverterServiceCallback<String[]> callback);
+
+    void getAllConvertersTypes(@NonNull ConverterServiceCallback<ArrayList<Pair<String, Boolean>>> callback);
 
     void getConverter(@NonNull String name, @NonNull ConverterServiceCallback<Converter> callback);
 

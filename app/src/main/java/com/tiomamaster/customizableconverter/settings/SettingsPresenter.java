@@ -1,9 +1,12 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 import com.tiomamaster.customizableconverter.data.SettingsRepository;
+
+import java.util.ArrayList;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -62,7 +65,18 @@ class SettingsPresenter implements SettingsContract.UserActionListener {
     @Override
     public void loadEditor() {
         state = State.CONVERTERS_EDITOR;
-        mEditView.showEditor();
+        // TODO should use getAll instead
+        mConvertersRepo.getEnabledConvertersTypes(new ConvertersRepository.LoadEnabledConvertersTypesCallback() {
+            @Override
+            public void onConvertersTypesLoaded(@NonNull String[] convertersTypes, int position) {
+                ArrayList<Pair<String,Boolean>> data = new ArrayList<>(convertersTypes.length);
+                for (String convertersType : convertersTypes) {
+                    Pair<String, Boolean> pair = new Pair<>(convertersType, true);
+                    data.add(pair);
+                }
+                mEditView.showEditor(data);
+            }
+        });
     }
 
     @Override

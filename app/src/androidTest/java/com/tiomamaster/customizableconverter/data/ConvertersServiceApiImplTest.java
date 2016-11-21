@@ -36,7 +36,7 @@ public class ConvertersServiceApiImplTest {
 
     @Test
     public void getAllConvertersTypesTest() throws Exception {
-//        String[] result = mApi.getAllConvertersTypes();
+//        String[] result = mApi.getEnabledConvertersTypes();
 //        String[] expected;
 //        if (TextUtils.equals(mLanguage, "ru"))
 //            expected = mContext.getResources().getStringArray(R.array.translation_for_files_ru);

@@ -33,7 +33,7 @@ public class ConverterPresenterTest {
     private ConverterPresenter mPresenter;
 
     @Captor
-    private ArgumentCaptor<ConvertersRepository.LoadConvertersTypesCallback> mLoadConvertersTypesCaptor;
+    private ArgumentCaptor<ConvertersRepository.LoadEnabledConvertersTypesCallback> mLoadConvertersTypesCaptor;
 
     @Captor
     private ArgumentCaptor<ConvertersRepository.GetConverterCallback> mGetConverterCaptor;
@@ -50,7 +50,7 @@ public class ConverterPresenterTest {
 
         verify(mView).setProgressIndicator(true);
 
-        verify(mRepository).getConvertersTypes(mLoadConvertersTypesCaptor.capture());
+        verify(mRepository).getEnabledConvertersTypes(mLoadConvertersTypesCaptor.capture());
         mLoadConvertersTypesCaptor.getValue().onConvertersTypesLoaded(CONVERTERS_TYPES, anyInt());
 
         verify(mView).setProgressIndicator(false);

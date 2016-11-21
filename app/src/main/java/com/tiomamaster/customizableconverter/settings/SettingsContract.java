@@ -1,7 +1,10 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 import android.support.v7.preference.Preference;
+
+import java.util.ArrayList;
 
 /**
  * Created by Artyom on 27.10.2016.
@@ -25,7 +28,7 @@ interface SettingsContract {
 
     interface EditView extends View {
 
-        void showEditor();
+        void showEditor(ArrayList<Pair<String, Boolean>> data);
     }
 
     interface UserActionListener {

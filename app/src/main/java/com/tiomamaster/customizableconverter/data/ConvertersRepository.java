@@ -1,17 +1,23 @@
 package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
-import static android.R.attr.name;
+import java.util.ArrayList;
 
 /**
  * Created by Artyom on 14.07.2016.
  */
 public interface ConvertersRepository {
 
-    interface LoadConvertersTypesCallback {
+    interface LoadEnabledConvertersTypesCallback {
 
         void onConvertersTypesLoaded(@NonNull String[] convertersTypes, int position);
+    }
+
+    interface LoadAllConvertersTypesCallback {
+
+        void onConvertersTypesLoaded(@NonNull ArrayList<Pair<String, Boolean>> convertersTypes);
     }
 
     interface GetConverterCallback {
@@ -19,7 +25,9 @@ public interface ConvertersRepository {
         void onConverterLoaded(@NonNull Converter converter);
     }
 
-    void getConvertersTypes(@NonNull LoadConvertersTypesCallback callback);
+    void getEnabledConvertersTypes(@NonNull LoadEnabledConvertersTypesCallback callback);
+
+    void getAllConverterTypes(@NonNull LoadAllConvertersTypesCallback callback);
 
     void getConverter(@NonNull String name, @NonNull GetConverterCallback callback);
 }

@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
-import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -26,7 +25,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
     public void loadConvertersTypes() {
         mConverterView.setProgressIndicator(true);
 
-        mConvertersRepository.getConvertersTypes(new ConvertersRepository.LoadConvertersTypesCallback() {
+        mConvertersRepository.getEnabledConvertersTypes(new ConvertersRepository.LoadEnabledConvertersTypesCallback() {
             @Override
             public void onConvertersTypesLoaded(@NonNull String[] convertersTypes, int position) {
                 checkNotNull(convertersTypes);

@@ -3,7 +3,9 @@ package com.tiomamaster.customizableconverter.data;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
@@ -43,13 +45,18 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void getAllConvertersTypes(@NonNull final ConverterServiceCallback<String[]> callback) {
+    public void getEnabledConvertersTypes(@NonNull final ConverterServiceCallback<String[]> callback) {
         checkNotNull(callback);
 
         H.postDelayed(new Runnable() {
             @Override
             public void run() {callback.onLoaded(CONVERTERS.keySet().toArray(new String[0]));}
         }, 1000);
+    }
+
+    @Override
+    public void getAllConvertersTypes(@NonNull ConverterServiceCallback<ArrayList<Pair<String, Boolean>>> callback) {
+
     }
 
     @Override

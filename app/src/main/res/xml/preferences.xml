@@ -32,6 +32,7 @@
         android:key="pref_precision"
         android:inputType="number"
         android:dialogMessage="@string/pref_dialog_message_precision"
+        android:defaultValue="5"
         android:persistent="true"
         android:layout="@layout/preference_list_item"
         android:dialogLayout="@layout/preference_dialog_edit_text" />
