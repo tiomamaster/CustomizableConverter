@@ -1,9 +1,12 @@
 package com.tiomamaster.customizableconverter.converter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,7 +30,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
         mConvertersRepository.getEnabledConvertersTypes(new ConvertersRepository.LoadEnabledConvertersTypesCallback() {
             @Override
-            public void onConvertersTypesLoaded(@NonNull String[] convertersTypes, int position) {
+            public void onConvertersTypesLoaded(@NonNull List<String> convertersTypes, int position) {
                 checkNotNull(convertersTypes);
 
                 mConverterView.setProgressIndicator(false);

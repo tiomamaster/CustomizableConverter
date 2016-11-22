@@ -17,7 +17,7 @@ interface ConverterContract {
 
         void setProgressIndicator(boolean active);
 
-        void showConvertersTypes(@NonNull String[] converters, int selection);
+        void showConvertersTypes(@NonNull List<String> converters, int selection);
 
         void showConverter(@NonNull Converter converter);
 

@@ -20,6 +20,8 @@ import android.widget.TextView;
 import com.google.common.annotations.VisibleForTesting;
 import com.tiomamaster.customizableconverter.R;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.R.id.toolbar;
 
@@ -113,7 +115,7 @@ public class ConverterActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    public void initSpinner(@NonNull String[] convertersTypes) {
+    public void initSpinner(@NonNull List<String> convertersTypes) {
         checkNotNull(convertersTypes);
 
         actionBar.setTitle("");
@@ -127,7 +129,7 @@ public class ConverterActivity extends AppCompatActivity {
         }
     }
 
-    public void initSpinner(@NonNull String[] convertersTypes, int selection) {
+    public void initSpinner(@NonNull List<String> convertersTypes, int selection) {
         initSpinner(convertersTypes);
 
         mSpinConvTypes.setSelection(selection);

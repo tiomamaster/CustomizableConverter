@@ -42,6 +42,8 @@ import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.settings.SettingsActivity;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -264,7 +266,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     @Override
-    public void showConvertersTypes(@NonNull String[] converters, int selection) {
+    public void showConvertersTypes(@NonNull List<String> converters, int selection) {
         checkNotNull(converters);
 
         // inflate spinner using converters types

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Artyom on 14.07.2016.
@@ -12,12 +13,12 @@ public interface ConvertersRepository {
 
     interface LoadEnabledConvertersTypesCallback {
 
-        void onConvertersTypesLoaded(@NonNull String[] convertersTypes, int position);
+        void onConvertersTypesLoaded(@NonNull List<String> convertersTypes, int position);
     }
 
     interface LoadAllConvertersTypesCallback {
 
-        void onConvertersTypesLoaded(@NonNull ArrayList<Pair<String, Boolean>> convertersTypes);
+        void onConvertersTypesLoaded(@NonNull List<Pair<String, Boolean>> convertersTypes);
     }
 
     interface GetConverterCallback {

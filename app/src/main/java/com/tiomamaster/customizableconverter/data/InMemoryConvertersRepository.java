@@ -2,8 +2,12 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.util.Pair;
+import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -20,8 +24,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     private String mLastConverterName;
 
-    @VisibleForTesting
-    String[] mCachedConvertersTypes;
+    private List<Pair<String,Boolean>> mCachedConvertersTypes;
 
     @VisibleForTesting
     Map<String, Converter> mCachedConverters;
@@ -44,27 +47,54 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             mFirstCall = false;
         }
 
+        mLastPos = 0;
         if (mCachedConvertersTypes != null) {
-            callback.onConvertersTypesLoaded(mCachedConvertersTypes, mLastPos);
+            callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
             return;
         }
 
-        mConvertersServiceApi.getEnabledConvertersTypes(new ConvertersServiceApi.ConverterServiceCallback<String[]>() {
+        mConvertersServiceApi.getAllConvertersTypes(
+                new ConvertersServiceApi.ConverterServiceCallback<List<Pair<String, Boolean>>>() {
             @Override
-            public void onLoaded(@NonNull String[] converters) {
-                checkNotNull(converters);
-
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
                 mCachedConvertersTypes = converters;
-
-                callback.onConvertersTypesLoaded(converters, mLastPos);
+                callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
             }
         });
     }
 
-    // TODO
-    @Override
-    public void getAllConverterTypes(@NonNull LoadAllConvertersTypesCallback callback) {
+    @NonNull
+    private List<String> getEnabledConverters() {
+        List<String> converters = new ArrayList<>(mCachedConvertersTypes.size());
+        for (int i = 0; i < mCachedConvertersTypes.size(); i++) {
+            Pair<String, Boolean> pair = mCachedConvertersTypes.get(i);
+            if (pair.second) {
+                converters.add(pair.first);
+                if (TextUtils.equals(pair.first, mLastConverterName)) mLastPos = i;
+            }
+        }
+        return converters;
+    }
 
+    @Override
+    public void getAllConverterTypes(@NonNull final LoadAllConvertersTypesCallback callback) {
+        checkNotNull(callback);
+
+        // simply return cached converters types if they exist
+        if (mCachedConvertersTypes != null) {
+            callback.onConvertersTypesLoaded(mCachedConvertersTypes);
+            return;
+        }
+
+        // or load they from the API, cache and return through using callback
+        mConvertersServiceApi.getAllConvertersTypes(
+                new ConvertersServiceApi.ConverterServiceCallback<List<Pair<String, Boolean>>>() {
+            @Override
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                mCachedConvertersTypes = converters;
+                callback.onConvertersTypesLoaded(converters);
+            }
+        });
     }
 
     @Override
@@ -72,7 +102,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         checkNotNull(name);
         if (mCachedConverters != null && mCachedConverters.containsKey(name)) {
             callback.onConverterLoaded(mCachedConverters.get(name));
-            mLastPos = mCachedConverters.get(name).getOrderPosition();
+            mLastConverterName = mCachedConverters.get(name).getName();
             return;
         }
 
@@ -91,8 +121,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         checkNotNull(converter);
 
         mLastConverterName = converter.getName();
-
-        mLastPos = converter.getOrderPosition();
 
         if (mCachedConverters == null) {
             mCachedConverters = new HashMap<>();

@@ -19,6 +19,7 @@ import com.tiomamaster.customizableconverter.converter.Divider;
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperCallback;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.security.AccessController.getContext;
@@ -97,7 +98,7 @@ public class EditFragment extends Fragment implements SettingsContract.EditView,
     }
 
     @Override
-    public void showEditor(ArrayList<Pair<String, Boolean>> data) {
+    public void showEditor(List<Pair<String, Boolean>> data) {
         mAdapter.setDataSet(data);
         mParentActivity.showFragment(this);
     }

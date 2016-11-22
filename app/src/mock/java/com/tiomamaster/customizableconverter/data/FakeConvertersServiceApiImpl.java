@@ -6,7 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -45,18 +47,15 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void getEnabledConvertersTypes(@NonNull final ConverterServiceCallback<String[]> callback) {
-        checkNotNull(callback);
-
+    public void getAllConvertersTypes(@NonNull final ConverterServiceCallback<List<Pair<String, Boolean>>> callback) {
+        final List<Pair<String, Boolean>> converters = new ArrayList<>(CONVERTERS.size());
+        for (Converter next : CONVERTERS.values()) {
+            converters.add(new Pair<>(next.getName(), new Random().nextBoolean()));
+        }
         H.postDelayed(new Runnable() {
             @Override
-            public void run() {callback.onLoaded(CONVERTERS.keySet().toArray(new String[0]));}
+            public void run() {callback.onLoaded(converters);}
         }, 1000);
-    }
-
-    @Override
-    public void getAllConvertersTypes(@NonNull ConverterServiceCallback<ArrayList<Pair<String, Boolean>>> callback) {
-
     }
 
     @Override

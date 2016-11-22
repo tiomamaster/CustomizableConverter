@@ -53,14 +53,14 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
 
         // verify that service api was called enables repository caching
-        verify(mServiceApi).getEnabledConvertersTypes(mCaptor.capture());
+        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
         mCaptor.getValue().onLoaded(CONVERTERS_TYPES);
 
         // second call to repository
         mRepository.getEnabledConvertersTypes(mLoadConvertersTypesCallback);
 
         // check Api was called once
-        verify(mServiceApi).getEnabledConvertersTypes(any(ConvertersServiceApi.ConverterServiceCallback.class));
+        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.ConverterServiceCallback.class));
     }
 
     @Test

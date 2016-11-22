@@ -18,6 +18,7 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,6 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>
         implements ItemTouchHelperAdapter {
+
+    private List<Pair<String, Boolean>> mDataSet;
+
+    private OnStartDragListener mDragListener;
 
     public interface OnStartDragListener  {
 
@@ -60,10 +65,6 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
         }
     }
 
-    private ArrayList<Pair<String, Boolean>> mDataSet;
-
-    private OnStartDragListener mDragListener;
-
     public RecyclerViewAdapter(OnStartDragListener dragListener) {
         mDragListener = dragListener;
     }
@@ -92,7 +93,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
         holder.mCheck.setChecked(mDataSet.get(position).second);
     }
 
-    public void setDataSet(ArrayList<Pair<String, Boolean>> newData) {
+    public void setDataSet(List<Pair<String, Boolean>> newData) {
         mDataSet = newData;
         notifyDataSetChanged();
     }

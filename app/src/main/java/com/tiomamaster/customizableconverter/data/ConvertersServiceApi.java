@@ -16,9 +16,7 @@ public interface ConvertersServiceApi {
         void onLoaded(@NonNull T converters);
     }
 
-    void getEnabledConvertersTypes(@NonNull ConverterServiceCallback<String[]> callback);
-
-    void getAllConvertersTypes(@NonNull ConverterServiceCallback<ArrayList<Pair<String, Boolean>>> callback);
+    void getAllConvertersTypes(@NonNull ConverterServiceCallback<List<Pair<String, Boolean>>> callback);
 
     void getConverter(@NonNull String name, @NonNull ConverterServiceCallback<Converter> callback);
 
