@@ -10,6 +10,7 @@ import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Adapter;
@@ -23,6 +24,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onData;
@@ -57,8 +60,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ConverterScreenTest {
-    @Rule
-    public ActivityTestRule<ConverterActivity> mActivityRule = new ActivityTestRule<>(
+
+    @Rule public ActivityTestRule<ConverterActivity> mActivityRule = new ActivityTestRule<>(
             ConverterActivity.class);
 
     private ConverterActivity mActivity;
@@ -127,14 +130,14 @@ public class ConverterScreenTest {
             onData(hasToString(selectionText)).perform(click());
 
             // Check content in Spinner Units
-            String[] expected = mFragment.mCurConverter.getAllUnitsName();
+            List<String> expected = mFragment.mCurConverter.getEnabledUnitsName();
             onView(withId(R.id.spinner_units)).perform(click());
-            for (int i = 0; i < expected.length; i++) {
+            for (int i = 0; i < expected.size(); i++) {
                 onData(is(instanceOf(String.class))).
                         atPosition(i).
-                        check(matches(withText(expected[i])));
+                        check(matches(withText(expected.get(i))));
             }
-            onData(hasToString(expected[0])).perform(click());
+            onData(hasToString(expected.get(0))).perform(click());
         }
     }
 
@@ -147,13 +150,13 @@ public class ConverterScreenTest {
         onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(String.valueOf(quantity)));
 
         // Get the result from the converter
-        String[][] expected = mFragment.mCurConverter.convertAllExtFormatted(quantity, from);
+        List<Pair<String, String>> expected = mFragment.mCurConverter.convertAll(quantity, from);
 
         checkRecyclerView(expected);
 
         from = mFragment.mSpinnerUnits.getAdapter().getItem(1).toString();
 
-        expected = mFragment.mCurConverter.convertAllExtFormatted(quantity, from);
+        expected = mFragment.mCurConverter.convertAll(quantity, from);
 
         // Select another unit
         onView(withId(R.id.spinner_units)).perform(click());
@@ -247,14 +250,14 @@ public class ConverterScreenTest {
         onView(withText(R.string.settings)).perform(click());
     }
 
-    private void checkRecyclerView(String[][] expected) {
+    private void checkRecyclerView(List<Pair<String, String>> expected) {
         // Check the result in RecyclerView
         ViewInteraction viewInteraction = onView(withId(R.id.conversion_result));
-        for (int i = 0; i < expected.length; i++) {
+        for (int i = 0; i < expected.size(); i++) {
             viewInteraction.perform(RecyclerViewActions.scrollToPosition(i+1));
             viewInteraction.check(matches(atPosition(i+1, allOf(
-                    withChild(withText(is(expected[i][0]))),
-                    withChild(withText(is(expected[i][1])))))));
+                    withChild(withText(is(expected.get(i).first))),
+                    withChild(withText(is(expected.get(i).second)))))));
         }
         viewInteraction.perform(RecyclerViewActions.scrollToPosition(0));
     }

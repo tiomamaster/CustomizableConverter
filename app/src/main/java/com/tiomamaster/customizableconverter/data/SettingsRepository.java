@@ -8,20 +8,14 @@ public interface SettingsRepository {
 
     interface OnSettingsChangeListener{
 
-        void onSettingsChange(int grSize, int maxFrDigits, boolean stForm);
+        void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm);
     }
 
     String[] getSummaries();
 
-    void setNewLanguage(String newVal);
+    boolean getStandardForm();
 
-    void setNewGroupingSize(int newVal);
-
-    void setNewPrecision(int newVal);
-
-    void setNewResultView(boolean newVal);
-
-    boolean getResultView();
+    boolean getDefaultForm();
 
     void setOnSettingsChangeListener(OnSettingsChangeListener listener);
 }

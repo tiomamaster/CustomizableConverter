@@ -8,7 +8,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.R;
-import com.tiomamaster.customizableconverter.converter.ConverterActivity;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,7 +40,7 @@ public class SettingsScreenTest {
             SettingsActivity.class);
 
     @Test
-    public void toolbarTitlesTest() {
+    public void toolbarTitlesChanging() {
         // check title is settings
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.toolbar))))
                 .check(matches(withText(R.string.settings)));
@@ -63,29 +62,56 @@ public class SettingsScreenTest {
     }
 
     @Test
-    public void grSizeOptionEnableTest() {
-
+    public void optionsEnableDisable() {
         boolean isStandardForm = PreferenceManager.getDefaultSharedPreferences(
-                mActivityRule.getActivity()).getBoolean("pref_standard_form", false);
+                mActivityRule.getActivity()).getBoolean("PREF_STANDARD_FORM", false);
+        boolean isDefaultForm = PreferenceManager.getDefaultSharedPreferences(
+                mActivityRule.getActivity()).getBoolean("PREF_DEFAULT_FORM", false);
 
-        if (!isStandardForm) {
-
-            onView(withText(R.string.pref_title_grouping_size)).check(matches(isEnabled()));
-
-            // enable standard form
-            onView(withText(R.string.pref_title_standard_form)).perform(click());
-
-            // check grouping size option is disabled
-            onView(withText(R.string.pref_title_grouping_size)).check(matches(not(isEnabled())));
-        } else {
-
-            onView(withText(R.string.pref_title_grouping_size)).check(matches(not(isEnabled())));
-
-            // disable standard form
-            onView(withText(R.string.pref_title_standard_form)).perform(click());
-
-            // check grouping size option is enabled
-            onView(withText(R.string.pref_title_grouping_size)).check(matches(isEnabled()));
+        // disable default form
+        if (isDefaultForm) {
+            onView(withText(R.string.pref_title_default_form)).perform(click());
         }
+
+        // disable standard form
+        if (isStandardForm) {
+            onView(withText(R.string.pref_title_standard_form)).perform(click());
+        }
+
+        // enable standard form
+        onView(withText(R.string.pref_title_standard_form)).perform(click());
+
+        // check that grouping size option is disable
+        onView(withText(R.string.pref_title_grouping_size)).check(matches(not(isEnabled())));
+
+        // enable default form
+        onView(withText(R.string.pref_title_default_form)).perform(click());
+
+        // check that all formatting options is disable
+        onView(withText(R.string.pref_title_grouping_size)).check(matches(not(isEnabled())));
+        onView(withText(R.string.pref_title_precision)).check(matches(not(isEnabled())));
+        onView(withText(R.string.pref_title_standard_form)).check(matches(not(isEnabled())));
+
+        // disable default form
+        onView(withText(R.string.pref_title_default_form)).perform(click());
+
+        // check the condition of formatting options
+        onView(withText(R.string.pref_title_grouping_size)).check(matches(not(isEnabled())));
+        onView(withText(R.string.pref_title_precision)).check(matches(isEnabled()));
+        onView(withText(R.string.pref_title_standard_form)).check(matches(isEnabled()));
+
+        // disable standard form
+        onView(withText(R.string.pref_title_standard_form)).perform(click());
+
+        // check that grouping size option is enable
+        onView(withText(R.string.pref_title_grouping_size)).check(matches(isEnabled()));
+
+        // enable default form
+        onView(withText(R.string.pref_title_default_form)).perform(click());
+
+        // check the condition of all formatting options is disable
+        onView(withText(R.string.pref_title_grouping_size)).check(matches(not(isEnabled())));
+        onView(withText(R.string.pref_title_precision)).check(matches(not(isEnabled())));
+        onView(withText(R.string.pref_title_standard_form)).check(matches(not(isEnabled())));
     }
 }

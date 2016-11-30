@@ -14,6 +14,7 @@ import com.tiomamaster.customizableconverter.R;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -185,7 +186,7 @@ public final class ConverterServiceApiEndpoint {
             }
             c.close();
             db.close();
-            return new Converter(name, units, errors);
+            return new Converter(name, new ArrayList<Converter.Unit>(), errors);
         }
 
         @Override

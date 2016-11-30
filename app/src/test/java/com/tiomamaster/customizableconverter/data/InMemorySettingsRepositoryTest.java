@@ -5,13 +5,11 @@ import android.content.SharedPreferences;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.theories.internal.BooleanSupplier;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.configuration.AnnotationEngine;
+
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -30,8 +28,7 @@ public class InMemorySettingsRepositoryTest {
 
     private SettingsRepository mSettingsRepo;
 
-    @Mock
-    private SettingsRepository.OnSettingsChangeListener mSettingsChangeListener;
+    @Mock private SettingsRepository.OnSettingsChangeListener mSettingsChangeListener;
 
     @Before
     public void setUp() {
@@ -45,64 +42,8 @@ public class InMemorySettingsRepositoryTest {
     }
 
     @Test
-    public void setNewGroupingSize() {
-
-        int grSize = 1;
-
-        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
-
-        mSettingsRepo.setNewGroupingSize(grSize);
-
-        // check that listener is called
-        verify(mSettingsChangeListener, times(2)).
-                onSettingsChange(captor.capture(), anyInt(), anyBoolean());
-
-        // check argument
-        assertEquals(grSize, captor.getValue().intValue());
-
+    public void setOnSettingsChangeListenerShouldCallIt() {
+        // check that listener was called
+        verify(mSettingsChangeListener).onSettingsChange(anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
-
-    @Test
-    public void setNewPrecision() {
-
-        int precision = 2;
-
-        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
-
-        mSettingsRepo.setNewPrecision(precision);
-
-        // check that listener is called
-        verify(mSettingsChangeListener, times(2)).
-                onSettingsChange(anyInt(), captor.capture(), anyBoolean());
-
-        // check argument
-        assertEquals(precision, captor.getValue().intValue());
-
-    }
-
-    @Test
-    public void setNewResultView() {
-
-        boolean view = true;
-
-        ArgumentCaptor<Boolean> captor = ArgumentCaptor.forClass(Boolean.class);
-
-        mSettingsRepo.setNewResultView(view);
-
-        // check that listener is called
-        verify(mSettingsChangeListener, times(2)).
-                onSettingsChange(anyInt(), anyInt(), captor.capture());
-
-        // check argument
-        assertEquals(view, captor.getValue().booleanValue());
-
-    }
-
-    @Test
-    public void setOnSettingsChangeListener() {
-
-        // check that listener is called
-        verify(mSettingsChangeListener).onSettingsChange(anyInt(), anyInt(), anyBoolean());
-    }
-
 }

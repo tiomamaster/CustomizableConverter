@@ -70,6 +70,12 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(savedInstanceState.getString(TITLE_KEY));
     }
 
+    @Override
+    public void onBackPressed() {
+        // TODO: maybe remove super call
+        mPresenter.handleHomePressed();
+    }
+
     private void initFragments(Fragment fragment1, Fragment fragment2) {
         // Add the Fragments to the fragment manager
         FragmentManager fragmentManager = getSupportFragmentManager();

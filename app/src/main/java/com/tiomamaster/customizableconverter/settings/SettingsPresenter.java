@@ -6,9 +6,10 @@ import android.support.v4.util.Pair;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 import com.tiomamaster.customizableconverter.data.SettingsRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.icon;
+import static android.R.attr.id;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -60,7 +61,7 @@ class SettingsPresenter implements SettingsContract.UserActionListener {
 
         mSettingsView.showSettings(mSettingsRepo.getSummaries());
 
-        mSettingsView.enableGrSizeOption(!mSettingsRepo.getResultView());
+        mSettingsView.enableGrSizeOption(!mSettingsRepo.getStandardForm());
     }
 
     @Override
@@ -75,25 +76,14 @@ class SettingsPresenter implements SettingsContract.UserActionListener {
     }
 
     @Override
-    public void handleLanguageChanged(String newVal) {
-        mSettingsRepo.setNewLanguage(newVal);
-    }
+    public void standardOrDefaultClicked() {
+        if (mSettingsRepo.getDefaultForm()) {
+            mSettingsView.enableFormattingOptions(false);
+            return;
+        } else {
+            mSettingsView.enableFormattingOptions(true);
+        }
 
-    @Override
-    public void handleGroupingSizeChanged(String newVal) {
-        mSettingsRepo.setNewGroupingSize(Integer.parseInt(newVal));
-    }
-
-    @Override
-    public void handlePrecisionChanged(String newVal) {
-        mSettingsRepo.setNewPrecision(Integer.parseInt(newVal));
-    }
-
-    @Override
-    public void handleResultViewChanged(boolean newVal) {
-
-        mSettingsView.enableGrSizeOption(!newVal);
-
-        mSettingsRepo.setNewResultView(newVal);
+        mSettingsView.enableGrSizeOption(!mSettingsRepo.getStandardForm());
     }
 }

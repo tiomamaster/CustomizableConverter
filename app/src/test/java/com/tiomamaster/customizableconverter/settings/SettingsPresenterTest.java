@@ -5,13 +5,16 @@ import com.tiomamaster.customizableconverter.data.SettingsRepository;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,17 +24,13 @@ import static org.mockito.Mockito.when;
  */
 public class SettingsPresenterTest {
 
-    @Mock
-    private ConvertersRepository mConvertersRepo;
+    @Mock private ConvertersRepository mConvertersRepo;
 
-    @Mock
-    private SettingsRepository mSettingsRepo;
+    @Mock private SettingsRepository mSettingsRepo;
 
-    @Mock
-    private SettingsContract.SettingsView mSettingsView;
+    @Mock private SettingsContract.SettingsView mSettingsView;
 
-    @Mock
-    private SettingsContract.EditView mEditView;
+    @Mock private SettingsContract.EditView mEditView;
 
     private SettingsContract.UserActionListener mPresenter;
 
@@ -43,7 +42,6 @@ public class SettingsPresenterTest {
 
     @Test
     public void handleHomePressed() {
-
         // load settings first
         mPresenter.loadSettings();
 
@@ -63,7 +61,6 @@ public class SettingsPresenterTest {
 
     @Test
     public void loadSettings() {
-
         when(mSettingsRepo.getSummaries()).thenReturn(new String[]{""});
 
         mPresenter.loadSettings();
@@ -72,29 +69,52 @@ public class SettingsPresenterTest {
 
         verify(mSettingsView).showSettings(new String[]{""});
 
-        verify(mSettingsRepo).getResultView();
+        verify(mSettingsRepo).getStandardForm();
 
         verify(mSettingsView).enableGrSizeOption(anyBoolean());
     }
 
     @Test
-    public void allSettingsChange() {
+    public void loadEditor() {
+        mPresenter.loadEditor();
 
-        // language changed
-        mPresenter.handleLanguageChanged(anyString());
-        verify(mSettingsRepo).setNewLanguage(anyString());
+        ArgumentCaptor<ConvertersRepository.LoadAllConvertersTypesCallback> captor =
+                ArgumentCaptor.forClass(ConvertersRepository.LoadAllConvertersTypesCallback.class);
+        verify(mConvertersRepo).getAllConverterTypes(captor.capture());
+        captor.getValue().onConvertersTypesLoaded(any(List.class));
 
-        // grouping size
-        mPresenter.handleGroupingSizeChanged("5");
-        verify(mSettingsRepo).setNewGroupingSize(anyInt());
+        verify(mEditView).showEditor(any(List.class));
+    }
 
-        // precision
-        mPresenter.handlePrecisionChanged("5");
-        verify(mSettingsRepo).setNewPrecision(anyInt());
+    @Test
+    public void standardOrDefaultClickedWithFalse() {
+        when(mSettingsRepo.getDefaultForm()).thenReturn(false);
+        when(mSettingsRepo.getStandardForm()).thenReturn(true);
+        mPresenter.standardOrDefaultClicked();
 
-        // standard form or not changed
-        mPresenter.handleResultViewChanged(anyBoolean());
-        verify(mSettingsView).enableGrSizeOption(anyBoolean());
-        verify(mSettingsRepo).setNewResultView(anyBoolean());
+        verify(mSettingsRepo).getDefaultForm();
+
+        ArgumentCaptor<Boolean> booleanCaptor = ArgumentCaptor.forClass(Boolean.TYPE);
+
+        verify(mSettingsView).enableFormattingOptions(booleanCaptor.capture());
+        assertTrue(booleanCaptor.getValue());
+
+        verify(mSettingsRepo).getStandardForm();
+
+        verify(mSettingsView).enableGrSizeOption(booleanCaptor.capture());
+        assertFalse(booleanCaptor.getValue());
+    }
+
+    @Test
+    public void standardOrDefaultClickedWithTrue() {
+        when(mSettingsRepo.getDefaultForm()).thenReturn(true);
+        mPresenter.standardOrDefaultClicked();
+
+        verify(mSettingsRepo).getDefaultForm();
+
+        ArgumentCaptor<Boolean> booleanCaptor = ArgumentCaptor.forClass(Boolean.TYPE);
+
+        verify(mSettingsView).enableFormattingOptions(booleanCaptor.capture());
+        assertFalse(booleanCaptor.getValue());
     }
 }

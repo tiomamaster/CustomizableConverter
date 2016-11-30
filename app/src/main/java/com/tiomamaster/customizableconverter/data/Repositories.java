@@ -10,11 +10,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Repositories {
 
-    private Repositories() {}
-
     private static ConvertersRepository convertersRepo = null;
 
     private static SettingsRepository settingsRepo = null;
+
+    private Repositories() {}
 
     public synchronized static ConvertersRepository getInMemoryRepoInstance(
             @NonNull ConvertersServiceApi convertersServiceApi) {

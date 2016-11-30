@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -19,15 +20,13 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     private final ConvertersServiceApi mConvertersServiceApi;
 
-    @VisibleForTesting
-    int mLastPos;
+    @VisibleForTesting int mLastPos;
 
-    private String mLastConverterName;
+    @VisibleForTesting String mLastConverterName;
 
     private List<Pair<String,Boolean>> mCachedConvertersTypes;
 
-    @VisibleForTesting
-    Map<String, Converter> mCachedConverters;
+    private Map<String, Converter> mCachedConverters;
 
     private boolean mFirstCall = true;
 
@@ -47,7 +46,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             mFirstCall = false;
         }
 
-        mLastPos = 0;
         if (mCachedConvertersTypes != null) {
             callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
             return;
@@ -63,18 +61,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         });
     }
 
-    @NonNull
-    private List<String> getEnabledConverters() {
-        List<String> converters = new ArrayList<>(mCachedConvertersTypes.size());
-        for (int i = 0; i < mCachedConvertersTypes.size(); i++) {
-            Pair<String, Boolean> pair = mCachedConvertersTypes.get(i);
-            if (pair.second) {
-                converters.add(pair.first);
-                if (TextUtils.equals(pair.first, mLastConverterName)) mLastPos = i;
-            }
-        }
-        return converters;
-    }
 
     @Override
     public void getAllConverterTypes(@NonNull final LoadAllConvertersTypesCallback callback) {
@@ -127,5 +113,19 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }
 
         mCachedConverters.put(converter.getName(), converter);
+    }
+
+    @NonNull
+    private List<String> getEnabledConverters() {
+        mLastPos = 0;
+        List<String> converters = new ArrayList<>(mCachedConvertersTypes.size());
+        for (int i = 0; i < mCachedConvertersTypes.size(); i++) {
+            Pair<String, Boolean> pair = mCachedConvertersTypes.get(i);
+            if (pair.second && !converters.contains(pair.first)) {
+                converters.add(pair.first);
+                if (pair.first.equals(mLastConverterName)) mLastPos = converters.size() - 1;
+            }
+        }
+        return converters;
     }
 }

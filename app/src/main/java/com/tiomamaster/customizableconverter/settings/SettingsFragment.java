@@ -15,8 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by Artyom on 11.10.2016.
  */
 
-public class SettingsFragment extends PreferenceFragmentCompat implements
-        SettingsContract.SettingsView, Preference.OnPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragmentCompat implements SettingsContract.SettingsView {
 
     private SettingsContract.UserActionListener mPresenter;
 
@@ -35,19 +34,32 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     public void onCreatePreferences(final Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
-        // set preference change listener for all preferences which started at position 1
-        for (int i = 1; i < getPreferenceScreen().getPreferenceCount(); i++) {
-            getPreferenceScreen().getPreference(i).setOnPreferenceChangeListener(this);
-        }
+        // customize converters click listener
+        getPreferenceScreen().getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                mPresenter.loadEditor();
+                return true;
+            }
+        });
 
-        getPreferenceScreen().getPreference(0)
-                .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        mPresenter.loadEditor();
-                        return true;
-                    }
-                });
+        // standard form click listener
+        getPreferenceScreen().getPreference(4).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                mPresenter.standardOrDefaultClicked();
+                return true;
+            }
+        });
+
+        // default form click listener
+        getPreferenceScreen().getPreference(5).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                mPresenter.standardOrDefaultClicked();
+                return true;
+            }
+        });
 
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -76,52 +88,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     }
 
     @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-        switch (preference.getOrder()) {
-            // language changed
-            case 1:
-                mPresenter.handleLanguageChanged((String) newValue);
-
-                preference.setSummary(R.string.language);
-                break;
-
-            // grouping size changed
-            case 2:
-                preference.setSummary(newValue + " " + getResources().
-                        getString(R.string.pref_summary_grouping_size));
-
-                mPresenter.handleGroupingSizeChanged((String) newValue);
-                break;
-
-            // precision changed
-            case 3:
-                preference.setSummary(newValue + " " + getResources().
-                        getString(R.string.pref_summary_precision));
-
-                mPresenter.handlePrecisionChanged((String) newValue);
-                break;
-
-            // standard form changed
-            case 4:
-                mPresenter.handleResultViewChanged((Boolean) newValue);
-                break;
-        }
-        return true;
+    public void closeSettings() {
+        getActivity().finish();
     }
 
-        @Override
-        public void closeSettings () {
-            getActivity().finish();
+    @Override
+    public void showSettings(String[] summaries) {
+        PreferenceScreen screen = getPreferenceScreen();
+        for (int i = 0; i < summaries.length; i++) {
+            screen.getPreference(i + 1).setSummary(summaries[i]);
         }
-
-        @Override
-        public void showSettings(String[] summaries) {
-            PreferenceScreen screen = getPreferenceScreen();
-            screen.getPreference(1).setSummary(summaries[0]);
-            screen.getPreference(2).setSummary(summaries[1]);
-            screen.getPreference(3).setSummary(summaries[2]);
-            mParentActivity.showFragment(this);
-        }
+        mParentActivity.showFragment(this);
+    }
 
     @Override
     public void enableGrSizeOption(boolean enable) {
@@ -129,7 +107,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     }
 
     @Override
-        public void setPresenter (@NonNull SettingsContract.UserActionListener presenter){
-            mPresenter = checkNotNull(presenter);
+    public void enableFormattingOptions(boolean enable) {
+        for (int i = 2; i < getPreferenceScreen().getPreferenceCount() - 1; i++) {
+            getPreferenceScreen().getPreference(i).setEnabled(enable);
         }
     }
+
+    @Override
+    public void setPresenter(@NonNull SettingsContract.UserActionListener presenter) {
+        mPresenter = checkNotNull(presenter);
+    }
+}

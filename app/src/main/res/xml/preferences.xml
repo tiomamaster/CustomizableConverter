@@ -10,7 +10,7 @@
         android:title="@string/pref_title_language"
         android:summary="@string/pref_summary_language"
         android:dialogTitle="@string/pref_dialog_title_language"
-        android:key="pref_language"
+        android:key="PREF_LANGUAGE"
         android:entries="@array/pref_lang_entries"
         android:entryValues="@array/pref_lang_entryValues"
         android:defaultValue="en"
@@ -19,7 +19,7 @@
 
     <EditTextPreference
         android:title="@string/pref_title_grouping_size"
-        android:key="pref_grouping_size"
+        android:key="PREF_GROUPING_SIZE"
         android:inputType="number"
         android:dialogMessage="@string/pref_dialog_message_grouping_size"
         android:defaultValue="3"
@@ -29,7 +29,7 @@
 
     <EditTextPreference
         android:title="@string/pref_title_precision"
-        android:key="pref_precision"
+        android:key="PREF_PRECISION"
         android:inputType="number"
         android:dialogMessage="@string/pref_dialog_message_precision"
         android:defaultValue="5"
@@ -39,7 +39,16 @@
 
     <SwitchPreferenceCompat
         android:title="@string/pref_title_standard_form"
-        android:key="pref_standard_form"
+        android:summary="@string/pref_summary_standard_form"
+        android:key="PREF_STANDARD_FORM"
+        android:defaultValue="false"
+        android:persistent="true"
+        android:layout="@layout/preference_list_item" />
+
+    <SwitchPreferenceCompat
+        android:title="@string/pref_title_default_form"
+        android:summary="@string/pref_summary_default_form"
+        android:key="PREF_DEFAULT_FORM"
         android:defaultValue="false"
         android:persistent="true"
         android:layout="@layout/preference_list_item" />

@@ -25,6 +25,8 @@ interface SettingsContract {
         void showSettings(String[] summaries);
 
         void enableGrSizeOption(boolean enable);
+
+        void enableFormattingOptions(boolean enable);
     }
 
     interface EditView extends View {
@@ -40,12 +42,6 @@ interface SettingsContract {
 
         void loadEditor();
 
-        void handleLanguageChanged(String newVal);
-
-        void handleGroupingSizeChanged(String newVal);
-
-        void handlePrecisionChanged(String newVal);
-
-        void handleResultViewChanged(boolean newVal);
+        void standardOrDefaultClicked();
     }
 }

@@ -2,15 +2,13 @@ package com.tiomamaster.customizableconverter.converter;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -53,14 +51,11 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     private ConverterContract.UserActionListener mActionsListener;
 
-    @VisibleForTesting
-    Converter mCurConverter;
+    @VisibleForTesting Converter mCurConverter;
 
-    @VisibleForTesting
-    InputMethodManager mImm;
+    @VisibleForTesting InputMethodManager mImm;
 
-    @VisibleForTesting
-    Spinner mSpinnerUnits;
+    @VisibleForTesting Spinner mSpinnerUnits;
     private ArrayAdapter<String> mUnitsAdapter;
 
     private EditText mQuantity;
@@ -69,8 +64,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     private ConverterActivity mParentActivity;
 
-    @VisibleForTesting
-    RecyclerView mConversionResult;
+    @VisibleForTesting RecyclerView mConversionResult;
     private ConversionResultAdapterWithHeader mResultAdapter;
 
     private View mRecyclerViewHeader;
@@ -79,49 +73,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     public static ConverterFragment newInstance() {
         return new ConverterFragment();
-    }
-
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        mParentActivity = (ConverterActivity) getActivity();
-
-        mActionsListener = new ConverterPresenter(Injection.
-                provideConvertersRepository(mParentActivity.getApplicationContext()), this);
-
-        mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-
-        // create adapter here because need context
-        mUnitsAdapter = new MySpinnerAdapter(mParentActivity, Color.BLACK,
-                Color.parseColor("#009688"), -1,
-                getResources().getDimensionPixelSize(R.dimen.spinner_dropdown_item_height),
-                mSpinnerUnits);
-        mSpinnerUnits.setAdapter(mUnitsAdapter);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.settings:
-                mActionsListener.openSettings();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mActionsListener.loadConvertersTypes();
     }
 
     @Nullable
@@ -229,22 +180,46 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         return root;
     }
 
-     void hideSoftInput() {
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = mParentActivity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(mParentActivity);
-        }
-        mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mParentActivity = (ConverterActivity) getActivity();
+
+        mActionsListener = new ConverterPresenter(Injection.
+                provideConvertersRepository(mParentActivity.getApplicationContext()), this);
+
+        mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        // create adapter here because need context
+        mUnitsAdapter = new MySpinnerAdapter(mParentActivity, Color.BLACK,
+                Color.parseColor("#009688"), -1,
+                getResources().getDimensionPixelSize(R.dimen.spinner_dropdown_item_height),
+                mSpinnerUnits);
+        mSpinnerUnits.setAdapter(mUnitsAdapter);
     }
 
-    // Convert from selected in Spinner unit and quantity in EditText
-    // to all possible units in this type of converter and set they to RecyclerView
-    private void convert(String from, String quantity) {
-        if (TextUtils.isEmpty(quantity)) return;
-        mResultAdapter.setDataSet(mCurConverter.convertAllExtFormatted(Double.parseDouble(quantity), from));
-        mResultText.setVisibility(View.VISIBLE);
+    @Override
+    public void onResume() {
+        super.onResume();
+        mActionsListener.loadConvertersTypes();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                mActionsListener.openSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -276,6 +251,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mActionsListener.loadConverter(mParentActivity.mSpinConvTypes.getSelectedItem().toString());
     }
 
+
+    // TODO: maybe refactor this method so that presenter call it with all data we need
     @Override
     public void showConverter(@NonNull Converter converter) {
         checkNotNull(converter);
@@ -283,7 +260,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         // clear spinner units and set new data
         mUnitsAdapter.clear();
-        for (String s : converter.getAllUnitsName()) {
+        for (String s : converter.getEnabledUnitsName()) {
             mUnitsAdapter.add(s);
         }
         // set last selection
@@ -315,6 +292,25 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         startActivity(new Intent(getContext(), SettingsActivity.class));
     }
 
+    void hideSoftInput() {
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = mParentActivity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(mParentActivity);
+        }
+        mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    // Convert from selected in Spinner unit and quantity in EditText
+    // to all possible units in this type of converter and set they to RecyclerView
+    // TODO: maybe transfer this method to the presenter
+    private void convert(String from, String quantity) {
+        if (TextUtils.isEmpty(quantity)) return;
+        mResultAdapter.setDataSet(mCurConverter.convertAll(Double.parseDouble(quantity), from));
+        mResultText.setVisibility(View.VISIBLE);
+    }
+
     /**
      * Handle selection of spinner converters types
      */
@@ -328,45 +324,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         private final static int TYPE_ITEM = 0;
         private final static int TYPE_HEADER = 1;
 
-        private String[][] mDataSet;
-
-        private class VHItem extends RecyclerView.ViewHolder {
-
-            private TextView mUnitName;
-            private TextView mResult;
-
-            VHItem(View itemView) {
-                super(itemView);
-                mUnitName = (TextView) itemView.findViewById(R.id.unit_name);
-                mResult = (TextView) itemView.findViewById(R.id.result);
-            }
-        }
-
-        private class VHHeader extends RecyclerView.ViewHolder {
-
-            VHHeader(View itemView) {
-                super(itemView);
-            }
-        }
-
-        void setDataSet(@NonNull String[][] newData) {
-            checkNotNull(newData);
-            if (mDataSet == null) {
-                mDataSet = newData;
-                notifyItemRangeInserted(1, mDataSet.length);
-            } else {
-                mDataSet = newData;
-                // because notifyItemChanged() cause bug inside recycler view
-                notifyDataSetChanged();
-            }
-        }
-
-        void clearDataSet() {
-            if (mDataSet != null) {
-                notifyItemRangeRemoved(1, mDataSet.length);
-                mDataSet = null;
-            }
-        }
+        private List<Pair<String, String>> mDataSet;
 
         @Override
         public int getItemViewType(int position) {
@@ -390,19 +348,18 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof VHItem) {
                 if (mDataSet != null) {
-                    ((VHItem) holder).mUnitName.setText(mDataSet[position - 1][0]);
+                    ((VHItem) holder).mUnitName.setText(mDataSet.get(position - 1).first);
 
-                    if (mDataSet[position - 1][1].contains("×")) {
+                    String result = mDataSet.get(position - 1).second;
+                    if (result.contains("×")) {
                         // format text to show power
-                        String result = mDataSet[position - 1][1];
                         int start = result.indexOf('×') + 3;
                         int end = result.length();
                         SpannableStringBuilder ssb = new SpannableStringBuilder(result);
                         ssb.setSpan(new SuperscriptSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         ssb.setSpan(new RelativeSizeSpan(0.75f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         ((VHItem) holder).mResult.setText(ssb);
-                    } else
-                        ((VHItem) holder).mResult.setText(mDataSet[position - 1][1]);
+                    } else ((VHItem) holder).mResult.setText(result);
                 }
             } else if (holder instanceof VHHeader) {
                 mQuantity.requestFocus();
@@ -412,7 +369,45 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         @Override
         public int getItemCount() {
             if (mDataSet == null) return 1;
-            return mDataSet.length + 1;
+            return mDataSet.size() + 1;
+        }
+
+        void setDataSet(@NonNull List<Pair<String, String>> newData) {
+            checkNotNull(newData);
+            if (mDataSet == null) {
+                mDataSet = newData;
+                notifyItemRangeInserted(1, mDataSet.size());
+            } else {
+                mDataSet = newData;
+                // because notifyItemChanged() cause bug inside recycler view
+                notifyDataSetChanged();
+            }
+        }
+
+        void clearDataSet() {
+            if (mDataSet != null) {
+                notifyItemRangeRemoved(1, mDataSet.size());
+                mDataSet = null;
+            }
+        }
+
+        private class VHItem extends RecyclerView.ViewHolder {
+
+            private TextView mUnitName;
+            private TextView mResult;
+
+            VHItem(View itemView) {
+                super(itemView);
+                mUnitName = (TextView) itemView.findViewById(R.id.unit_name);
+                mResult = (TextView) itemView.findViewById(R.id.result);
+            }
+        }
+
+        private class VHHeader extends RecyclerView.ViewHolder {
+
+            VHHeader(View itemView) {
+                super(itemView);
+            }
         }
     }
 }

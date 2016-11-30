@@ -10,9 +10,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
-import static org.mockito.Matchers.any;
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -22,21 +25,17 @@ import static org.mockito.Mockito.verify;
  */
 public class ConverterPresenterTest {
 
-    private static final String[] CONVERTERS_TYPES = {"Test0", "Test1"};
+    private static final List<String> CONVERTERS_TYPES = Arrays.asList("Test0", "Test1");
 
-    @Mock
-    private ConverterContract.View mView;
+    @Mock private ConverterContract.View mView;
 
-    @Mock
-    private ConvertersRepository mRepository;
+    @Mock private ConvertersRepository mRepository;
 
     private ConverterPresenter mPresenter;
 
-    @Captor
-    private ArgumentCaptor<ConvertersRepository.LoadEnabledConvertersTypesCallback> mLoadConvertersTypesCaptor;
+    @Captor private ArgumentCaptor<ConvertersRepository.LoadEnabledConvertersTypesCallback> mLoadConvertersTypesCaptor;
 
-    @Captor
-    private ArgumentCaptor<ConvertersRepository.GetConverterCallback> mGetConverterCaptor;
+    @Captor private ArgumentCaptor<ConvertersRepository.GetConverterCallback> mGetConverterCaptor;
 
     @Before
     public void setUp() {
@@ -45,7 +44,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void loadConvertersTypesAndShowInView() {
+    public void loadConvertersTypesShowItInView() {
         mPresenter.loadConvertersTypes();
 
         verify(mView).setProgressIndicator(true);
@@ -59,22 +58,25 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void loadConverterAndShowInView() {
-        mPresenter.loadConverter(CONVERTERS_TYPES[0]);
+    public void loadConverterShowItView() {
+        String name = CONVERTERS_TYPES.get(0);
+        mPresenter.loadConverter(name);
 
         verify(mView).setProgressIndicator(true);
 
-        verify(mRepository).getConverter(eq(CONVERTERS_TYPES[0]), mGetConverterCaptor.capture());
-        Converter converter = new Converter(CONVERTERS_TYPES[0], new LinkedHashMap<String, Double>());
+        verify(mRepository).getConverter(eq(name), mGetConverterCaptor.capture());
+        Converter converter = new Converter(name, new ArrayList<Converter.Unit>());
         mGetConverterCaptor.getValue().onConverterLoaded(converter);
 
         verify(mView).setProgressIndicator(false);
 
         verify(mView).showConverter(converter);
+
+        assertEquals(name, converter.getName());
     }
 
     @Test
-    public void openSettingsTest() {
+    public void openSettingsShowSettingsView() {
         mPresenter.openSettings();
 
         verify(mView).showSettingsUi();

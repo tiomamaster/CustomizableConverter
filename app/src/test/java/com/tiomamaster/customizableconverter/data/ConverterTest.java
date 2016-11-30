@@ -1,9 +1,16 @@
 package com.tiomamaster.customizableconverter.data;
 
+import android.support.v4.util.Pair;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runners.JUnit4;
 
-import java.util.LinkedHashMap;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -24,95 +31,83 @@ import static org.junit.Assert.assertTrue;
  */
 public class ConverterTest {
 
-    private static double delta = 0.000001;
+    private static double sDelta = 0.000001;
 
-    private static String[] unitsName = {"Meter", "Centimeter", "Fathom", "League", "Mile"};
+    private static String[] sUnitsName = {"Meter", "Centimeter", "Fathom", "League", "Mile"};
 
-    private static double[] unitsValue = {1, 0.01, 1.8288, 4828.032, 1609.344};
+    private static double[] sUnitsValue = {1, 0.01, 1.8288, 4828.032, 1609.344};
 
-    private static LinkedHashMap<String, Double> units;
+    private static boolean[] sIsEnabled = {true, true, true, false, true};
 
-    private static Converter converter;
+    private static List<Converter.Unit> sUnits;
+
+    private static Converter sConverter;
 
     @BeforeClass
     public static void setUp() {
-        units = new LinkedHashMap<>();
-        for (int i = 0; i < unitsName.length; i++) {
-            units.put(unitsName[i], unitsValue[i]);
+        sUnits = new ArrayList<>();
+        for (int i = 0; i < sUnitsName.length; i++) {
+            sUnits.add(new Converter.Unit(sUnitsName[i], sUnitsValue[i], sIsEnabled[i]));
         }
-        converter = new Converter("Test", units);
+        sConverter = new Converter("Test", sUnits);
     }
 
     @Test
-    public void convertFromToTest() {
-        assertEquals(200, converter.convertFromTo(2, unitsName[0], unitsName[1]), delta);
-        assertEquals(0.01025, converter.convertFromTo(1.025, unitsName[1], unitsName[0]), delta);
-    }
+    public void convertAllCheckResult() {
+        // set default form to unsure correct testing
+        sConverter.onSettingsChange(0,0,false,true);
 
-    @Test
-    public void convertTest() {
-        String from = unitsName[4];
-        double quantity = 0.125;
-        double[] expected = new double[unitsName.length];
-        for (int i = 0; i < unitsName.length; i++) {
-            expected[i] = converter.convertFromTo(quantity, from, unitsName[i]);
-        }
-        assertArrayEquals(expected, converter.convertAll(quantity, from), delta);
-    }
-
-    @Test
-    public void convertAllExtTest() {
-        String from = unitsName[1];
+        String from = sUnitsName[1];
         double quantity = 5.2225;
-        String expectedNames[] = converter.getAllUnitsName();
-        double[] expectedResults = converter.convertAll(quantity, from);
-        String[][] actual = converter.convertAllExt(quantity, from);
-        for (int i = 0; i < actual.length; i++) {
-            assertEquals(expectedNames[i], actual[i][0]);
-            assertEquals(String.valueOf(expectedResults[i]), actual[i][1]);
-        }
-    }
-
-    @Test
-    public void convertAllExtFormattedTest() {
-        String from = unitsName[1];
-        double quantity = 5.2225;
-        String expectedNames[] = converter.getAllUnitsName();
-        double[] expectedResults = converter.convertAll(quantity, from);
-        String[][] actual = converter.convertAllExtFormatted(quantity, from);
+        List<String> expectedNames = sConverter.getEnabledUnitsName();
+        List<Pair<String, String>> actual = sConverter.convertAll(quantity, from);
 
         // check result not contains from unit
-        assertEquals(expectedResults.length - 1, actual.length);
-        assertEquals(expectedNames.length - 1, actual.length);
-        for (String[] anActual : actual) {
-            assertNotEquals(from, anActual[0]);
-        }
+        assertEquals(expectedNames.size() - 1, actual.size());
+        assertFalse(actual.contains(new Pair<>(sUnitsName[1], quantity + "")));
+
+        // check conversion result
+        assertEquals(sUnitsName[4], actual.get(2).first);
+        assertEquals(quantity * sUnitsValue[1] / sUnitsValue[4] + "",
+                actual.get(2).second);
     }
 
     @Test
-    public void changeSettings_CheckConversionResult() {
-
+    public void changeSettingsCheckConversionResult() {
         // try to get standard form
-        converter.onSettingsChange(3, 5, true);
-        String[][] actual = converter.convertAllExtFormatted(5, unitsName[0]);
+        sConverter.onSettingsChange(3, 5, true, false);
+        List<Pair<String, String>> actual = sConverter.convertAll(5, sUnitsName[0]);
 
         // check conversion result contains ×10 in each string
-        for (String[] anActual : actual) {
-            assertTrue(anActual[1].contains("×10"));
+        for (Pair<String, String> anActual : actual) {
+            assertTrue(anActual.second.contains("×10"));
         }
 
         // try to get default view of result
-        converter.onSettingsChange(3, 5, false);
-        actual = converter.convertAllExtFormatted(5, unitsName[0]);
+        sConverter.onSettingsChange(3, 5, false, false);
+        actual = sConverter.convertAll(5, sUnitsName[0]);
 
         // check conversion result not contains ×10
-        for (String[] anActual : actual) {
-            assertFalse(anActual[1].contains("×10"));
+        for (Pair<String, String> anActual : actual) {
+            assertFalse(anActual.second.contains("×10"));
         }
     }
 
     @Test
-    public void getAllUnitsTest() {
-        assertArrayEquals(unitsName, converter.getAllUnitsName());
+    public void getEnabledUnitsCheckResult() {
+        assertFalse(sConverter.getEnabledUnitsName().contains(sUnitsName[3]));
+        assertEquals(4, sConverter.getEnabledUnitsName().size());
+    }
+
+    @Test
+    public void equalsUnit() {
+        List<Converter.Unit> units = new ArrayList<>();
+        Converter.Unit u = new Converter.Unit("One", 1d, true);
+
+        units.add(u);
+
+        // check that double and boolean field not affect for equals
+        u = new Converter.Unit(u.name, 2d, false);
+        assertTrue(units.contains(u));
     }
 }

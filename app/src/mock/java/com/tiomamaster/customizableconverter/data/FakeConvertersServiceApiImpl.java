@@ -27,9 +27,9 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
 
     static {
         for (int j = 0; j < convertersCount; j ++) {
-            LinkedHashMap<String, Double> units = new LinkedHashMap<>();
+            List<Converter.Unit> units = new ArrayList<>();
             for (int i = 0; i < unitsCount - j; i++) {
-                units.put("Unit" + i + j, ((double) i + 1 + j*5));
+                units.add(new Converter.Unit("Unit" + i + j, (double) i + 1 + j*5, true));
             }
             Converter test = new Converter("Fake converter" + j, units);
             test.setLastUnitPosition(new Random().nextInt(test.getUnits().size()));
@@ -39,7 +39,6 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     public FakeConvertersServiceApiImpl(Context context) {
-
         // set listener only for one converter instance
         Repositories.getInMemoryRepoInstance(context).
                 setOnSettingsChangeListener(CONVERTERS.get("Fake converter0").
@@ -50,7 +49,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     public void getAllConvertersTypes(@NonNull final ConverterServiceCallback<List<Pair<String, Boolean>>> callback) {
         final List<Pair<String, Boolean>> converters = new ArrayList<>(CONVERTERS.size());
         for (Converter next : CONVERTERS.values()) {
-            converters.add(new Pair<>(next.getName(), new Random().nextBoolean()));
+            converters.add(new Pair<>(next.getName(), true));
         }
         H.postDelayed(new Runnable() {
             @Override

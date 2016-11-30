@@ -1,8 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
+
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
+
     defaultConfig {
         applicationId "com.tiomamaster.customizableconverter.demo"
         minSdkVersion rootProject.minSdkVersion
@@ -11,12 +13,14 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     productFlavors {
         mock {
             applicationIdSuffix = ".mock"
@@ -24,11 +28,16 @@ android {
         prod {
         }
     }
+
     android.variantFilter { variant ->
         if(variant.buildType.name.equals('release')
                 && variant.getFlavors().get(0).name.equals('mock')) {
             variant.setIgnore(true);
         }
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 
