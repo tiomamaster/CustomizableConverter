@@ -72,13 +72,13 @@ public class ConverterScreenTest {
     public void setUp() {
         mActivity = mActivityRule.getActivity();
         mFragment = (ConverterFragment) mActivity.getSupportFragmentManager().
-                findFragmentByTag(mActivity.mConverterFragmentTag);
+                findFragmentByTag(mActivity.CONVERTER_FRAGMENT_TAG);
     }
 
     @Test
     public void checkSpinnerConvertersStateAfterRotate() {
         // Spinner Converter Types prepare for rotate
-        Adapter adapterConv = mActivity.mSpinConvTypes.getAdapter();
+        Adapter adapterConv = mActivity.mSpinConverterTypes.getAdapter();
         String selectionText = adapterConv.getItem(
                 adapterConv.getCount() - 1).toString();
         onView(withId(R.id.spinner_conv_types)).perform(click());
@@ -123,7 +123,7 @@ public class ConverterScreenTest {
     @Test
     public void chooseConverterAndShowIt() {
         // Select all converters in Spinner
-        Adapter adapter = mActivity.mSpinConvTypes.getAdapter();
+        Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
         for (int j = 0; j < adapter.getCount(); j++) {
             String selectionText = adapter.getItem(j).toString();
             onView(withId(R.id.spinner_conv_types)).perform(click());

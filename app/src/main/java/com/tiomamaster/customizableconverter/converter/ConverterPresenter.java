@@ -35,6 +35,11 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
                 mConverterView.setProgressIndicator(false);
 
+                if (convertersTypes.size() == 0) {
+                    mConverterView.showNoting();
+                    return;
+                }
+
                 mConverterView.showConvertersTypes(convertersTypes, position);
             }
         });

@@ -1,11 +1,13 @@
 package com.tiomamaster.customizableconverter.settings;
 
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -18,17 +20,16 @@ import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.converter.Divider;
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperCallback;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.security.AccessController.getContext;
 
 /**
  * Created by Artyom on 20.10.2016.
  */
 
-public class EditFragment extends Fragment implements SettingsContract.EditView, RecyclerViewAdapter.OnStartDragListener {
+public class EditFragment extends Fragment implements SettingsContract.EditView,
+        RecyclerViewAdapter.ActionListener {
 
     private SettingsContract.UserActionListener mPresenter;
 
@@ -106,5 +107,28 @@ public class EditFragment extends Fragment implements SettingsContract.EditView,
     @Override
     public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
         mItemTouchHelper.startDrag(viewHolder);
+    }
+
+    @Override
+    public void onStartSwipe(final int position) {
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case AlertDialog.BUTTON_POSITIVE:
+                        mAdapter.confirmDismiss(position);
+                        break;
+                    case AlertDialog.BUTTON_NEGATIVE:
+                        mAdapter.cancelDismiss(position);
+                        break;
+                }
+            }
+        };
+
+        new AlertDialog.Builder(mParentActivity).setMessage(
+                "Are you sure want to delete this converter?")
+                .setPositiveButton("OK", listener)
+                .setNegativeButton("CANCEL", listener)
+                .setCancelable(false).show();
     }
 }

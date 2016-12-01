@@ -20,8 +20,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     private static final String TITLE_KEY = "TitleKey";
 
-    static final String SFT = "SFT";
-    static final String EFT = "EFT";
+    private static final String SETTINGS_FRAGMENT_TAG = "SETTINGS_FRAGMENT_TAG";
+    private static final String EDIT_FRAGMENT_TAG = "EDIT_FRAGMENT_TAG";
 
     private SettingsContract.UserActionListener mPresenter;
 
@@ -35,8 +35,8 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // find or create fragments and add they to the activity
-        SettingsFragment settingsFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(SFT);
-        EditFragment editFragment = (EditFragment) getSupportFragmentManager().findFragmentByTag(EFT);
+        SettingsFragment settingsFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(SETTINGS_FRAGMENT_TAG);
+        EditFragment editFragment = (EditFragment) getSupportFragmentManager().findFragmentByTag(EDIT_FRAGMENT_TAG);
         if (settingsFragment == null) {
             settingsFragment = SettingsFragment.newInstance();
             editFragment = EditFragment.newInstance();
@@ -72,7 +72,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // TODO: maybe remove super call
         mPresenter.handleHomePressed();
     }
 
@@ -80,8 +79,8 @@ public class SettingsActivity extends AppCompatActivity {
         // Add the Fragments to the fragment manager
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.contentFrame, fragment1, SFT);
-        transaction.add(R.id.contentFrame, fragment2, EFT);
+        transaction.add(R.id.contentFrame, fragment1, SETTINGS_FRAGMENT_TAG);
+        transaction.add(R.id.contentFrame, fragment2, EDIT_FRAGMENT_TAG);
         transaction.commit();
     }
 
@@ -89,11 +88,11 @@ public class SettingsActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment instanceof SettingsFragment) {
-            transaction.hide(fragmentManager.findFragmentByTag(EFT));
+            transaction.hide(fragmentManager.findFragmentByTag(EDIT_FRAGMENT_TAG));
             getSupportActionBar().setTitle(getResources().getString(R.string.settings));
         }
         else {
-            transaction.hide(fragmentManager.findFragmentByTag(SFT));
+            transaction.hide(fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG));
             getSupportActionBar().setTitle(R.string.pref_title_customize);
         }
         transaction.show(fragment);

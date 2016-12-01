@@ -22,6 +22,8 @@ interface ConverterContract {
         void showConverter(@NonNull Converter converter);
 
         void showSettingsUi();
+
+        void showNoting();
     }
 
     interface UserActionListener {

@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
@@ -231,7 +232,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         final SwipeRefreshLayout srl =
                 (SwipeRefreshLayout) getView().findViewById(R.id.refresh_layout);
 
-        // Make sure setRefreshing() is called after the layout is done with everything else.
+        // make sure setRefreshing() is called after the layout is done with everything else.
         srl.post(new Runnable() {
             @Override
             public void run() {
@@ -248,7 +249,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mParentActivity.initSpinner(converters, selection);
 
         // show last selected converter
-        mActionsListener.loadConverter(mParentActivity.mSpinConvTypes.getSelectedItem().toString());
+        mActionsListener.loadConverter(mParentActivity.mSpinConverterTypes.getSelectedItem().toString());
     }
 
 
@@ -290,6 +291,13 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     @Override
     public void showSettingsUi() {
         startActivity(new Intent(getContext(), SettingsActivity.class));
+    }
+
+    @Override
+    public void showNoting() {
+        mConversionResult.setVisibility(View.GONE);
+        mParentActivity.showSpinner(false);
+        Snackbar.make(getView(), "Nothing to how", Snackbar.LENGTH_INDEFINITE).show();
     }
 
     void hideSoftInput() {

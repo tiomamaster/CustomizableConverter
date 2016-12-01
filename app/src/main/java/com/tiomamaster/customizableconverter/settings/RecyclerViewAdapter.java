@@ -10,13 +10,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 
 import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperAdapter;
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperViewHolder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,11 +31,89 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
 
     private List<Pair<String, Boolean>> mDataSet;
 
-    private OnStartDragListener mDragListener;
+    private ActionListener mActionListener;
 
-    public interface OnStartDragListener  {
+    RecyclerViewAdapter(ActionListener dragListener) {
+        mActionListener = dragListener;
+    }
+
+    @Override
+    public RecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new RecyclerViewAdapter.ViewHolder(LayoutInflater.from(parent.getContext()).
+                inflate(R.layout.edit_recycler_view_item, parent, false));
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.mText.setText(mDataSet.get(position).first);
+
+        holder.mHandle.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEventCompat.getActionMasked(event) ==
+                        MotionEvent.ACTION_DOWN) {
+                    mActionListener.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
+
+        holder.mCheck.setChecked(mDataSet.get(position).second);
+        holder.mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mDataSet.add(holder.getAdapterPosition(),
+                new Pair<>(mDataSet.remove(holder.getAdapterPosition()).first, isChecked));
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        if (mDataSet != null)
+            return mDataSet.size();
+        return 0;
+    }
+
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mDataSet, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mDataSet, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+        mActionListener.onStartSwipe(position);
+    }
+
+    void cancelDismiss(int position) {
+        notifyItemChanged(position);
+    }
+
+    void confirmDismiss(int position) {
+        mDataSet.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    void setDataSet(List<Pair<String, Boolean>> newData) {
+        mDataSet = newData;
+        notifyDataSetChanged();
+    }
+
+    interface ActionListener {
 
         void onStartDrag(RecyclerView.ViewHolder viewHolder);
+
+        void onStartSwipe(int position);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
@@ -63,60 +141,5 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
         public void onItemClear() {
             itemView.setBackgroundColor(0);
         }
-    }
-
-    public RecyclerViewAdapter(OnStartDragListener dragListener) {
-        mDragListener = dragListener;
-    }
-
-    @Override
-    public RecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new RecyclerViewAdapter.ViewHolder(LayoutInflater.from(parent.getContext()).
-                inflate(R.layout.edit_recycler_view_item, parent, false));
-    }
-
-    @Override
-    public void onBindViewHolder(final RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.mText.setText(mDataSet.get(position).first);
-
-        holder.mHandle.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) ==
-                        MotionEvent.ACTION_DOWN) {
-                    mDragListener.onStartDrag(holder);
-                }
-                return false;
-            }
-        });
-
-        holder.mCheck.setChecked(mDataSet.get(position).second);
-    }
-
-    public void setDataSet(List<Pair<String, Boolean>> newData) {
-        mDataSet = newData;
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public int getItemCount() {
-        if (mDataSet != null)
-            return mDataSet.size();
-        return 0;
-    }
-
-    @Override
-    public boolean onItemMove(int fromPosition, int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(mDataSet, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(mDataSet, i, i - 1);
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition);
-        return true;
     }
 }
