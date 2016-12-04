@@ -126,7 +126,7 @@ public class EditFragment extends Fragment implements SettingsContract.EditView,
         };
 
         new AlertDialog.Builder(mParentActivity).setMessage(
-                "Are you sure want to delete this converter?")
+                getString(R.string.msg_delete_converter))
                 .setPositiveButton("OK", listener)
                 .setNegativeButton("CANCEL", listener)
                 .setCancelable(false).show();

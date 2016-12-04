@@ -6,7 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
@@ -16,7 +16,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
@@ -30,15 +29,12 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
-import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.settings.SettingsActivity;
 
 import java.util.List;
@@ -50,9 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ConverterFragment extends Fragment implements ConverterContract.View {
 
-    private ConverterContract.UserActionListener mActionsListener;
-
-    @VisibleForTesting Converter mCurConverter;
+    @VisibleForTesting ConverterContract.UserActionListener mActionsListener;
 
     @VisibleForTesting InputMethodManager mImm;
 
@@ -70,7 +64,10 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     private View mRecyclerViewHeader;
 
-    public ConverterFragment() {}
+    private TextView mMsg;
+
+    public ConverterFragment() {
+    }
 
     public static ConverterFragment newInstance() {
         return new ConverterFragment();
@@ -81,6 +78,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     public View onCreateView(LayoutInflater inflater, @Nullable final ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_converter, container, false);
+
+        mMsg = (TextView) root.findViewById(R.id.text);
+        mMsg.setVisibility(View.GONE);
 
         mConversionResult = (RecyclerView) root.findViewById(R.id.conversion_result);
         mConversionResult.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -108,7 +108,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         // draw divider between items
         mConversionResult.addItemDecoration(new Divider(getActivity(), 1));
 
-        mConversionResult.setVisibility(View.INVISIBLE);
+        mConversionResult.setVisibility(View.GONE);
 
         SwipeRefreshLayout swipeRefreshLayout =
                 (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
@@ -129,13 +129,15 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             // save last selected unit position in converter
-                            mCurConverter.setLastUnitPosition(position);
+                            mActionsListener.saveLastUnitPos(position);
 
-                            convert(((CheckedTextView) view).getText().toString(), mQuantity.getText().toString());
+                            mActionsListener.convert(((TextView) view).getText().toString(),
+                                    mQuantity.getText().toString());
                         }
 
                         @Override
-                        public void onNothingSelected(AdapterView<?> parent) {}
+                        public void onNothingSelected(AdapterView<?> parent) {
+                        }
                     });
                 }
                 return false;
@@ -153,19 +155,20 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                     mQuantity.setFocusableInTouchMode(true);
                     mQuantity.addTextChangedListener(new TextWatcher() {
                         @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
 
                         @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        }
 
                         @Override
                         public void afterTextChanged(Editable s) {
-                            if (s.length() != 0 && mSpinnerUnits.getSelectedItem() != null) {
-                                // save last entered quantity in converter
-                                mCurConverter.setLastQuantity(s.toString());
+                            // save last entered quantity in converter
+                            mActionsListener.saveLastQuantity(s.toString());
 
-                                convert(mSpinnerUnits.getSelectedItem().toString(), s.toString());
-                            }
+                            mActionsListener.convert(mSpinnerUnits.getSelectedItem().toString(),
+                                    s.toString());
                         }
                     });
                 }
@@ -252,24 +255,22 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mActionsListener.loadConverter(mParentActivity.mSpinConverterTypes.getSelectedItem().toString());
     }
 
-
-    // TODO: maybe refactor this method so that presenter call it with all data we need
     @Override
-    public void showConverter(@NonNull Converter converter) {
-        checkNotNull(converter);
-        mCurConverter = converter;
+    public void showConverter(@NonNull List<String> units, int lastUnitPos, @NonNull String lastQuantity) {
+        checkNotNull(units);
+        checkNotNull(lastQuantity);
 
         // clear spinner units and set new data
         mUnitsAdapter.clear();
-        for (String s : converter.getEnabledUnitsName()) {
+        for (String s : units) {
             mUnitsAdapter.add(s);
         }
         // set last selection
-        mSpinnerUnits.setSelection(converter.getLastUnitPosition());
+        mSpinnerUnits.setSelection(lastUnitPos);
 
         // set last quantity text
         if (mQuantity != null) {
-            mQuantity.setText(converter.getLastQuantity());
+            mQuantity.setText(lastQuantity);
             mQuantity.setFocusableInTouchMode(false);
             mQuantity.clearFocus();
         }
@@ -283,9 +284,18 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
 
         // show conversion result
-        convert(mSpinnerUnits.getSelectedItem().toString(), converter.getLastQuantity());
+        mActionsListener.convert(mSpinnerUnits.getSelectedItem().toString(), lastQuantity);
+    }
 
+    @Override
+    public void showConversionResult(@NonNull List<Pair<String, String>> result) {
+        checkNotNull(result);
+
+        mResultAdapter.setDataSet(result);
+
+        mMsg.setVisibility(View.GONE);
         mConversionResult.setVisibility(View.VISIBLE);
+        mResultText.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -295,9 +305,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void showNoting() {
+        mMsg.setVisibility(View.VISIBLE);
         mConversionResult.setVisibility(View.GONE);
         mParentActivity.showSpinner(false);
-        Snackbar.make(getView(), "Nothing to how", Snackbar.LENGTH_INDEFINITE).show();
     }
 
     void hideSoftInput() {
@@ -308,15 +318,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             view = new View(mParentActivity);
         }
         mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    // Convert from selected in Spinner unit and quantity in EditText
-    // to all possible units in this type of converter and set they to RecyclerView
-    // TODO: maybe transfer this method to the presenter
-    private void convert(String from, String quantity) {
-        if (TextUtils.isEmpty(quantity)) return;
-        mResultAdapter.setDataSet(mCurConverter.convertAll(Double.parseDouble(quantity), from));
-        mResultText.setVisibility(View.VISIBLE);
     }
 
     /**

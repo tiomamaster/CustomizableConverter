@@ -1,5 +1,7 @@
 package com.tiomamaster.customizableconverter.converter;
 
+import android.support.v4.util.Pair;
+
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
@@ -16,9 +18,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by Artyom on 16.07.2016.
@@ -30,6 +38,8 @@ public class ConverterPresenterTest {
     @Mock private ConverterContract.View mView;
 
     @Mock private ConvertersRepository mRepository;
+
+    @Mock private Converter mCurConverter;
 
     private ConverterPresenter mPresenter;
 
@@ -58,7 +68,19 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void loadConverterShowItView() {
+    public void loadConvertersTypesShowNothing() {
+        mPresenter.loadConvertersTypes();
+
+        verify(mView).setProgressIndicator(true);
+
+        verify(mRepository).getEnabledConvertersTypes(mLoadConvertersTypesCaptor.capture());
+        mLoadConvertersTypesCaptor.getValue().onConvertersTypesLoaded(new ArrayList<String>(), anyInt());
+
+        verify(mView).showNoting();
+    }
+
+    @Test
+    public void loadConverterShowItInView() {
         String name = CONVERTERS_TYPES.get(0);
         mPresenter.loadConverter(name);
 
@@ -70,9 +92,67 @@ public class ConverterPresenterTest {
 
         verify(mView).setProgressIndicator(false);
 
-        verify(mView).showConverter(converter);
+        verify(mView).showConverter(anyList(), anyInt(), anyString());
 
         assertEquals(name, converter.getName());
+    }
+
+    @Test
+    public void callConvertShowResult() {
+        String from = "Test";
+        double quantity = 100;
+
+        when(mCurConverter.convertAll(quantity, from)).thenReturn(new ArrayList<Pair<String, String>>());
+
+        mPresenter.loadConverter(anyString());
+
+        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+
+        mPresenter.convert(from, String.valueOf(quantity));
+
+        ArgumentCaptor<Double> doubleCaptor = ArgumentCaptor.forClass(Double.TYPE);
+        ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(mCurConverter).convertAll(doubleCaptor.capture(), stringCaptor.capture());
+
+        assertEquals(from, stringCaptor.getValue());
+        assertEquals(quantity, doubleCaptor.getValue());
+
+        verify(mView).showConversionResult(anyList());
+    }
+
+    @Test
+    public void saveLastUnitPosCallCurConverter() {
+        mPresenter.loadConverter(anyString());
+
+        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+
+        mPresenter.saveLastUnitPos(1);
+
+        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.TYPE);
+
+        verify(mCurConverter).setLastUnitPosition(captor.capture());
+        assertEquals(1, captor.getValue().intValue());
+    }
+
+    @Test
+    public void saveLastQuantityCallCurConverter() {
+        mPresenter.loadConverter(anyString());
+
+        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+
+        String quantity = "100";
+
+        mPresenter.saveLastQuantity(quantity);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+
+        verify(mCurConverter).setLastQuantity(captor.capture());
+
+        assertEquals(quantity, captor.getValue());
     }
 
     @Test

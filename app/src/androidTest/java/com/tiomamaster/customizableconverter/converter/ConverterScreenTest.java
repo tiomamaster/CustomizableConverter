@@ -72,7 +72,7 @@ public class ConverterScreenTest {
     public void setUp() {
         mActivity = mActivityRule.getActivity();
         mFragment = (ConverterFragment) mActivity.getSupportFragmentManager().
-                findFragmentByTag(mActivity.CONVERTER_FRAGMENT_TAG);
+                findFragmentByTag(ConverterActivity.CONVERTER_FRAGMENT_TAG);
     }
 
     @Test
@@ -130,7 +130,8 @@ public class ConverterScreenTest {
             onData(hasToString(selectionText)).perform(click());
 
             // Check content in Spinner Units
-            List<String> expected = mFragment.mCurConverter.getEnabledUnitsName();
+            List<String> expected = ((ConverterPresenter) mFragment.mActionsListener)
+                    .mCurConverter.getEnabledUnitsName();
             onView(withId(R.id.spinner_units)).perform(click());
             for (int i = 0; i < expected.size(); i++) {
                 onData(is(instanceOf(String.class))).
@@ -150,13 +151,15 @@ public class ConverterScreenTest {
         onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(String.valueOf(quantity)));
 
         // Get the result from the converter
-        List<Pair<String, String>> expected = mFragment.mCurConverter.convertAll(quantity, from);
+        List<Pair<String, String>> expected = ((ConverterPresenter) mFragment.mActionsListener)
+                .mCurConverter.convertAll(quantity, from);
 
         checkRecyclerView(expected);
 
         from = mFragment.mSpinnerUnits.getAdapter().getItem(1).toString();
 
-        expected = mFragment.mCurConverter.convertAll(quantity, from);
+        expected = ((ConverterPresenter) mFragment.mActionsListener)
+                .mCurConverter.convertAll(quantity, from);
 
         // Select another unit
         onView(withId(R.id.spinner_units)).perform(click());

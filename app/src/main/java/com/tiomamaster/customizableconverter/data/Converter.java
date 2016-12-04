@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.tiomamaster.customizableconverter.R.id.quantity;
 
 /**
  * Created by Artyom on 14.07.2016.
@@ -131,6 +132,7 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
         this.mLastUnitPosition = mLastUnit;
     }
 
+    @NonNull
     public String getLastQuantity() {
         if (mLastQuantity == null)
             return "";
@@ -151,7 +153,7 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
         double value;
         boolean isEnabled;
 
-        public Unit(@NonNull String name, double value, boolean isEnabled) throws IllegalArgumentException {
+        public Unit(@NonNull String name, double value, boolean isEnabled) {
             this.name = checkNotNull(name);
             this.value = value;
             this.isEnabled = isEnabled;
