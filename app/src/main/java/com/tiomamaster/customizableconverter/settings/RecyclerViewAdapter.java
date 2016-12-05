@@ -31,10 +31,10 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
 
     private List<Pair<String, Boolean>> mDataSet;
 
-    private ActionListener mActionListener;
+    private AdapterActionListener mAdapterActionListener;
 
-    RecyclerViewAdapter(ActionListener dragListener) {
-        mActionListener = dragListener;
+    RecyclerViewAdapter(AdapterActionListener listener) {
+        mAdapterActionListener = listener;
     }
 
     @Override
@@ -52,7 +52,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
             public boolean onTouch(View v, MotionEvent event) {
                 if (MotionEventCompat.getActionMasked(event) ==
                         MotionEvent.ACTION_DOWN) {
-                    mActionListener.onStartDrag(holder);
+                    mAdapterActionListener.onStartDrag(holder);
                 }
                 return false;
             }
@@ -92,7 +92,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
 
     @Override
     public void onItemDismiss(int position) {
-        mActionListener.onStartSwipe(position);
+        mAdapterActionListener.onStartSwipe(position);
     }
 
     void cancelDismiss(int position) {
@@ -109,7 +109,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewH
         notifyDataSetChanged();
     }
 
-    interface ActionListener {
+    interface AdapterActionListener {
 
         void onStartDrag(RecyclerView.ViewHolder viewHolder);
 

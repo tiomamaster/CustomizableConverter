@@ -27,6 +27,9 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import static android.support.test.InstrumentationRegistry.getArguments;
+import static android.support.test.InstrumentationRegistry.getContext;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
@@ -52,6 +55,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -76,11 +80,11 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void checkSpinnerConvertersStateAfterRotate() {
-        // Spinner Converter Types prepare for rotate
-        Adapter adapterConv = mActivity.mSpinConverterTypes.getAdapter();
-        String selectionText = adapterConv.getItem(
-                adapterConv.getCount() - 1).toString();
+    public void rotateCheckSpinnerConvertersState() {
+        // spinner converter types prepare for rotate
+        Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
+        String selectionText = adapter.getItem(
+                adapter.getCount() - 1).toString();
         onView(withId(R.id.spinner_conv_types)).perform(click());
         onData(hasToString(selectionText)).perform(click());
 
@@ -92,7 +96,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void checkRecyclerViewStateAfterRotate() {
+    public void rotateCheckRecyclerViewState() {
         // spinner units prepare for rotate
         Adapter adapter = mFragment.mSpinnerUnits.getAdapter();
         String selectionText = adapter.getItem(
@@ -121,15 +125,15 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void chooseConverterAndShowIt() {
-        // Select all converters in Spinner
+    public void chooseConverterShowIt() {
+        // select all converters in spinner
         Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
         for (int j = 0; j < adapter.getCount(); j++) {
             String selectionText = adapter.getItem(j).toString();
             onView(withId(R.id.spinner_conv_types)).perform(click());
             onData(hasToString(selectionText)).perform(click());
 
-            // Check content in Spinner Units
+            // check content in spinner units
             List<String> expected = ((ConverterPresenter) mFragment.mActionsListener)
                     .mCurConverter.getEnabledUnitsName();
             onView(withId(R.id.spinner_units)).perform(click());
@@ -143,25 +147,25 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void conversionTest() {
+    public void convertCheckResult() {
         double quantity = 998.2217;
         String from = mFragment.mSpinnerUnits.getSelectedItem().toString();
 
-        // Type text into EditText
+        // type text into EditText
         onView(withId(R.id.quantity)).perform(clearText()).perform(typeText(String.valueOf(quantity)));
 
-        // Get the result from the converter
+        // get the result from the converter
         List<Pair<String, String>> expected = ((ConverterPresenter) mFragment.mActionsListener)
                 .mCurConverter.convertAll(quantity, from);
 
         checkRecyclerView(expected);
 
-        from = mFragment.mSpinnerUnits.getAdapter().getItem(1).toString();
+        from = mFragment.mSpinnerUnits.getAdapter().getItem(5).toString();
 
         expected = ((ConverterPresenter) mFragment.mActionsListener)
                 .mCurConverter.convertAll(quantity, from);
 
-        // Select another unit
+        // select another unit
         onView(withId(R.id.spinner_units)).perform(click());
         onData(hasToString(from)).perform(click());
 
@@ -169,22 +173,22 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void closeSoftKeyboardWhenScrollTest() {
+    public void scrollCloseSoftKeyboard() {
         // input text to show keyboard
         onView(withId(R.id.quantity)).perform(typeText("900"));
 
         // check soft keyboard is being shown
-        Assert.assertTrue(mFragment.mImm.isActive());
+        assertTrue(mFragment.mImm.isActive());
 
         // scroll
         onView(withId(R.id.conversion_result)).perform(RecyclerViewActions.actionOnItemAtPosition(7, click()));
 
         // check soft keyboard is hidden
-        Assert.assertFalse(mFragment.mImm.isActive());
+        assertFalse(mFragment.mImm.isActive());
     }
 
     @Test
-    public void saveConverterStateTest() {
+    public void changeConverterSaveConverterState() {
         int converterPos = 2;
         int anotherConverterPos = 3;
         int unitPosition = 3;
@@ -209,19 +213,23 @@ public class ConverterScreenTest {
         // select converter again and check it state
         spinnerConverterTypes.perform(click());
         onData(is(instanceOf(String.class))).atPosition(converterPos).perform(click());
+
         // spinner units state
         assertEquals(unitPosition, mFragment.mSpinnerUnits.getSelectedItemPosition());
+
         // quantity edit text state
         onView(withId(R.id.quantity)).check(matches(withText(quantityText)));
+
         // check text view result is visible
         onView(withId(R.id.resultText)).
                 check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
+
         // result is shown
         assertTrue(mFragment.mConversionResult.getAdapter().getItemCount() > 1);
     }
 
     @Test
-    public void hideSoftInputWhenConverterChangeTest() {
+    public void changeConverterHideSoftInput() {
         // select converter
         ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_conv_types));
         spinnerConverterTypes.perform(click());
@@ -230,16 +238,19 @@ public class ConverterScreenTest {
         // touch edit text to show soft input
         onView(withId(R.id.quantity)).perform(typeText("1"));
 
+        // check the keyboard is visible
+        assertTrue(mFragment.mImm.isActive());
+
         // select another converter
         spinnerConverterTypes.perform(click());
         onData(is(instanceOf(String.class))).atPosition(1).perform(click());
 
         // check the keyboard is invisible
-        assertTrue(mFragment.mImm.isActive());
+        assertFalse(mFragment.mImm.isActive());
     }
 
     @Test
-    public void clickSettingsMenuItem_openSettingsUi() {
+    public void clickSettingsMenuItemOpenSettingsUi() {
         selectSettingsFromMenu();
 
         // check that settings text in toolbar is visible

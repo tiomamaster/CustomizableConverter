@@ -29,9 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 
 public class EditFragment extends Fragment implements SettingsContract.EditView,
-        RecyclerViewAdapter.ActionListener {
+        RecyclerViewAdapter.AdapterActionListener {
 
-    private SettingsContract.UserActionListener mPresenter;
+    private SettingsContract.UserActionListener mActionListener;
 
     private SettingsActivity mParentActivity;
 
@@ -80,7 +80,7 @@ public class EditFragment extends Fragment implements SettingsContract.EditView,
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                mPresenter.handleHomePressed();
+                mActionListener.handleHomePressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -88,7 +88,7 @@ public class EditFragment extends Fragment implements SettingsContract.EditView,
 
     @Override
     public void setPresenter(@NonNull SettingsContract.UserActionListener presenter) {
-        mPresenter = checkNotNull(presenter);
+        mActionListener = checkNotNull(presenter);
     }
 
     @Override
@@ -127,8 +127,8 @@ public class EditFragment extends Fragment implements SettingsContract.EditView,
 
         new AlertDialog.Builder(mParentActivity).setMessage(
                 getString(R.string.msg_delete_converter))
-                .setPositiveButton("OK", listener)
-                .setNegativeButton("CANCEL", listener)
+                .setPositiveButton(android.R.string.ok, listener)
+                .setNegativeButton(android.R.string.cancel, listener)
                 .setCancelable(false).show();
     }
 }

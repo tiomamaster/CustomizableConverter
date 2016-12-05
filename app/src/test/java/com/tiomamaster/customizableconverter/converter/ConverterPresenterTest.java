@@ -14,13 +14,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -104,10 +100,7 @@ public class ConverterPresenterTest {
 
         when(mCurConverter.convertAll(quantity, from)).thenReturn(new ArrayList<Pair<String, String>>());
 
-        mPresenter.loadConverter(anyString());
-
-        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
-        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+        loadConverter();
 
         mPresenter.convert(from, String.valueOf(quantity));
 
@@ -124,10 +117,7 @@ public class ConverterPresenterTest {
 
     @Test
     public void saveLastUnitPosCallCurConverter() {
-        mPresenter.loadConverter(anyString());
-
-        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
-        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+        loadConverter();
 
         mPresenter.saveLastUnitPos(1);
 
@@ -139,10 +129,7 @@ public class ConverterPresenterTest {
 
     @Test
     public void saveLastQuantityCallCurConverter() {
-        mPresenter.loadConverter(anyString());
-
-        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
-        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+        loadConverter();
 
         String quantity = "100";
 
@@ -160,5 +147,12 @@ public class ConverterPresenterTest {
         mPresenter.openSettings();
 
         verify(mView).showSettingsUi();
+    }
+
+    private void loadConverter() {
+        mPresenter.loadConverter(anyString());
+
+        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
     }
 }

@@ -67,6 +67,7 @@ class SettingsPresenter implements SettingsContract.UserActionListener {
     @Override
     public void loadEditor() {
         state = State.CONVERTERS_EDITOR;
+
         mConvertersRepo.getAllConverterTypes(new ConvertersRepository.LoadAllConvertersTypesCallback() {
             @Override
             public void onConvertersTypesLoaded(@NonNull List<Pair<String, Boolean>> convertersTypes) {

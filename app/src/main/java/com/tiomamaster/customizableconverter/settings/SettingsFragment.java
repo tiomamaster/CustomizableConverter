@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SettingsContract.SettingsView {
 
-    private SettingsContract.UserActionListener mPresenter;
+    private SettingsContract.UserActionListener mActionListener;
 
     private SettingsActivity mParentActivity;
 
@@ -38,7 +38,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         getPreferenceScreen().getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                mPresenter.loadEditor();
+                mActionListener.loadEditor();
                 return true;
             }
         });
@@ -47,7 +47,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         getPreferenceScreen().getPreference(4).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                mPresenter.standardOrDefaultClicked();
+                mActionListener.standardOrDefaultClicked();
                 return true;
             }
         });
@@ -56,7 +56,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         getPreferenceScreen().getPreference(5).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                mPresenter.standardOrDefaultClicked();
+                mActionListener.standardOrDefaultClicked();
                 return true;
             }
         });
@@ -73,7 +73,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
 
         if (isFirstCall) {
             isFirstCall = false;
-            mPresenter.loadSettings();
+            mActionListener.loadSettings();
         }
     }
 
@@ -81,7 +81,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                mPresenter.handleHomePressed();
+                mActionListener.handleHomePressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -115,6 +115,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
 
     @Override
     public void setPresenter(@NonNull SettingsContract.UserActionListener presenter) {
-        mPresenter = checkNotNull(presenter);
+        mActionListener = checkNotNull(presenter);
     }
 }
