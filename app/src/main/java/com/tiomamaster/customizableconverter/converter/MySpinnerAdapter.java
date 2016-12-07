@@ -31,7 +31,7 @@ class MySpinnerAdapter extends ArrayAdapter<String> {
 
     MySpinnerAdapter(Context ctx, int colorPrimary, int colorAccent, int background,
                             int height, Spinner spinner) {
-        super(ctx, R.layout.spinner_conv_types_item);
+        super(ctx, R.layout.item_spinner_conv_types);
         mInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mColorPrimary = colorPrimary;
         mColorAccent =colorAccent;
@@ -45,7 +45,7 @@ class MySpinnerAdapter extends ArrayAdapter<String> {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.spinner_conv_types_item, null);
+            convertView = mInflater.inflate(R.layout.item_spinner_conv_types, null);
             ((AppCompatCheckedTextView)convertView).setTextColor(mColorPrimary);
             ((AppCompatCheckedTextView)convertView).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             if (mBackground != -1) {
@@ -59,7 +59,7 @@ class MySpinnerAdapter extends ArrayAdapter<String> {
     @Override
     public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.spinner_conv_types_item, null);
+            convertView = mInflater.inflate(R.layout.item_spinner_conv_types, null);
             ((AppCompatCheckedTextView)convertView).setHeight(mHeight);
             ((AppCompatCheckedTextView)convertView).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             int paddingLeftRight = mContext.getResources().

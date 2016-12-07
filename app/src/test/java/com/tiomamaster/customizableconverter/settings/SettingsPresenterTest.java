@@ -56,7 +56,7 @@ public class SettingsPresenterTest {
         mPresenter.handleHomePressed();
 
         // check the settings shown 2 times because first call
-        verify(mSettingsView, times(2)).showSettings(null);
+        verify(mSettingsView, times(2)).showSummaries(null);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class SettingsPresenterTest {
 
         verify(mSettingsRepo).getSummaries();
 
-        verify(mSettingsView).showSettings(new String[]{""});
+        verify(mSettingsView).showSummaries(new String[]{""});
 
         verify(mSettingsRepo).getStandardForm();
 

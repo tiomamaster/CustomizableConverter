@@ -7,41 +7,56 @@ import android.support.v7.preference.Preference;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+
 /**
  * Created by Artyom on 27.10.2016.
  */
-
 interface SettingsContract {
 
     interface View {
 
         void setPresenter(@NonNull UserActionListener presenter);
+
+        void showPreviousView();
+    }
+
+    interface UserActionListener {
+
+        void handleHomePressed();
     }
 
     interface SettingsView extends View {
 
-        void closeSettings();
-
-        void showSettings(String[] summaries);
+        void showSummaries(String[] summaries);
 
         void enableGrSizeOption(boolean enable);
 
         void enableFormattingOptions(boolean enable);
     }
 
-    interface EditView extends View {
+    interface SettingsUal extends UserActionListener {
 
-        void showEditor(List<Pair<String, Boolean>> data);
-    }
-
-    interface UserActionListener {
-
-        void handleHomePressed();
-
-        void loadSettings();
-
-        void loadEditor();
+        void loadSummaries();
 
         void standardOrDefaultClicked();
+    }
+
+    interface ConvertersEditView extends View {
+
+        void showConverters(List<Pair<String, Boolean>> data);
+    }
+
+    interface ConvertersEditUal extends UserActionListener {
+
+        void loadConverters();
+    }
+
+    interface ConverterEditView extends View {
+
+    }
+
+    interface ConverterEditUal extends UserActionListener {
+
     }
 }

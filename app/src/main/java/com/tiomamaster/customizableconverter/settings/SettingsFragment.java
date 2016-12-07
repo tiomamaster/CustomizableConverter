@@ -7,7 +7,9 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 import android.view.MenuItem;
 
+import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
+import com.tiomamaster.customizableconverter.data.Repositories;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -17,11 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SettingsContract.SettingsView {
 
-    private SettingsContract.UserActionListener mActionListener;
+    private SettingsContract.SettingsUal mActionListener;
 
     private SettingsActivity mParentActivity;
-
-    private boolean isFirstCall = true;
 
     public SettingsFragment() {
     }
@@ -38,7 +38,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         getPreferenceScreen().getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                mActionListener.loadEditor();
+                ConvertersEditFragment view = ConvertersEditFragment.newInstance();
+                SettingsContract.UserActionListener presenter = new ConvertersEditPresenter(
+                        Injection.provideConvertersRepository(getContext()), view);
+                mParentActivity.showFragment(view);
+                mParentActivity.setUserActionListener(presenter);
+                mParentActivity.setFabVisibility(true);
                 return true;
             }
         });
@@ -71,10 +76,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
 
         mParentActivity = (SettingsActivity) getActivity();
 
-        if (isFirstCall) {
-            isFirstCall = false;
-            mActionListener.loadSettings();
-        }
+        mActionListener.loadSummaries();
     }
 
     @Override
@@ -88,17 +90,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
     }
 
     @Override
-    public void closeSettings() {
-        getActivity().finish();
-    }
-
-    @Override
-    public void showSettings(String[] summaries) {
+    public void showSummaries(String[] summaries) {
         PreferenceScreen screen = getPreferenceScreen();
         for (int i = 0; i < summaries.length; i++) {
             screen.getPreference(i + 1).setSummary(summaries[i]);
         }
-        mParentActivity.showFragment(this);
     }
 
     @Override
@@ -115,6 +111,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
 
     @Override
     public void setPresenter(@NonNull SettingsContract.UserActionListener presenter) {
-        mActionListener = checkNotNull(presenter);
+        mActionListener = (SettingsContract.SettingsUal) checkNotNull(presenter);
+    }
+
+    @Override
+    public void showPreviousView() {
+        getActivity().finish();
     }
 }

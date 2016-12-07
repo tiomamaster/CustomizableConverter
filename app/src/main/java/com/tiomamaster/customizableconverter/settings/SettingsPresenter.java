@@ -16,64 +16,29 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by Artyom on 27.10.2016.
  */
 
-class SettingsPresenter implements SettingsContract.UserActionListener {
+class SettingsPresenter implements SettingsContract.SettingsUal {
 
-    private enum State {
-        SETTINGS, CONVERTERS_EDITOR, UNITS_EDITOR
-    }
+    @NonNull private SettingsRepository mSettingsRepo;
 
-    private ConvertersRepository mConvertersRepo;
-    private SettingsRepository mSettingsRepo;
-    private SettingsContract.SettingsView mSettingsView;
-    private SettingsContract.EditView mEditView;
+    @NonNull private SettingsContract.SettingsView mSettingsView;
 
-    private State state = State.SETTINGS;
 
-    SettingsPresenter(@NonNull ConvertersRepository convertersRepository,
-                      SettingsRepository settingsRepository, @NonNull SettingsContract.SettingsView settingsView,
-                      @NonNull SettingsContract.EditView editView) {
-        mConvertersRepo = checkNotNull(convertersRepository, "convertersRepository cannot be null");
+    SettingsPresenter(@NonNull SettingsRepository settingsRepository,
+                      @NonNull SettingsContract.SettingsView settingsView) {
         mSettingsRepo = checkNotNull(settingsRepository, "settingsRepository cannot be null");
         mSettingsView = checkNotNull(settingsView, "settingsView cannot be null");
-        mEditView = checkNotNull(editView, "editView cannot be null");
 
         mSettingsView.setPresenter(this);
-        mEditView.setPresenter(this);
     }
 
     @Override
     public void handleHomePressed() {
-        switch (state) {
-            case SETTINGS:
-                mSettingsView.closeSettings();
-                break;
-            case CONVERTERS_EDITOR:
-                loadSettings();
-                break;
-            case UNITS_EDITOR:
-                break;
-        }
+        mSettingsView.showPreviousView();
     }
 
     @Override
-    public void loadSettings() {
-        state = State.SETTINGS;
-
-        mSettingsView.showSettings(mSettingsRepo.getSummaries());
-
-        mSettingsView.enableGrSizeOption(!mSettingsRepo.getStandardForm());
-    }
-
-    @Override
-    public void loadEditor() {
-        state = State.CONVERTERS_EDITOR;
-
-        mConvertersRepo.getAllConverterTypes(new ConvertersRepository.LoadAllConvertersTypesCallback() {
-            @Override
-            public void onConvertersTypesLoaded(@NonNull List<Pair<String, Boolean>> convertersTypes) {
-                mEditView.showEditor(convertersTypes);
-            }
-        });
+    public void loadSummaries() {
+        mSettingsView.showSummaries(mSettingsRepo.getSummaries());
     }
 
     @Override

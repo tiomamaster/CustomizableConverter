@@ -117,7 +117,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 ContextCompat.getColor(getActivity(), R.color.accent),
                 ContextCompat.getColor(getActivity(), R.color.primary_dark));
 
-        mRecyclerViewHeader = inflater.inflate(R.layout.recycler_view_header, container, false);
+        mRecyclerViewHeader = inflater.inflate(R.layout.rw_header, container, false);
 
         mSpinnerUnits = (Spinner) mRecyclerViewHeader.findViewById(R.id.spinner_units);
         // to prevent system calls
@@ -345,7 +345,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_ITEM) {
                 return new VHItem(LayoutInflater.from(parent.getContext()).
-                        inflate(R.layout.recycler_view_item, parent, false));
+                        inflate(R.layout.rw_item, parent, false));
             } else if (viewType == TYPE_HEADER) {
                 return new VHHeader(mRecyclerViewHeader);
             }
