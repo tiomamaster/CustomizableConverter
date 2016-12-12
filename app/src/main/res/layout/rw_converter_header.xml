@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/convert_from"
+        android:text="@string/label_spin_convert_from"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
         android:textSize="12sp"
@@ -25,7 +25,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/in_quantity"
+        android:text="@string/label_edit_text_quantity"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:textSize="12sp"
@@ -43,7 +43,7 @@
         android:id="@+id/resultText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/result"
+        android:text="@string/label_rw_result"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
         android:visibility="invisible"

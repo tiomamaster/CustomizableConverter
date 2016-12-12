@@ -67,7 +67,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View root = inflater.inflate(R.layout.fragment_edit, container, false);
+        final View root = inflater.inflate(R.layout.fragment_converters_edit, container, false);
 
         mRecyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

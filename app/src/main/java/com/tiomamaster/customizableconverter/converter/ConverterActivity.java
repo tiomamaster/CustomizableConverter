@@ -47,7 +47,7 @@ public class ConverterActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
 
-        mSpinConverterTypes = (Spinner) findViewById(R.id.spinner_conv_types);
+        mSpinConverterTypes = (Spinner) findViewById(R.id.spinner_converter_types);
         mSpinConverterTypes.setVisibility(View.GONE);
         mConvertersAdapter = new MySpinnerAdapter(this, Color.WHITE, Color.parseColor("#009688"),
                 Color.parseColor("#673AB7"),

@@ -19,7 +19,6 @@ import com.tiomamaster.customizableconverter.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,9 +26,6 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
-import static android.support.test.InstrumentationRegistry.getArguments;
-import static android.support.test.InstrumentationRegistry.getContext;
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
@@ -85,13 +81,13 @@ public class ConverterScreenTest {
         Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
         String selectionText = adapter.getItem(
                 adapter.getCount() - 1).toString();
-        onView(withId(R.id.spinner_conv_types)).perform(click());
+        onView(withId(R.id.spinner_converter_types)).perform(click());
         onData(hasToString(selectionText)).perform(click());
 
         rotateScreenAndCheckIt();
 
         // Check state
-        onView(withId(R.id.spinner_conv_types))
+        onView(withId(R.id.spinner_converter_types))
                 .check(matches(withSpinnerText(selectionText)));
     }
 
@@ -130,7 +126,7 @@ public class ConverterScreenTest {
         Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
         for (int j = 0; j < adapter.getCount(); j++) {
             String selectionText = adapter.getItem(j).toString();
-            onView(withId(R.id.spinner_conv_types)).perform(click());
+            onView(withId(R.id.spinner_converter_types)).perform(click());
             onData(hasToString(selectionText)).perform(click());
 
             // check content in spinner units
@@ -195,7 +191,7 @@ public class ConverterScreenTest {
         String quantityText = "54.02164";
 
         // select converter
-        ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_conv_types));
+        ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_converter_types));
         spinnerConverterTypes.perform(click());
         onData(is(instanceOf(String.class))).atPosition(converterPos).perform(click());
 
@@ -231,7 +227,7 @@ public class ConverterScreenTest {
     @Test
     public void changeConverterHideSoftInput() {
         // select converter
-        ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_conv_types));
+        ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_converter_types));
         spinnerConverterTypes.perform(click());
         onData(is(instanceOf(String.class))).atPosition(0).perform(click());
 
@@ -254,14 +250,14 @@ public class ConverterScreenTest {
         selectSettingsFromMenu();
 
         // check that settings text in toolbar is visible
-        onView(withText(R.string.settings)).check(matches(isDisplayed()));
+        onView(withText(R.string.title_fragment_settings)).check(matches(isDisplayed()));
     }
 
     private void selectSettingsFromMenu() {
         openActionBarOverflowOrOptionsMenu(getTargetContext());
 
         // Click on settings option
-        onView(withText(R.string.settings)).perform(click());
+        onView(withText(R.string.title_fragment_settings)).perform(click());
     }
 
     private void checkRecyclerView(List<Pair<String, String>> expected) {

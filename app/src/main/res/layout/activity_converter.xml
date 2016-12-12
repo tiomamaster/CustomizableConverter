@@ -22,7 +22,7 @@
             app:layout_scrollFlags="scroll|enterAlways">
 
         <Spinner
-            android:id="@+id/spinner_conv_types"
+            android:id="@+id/spinner_converter_types"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 

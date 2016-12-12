@@ -16,17 +16,14 @@ import org.junit.runner.RunWith;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
-import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
 
 /**
  * Created by Artyom on 31.10.2016.
@@ -43,7 +40,7 @@ public class SettingsScreenTest {
     public void toolbarTitlesChanging() {
         // check title is settings
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.toolbar))))
-                .check(matches(withText(R.string.settings)));
+                .check(matches(withText(R.string.title_fragment_settings)));
 
         // go to editor
         onView(withText(R.string.pref_title_customize)).perform(click());
@@ -58,7 +55,7 @@ public class SettingsScreenTest {
 
         // check title
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.toolbar))))
-                .check(matches(withText(R.string.settings)));
+                .check(matches(withText(R.string.title_fragment_settings)));
     }
 
     @Test

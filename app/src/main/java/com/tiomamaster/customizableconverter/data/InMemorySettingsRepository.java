@@ -68,7 +68,7 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
         String[] summaries = new String[5];
 
         // language summary
-        summaries[0] = mContext.getString(R.string.language);
+        summaries[0] = mContext.getString(R.string.app_language);
 
         // grouping size summary
         summaries[1] = mGrSize + " " + mContext.getString(R.string.pref_summary_grouping_size);

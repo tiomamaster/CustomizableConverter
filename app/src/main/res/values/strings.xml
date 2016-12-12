@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Customizable Converter</string>
-    <string name="convert_from">Convert from:</string>
-    <string name="in_quantity">In quantity:</string>
-    <string name="result">Result:</string>
-    <string name="settings">Settings</string>
+    <string name="label_spin_convert_from">Convert from:</string>
+    <string name="label_edit_text_quantity">In quantity:</string>
+    <string name="label_rw_result">Result:</string>
+    <string name="title_fragment_settings">Settings</string>
     <string name="pref_title_customize">Customize converters</string>
     <string name="pref_title_language">Language</string>
     <string name="pref_summary_language">Change the application language</string>
@@ -18,7 +18,9 @@
     <string name="pref_summary_default_form">Show conversion result without any formatting</string>
     <string name="pref_summary_grouping_size">digits</string>
     <string name="pref_summary_precision">decimal digits</string>
-    <string name="language">English</string>
+    <string name="app_language">English</string>
     <string name="msg_show_nothing">There are no enabled converters.</string>
     <string name="msg_delete_converter">Are you sure want to delete this converter?</string>
+    <string name="label_converter_name">Converter name:</string>
+    <string name="hint_converter_name">Input converter name</string>
 </resources>
