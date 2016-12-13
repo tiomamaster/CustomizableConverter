@@ -1,61 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:minHeight="72dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginRight="16dp"
-    android:layout_marginEnd="16dp">
+    android:paddingLeft="16dp"
+    android:paddingStart="16dp"
+    android:paddingRight="16dp"
+    android:paddingEnd="16dp">
 
-    <EditText
-        android:id="@+id/edit_text_unit_name"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/primary_text"
-        android:textSize="16sp"
-        android:inputType="text"
-        android:enabled="false"
-        tools:text="Name"
-        android:layout_marginBottom="2.5dp"
-        android:layout_toLeftOf="@+id/checkBox_enable"
-        android:layout_toStartOf="@+id/checkBox_enable" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:paddingTop="16dp"
+        android:paddingBottom="2dp">
 
-    <EditText
-        android:id="@+id/edit_text_unit_value"
+        <TextView
+            android:id="@+id/text_unit_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary_text"
+            android:textSize="16sp"
+            android:layout_toLeftOf="@+id/check_box_enable"
+            android:layout_toStartOf="@+id/check_box_enable"
+            tools:text="Name"/>
+
+        <CheckBox
+            android:id="@id/check_box_enable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/text_unit_name"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/primary_text"
-        android:textSize="16sp"
-        android:inputType="numberDecimal"
-        android:enabled="false"
-        tools:text="1234.456"
-        android:layout_below="@+id/edit_text_unit_name"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="2.5dp"
-        android:layout_toLeftOf="@+id/checkBox_enable"
-        android:layout_toStartOf="@+id/checkBox_enable" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:paddingTop="10dp"
+        android:paddingBottom="16dp">
 
-    <CheckBox
-        android:id="@id/checkBox_enable"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/edit_text_unit_name"
-        android:layout_alignBottom="@+id/edit_text_unit_name"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        <TextView
+            android:id="@+id/text_unit_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary_text"
+            android:textSize="16sp"
+            android:layout_toLeftOf="@+id/image_view_handle"
+            android:layout_toStartOf="@+id/image_view_handle"
+            tools:text="123.456"/>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_reorder_24px"
-        android:layout_marginTop="7dp"
-        android:layout_alignTop="@+id/edit_text_unit_value"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@+id/edit_text_unit_value"
-        android:layout_toEndOf="@+id/edit_text_unit_value" />
+        <ImageView
+            android:id="@+id/image_view_handle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_reorder_24px"
+            android:scaleType="center"
+            android:layout_alignBottom="@+id/text_unit_value"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp" />
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</LinearLayout>

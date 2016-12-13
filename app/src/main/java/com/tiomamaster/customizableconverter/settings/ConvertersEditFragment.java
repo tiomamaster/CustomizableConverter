@@ -226,9 +226,9 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
             ViewHolder(View itemView) {
                 super(itemView);
 
-                mText = (AppCompatTextView) itemView.findViewById(R.id.textView);
-                mHandle = (ImageView) itemView.findViewById(R.id.handle);
-                mCheck = (AppCompatCheckBox) itemView.findViewById(R.id.checkBox);
+                mText = (AppCompatTextView) itemView.findViewById(R.id.text_view_name);
+                mHandle = (ImageView) itemView.findViewById(R.id.image_view_handle);
+                mCheck = (AppCompatCheckBox) itemView.findViewById(R.id.check_box_enable);
             }
 
             @Override
