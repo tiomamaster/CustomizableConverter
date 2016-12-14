@@ -34,12 +34,7 @@ class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
     }
 
     @Override
-    public void loadConverters() {
-        mConvertersRepo.getAllConverterTypes(new ConvertersRepository.LoadAllConvertersTypesCallback() {
-            @Override
-            public void onConvertersTypesLoaded(@NonNull List<Pair<String, Boolean>> convertersTypes) {
-                mView.showConverters(convertersTypes);
-            }
-        });
+    public List<Pair<String, Boolean>> loadConverters() {
+        return mConvertersRepo.getCachedConvertersTypes();
     }
 }

@@ -11,6 +11,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.R.id.quantity;
 
@@ -64,7 +65,7 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
     }
 
     @NonNull
-    List<Unit> getUnits() {
+    public List<Unit> getUnits() {
         return mUnits;
     }
 
@@ -149,9 +150,9 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
     }
 
     public static class Unit {
-        @NonNull String name;
-        double value;
-        boolean isEnabled;
+        public @NonNull String name;
+        public double value;
+        public boolean isEnabled;
 
         public Unit(@NonNull String name, double value, boolean isEnabled) {
             this.name = checkNotNull(name);

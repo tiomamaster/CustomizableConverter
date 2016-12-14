@@ -60,7 +60,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     private ConverterActivity mParentActivity;
 
     @VisibleForTesting RecyclerView mConversionResult;
-    private ConversionResultAdapterWithHeader mResultAdapter;
+    private ResultAdapterWithHeader mResultAdapter;
 
     private View mRecyclerViewHeader;
 
@@ -84,7 +84,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mConversionResult = (RecyclerView) root.findViewById(R.id.conversion_result);
         mConversionResult.setLayoutManager(new LinearLayoutManager(getContext()));
-        mResultAdapter = new ConversionResultAdapterWithHeader();
+        mResultAdapter = new ResultAdapterWithHeader();
         mConversionResult.setAdapter(mResultAdapter);
 
         // clear edit text focus
@@ -328,7 +328,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mActionsListener.loadConverter(selection);
     }
 
-    private class ConversionResultAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private class ResultAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private final static int TYPE_ITEM = 0;
         private final static int TYPE_HEADER = 1;
@@ -407,8 +407,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
             VHItem(View itemView) {
                 super(itemView);
-                mUnitName = (TextView) itemView.findViewById(R.id.edit_text_unit_name);
-                mResult = (TextView) itemView.findViewById(R.id.edit_text_unit_value);
+
+                mUnitName = (TextView) itemView.findViewById(R.id.text_unit_name);
+                mResult = (TextView) itemView.findViewById(R.id.text_unit_value);
             }
         }
 

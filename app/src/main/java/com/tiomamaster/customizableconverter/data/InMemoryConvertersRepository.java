@@ -103,6 +103,11 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         });
     }
 
+    @Override
+    public List<Pair<String, Boolean>> getCachedConvertersTypes() {
+        return mCachedConvertersTypes;
+    }
+
     private void cacheConverter(@NonNull Converter converter) {
         checkNotNull(converter);
 

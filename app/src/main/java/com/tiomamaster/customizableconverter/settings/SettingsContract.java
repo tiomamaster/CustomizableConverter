@@ -1,8 +1,11 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.preference.Preference;
+
+import com.tiomamaster.customizableconverter.data.Converter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,19 +47,23 @@ interface SettingsContract {
 
     interface ConvertersEditView extends View {
 
-        void showConverters(List<Pair<String, Boolean>> data);
     }
 
     interface ConvertersEditUal extends UserActionListener {
 
-        void loadConverters();
+        List<Pair<String, Boolean>> loadConverters();
     }
 
-    interface ConverterEditView extends View {
+    interface EditConverterView extends View {
 
+        void showUnits(@Nullable List<Converter.Unit> units);
     }
 
-    interface ConverterEditUal extends UserActionListener {
+    interface EditConverterUal extends UserActionListener {
 
+        @Nullable
+        String getConverterName();
+
+        void loadUnits();
     }
 }

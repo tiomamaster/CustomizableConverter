@@ -35,7 +35,6 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mFab = (FloatingActionButton) findViewById(R.id.fab_add);
-        mFab.setVisibility(View.GONE);
 
         mPresenter = (SettingsContract.UserActionListener) getLastCustomNonConfigurationInstance();
 
@@ -48,6 +47,10 @@ public class SettingsActivity extends AppCompatActivity {
             mPresenter = new SettingsPresenter(
                     Repositories.getInMemoryRepoInstance(getApplicationContext()),
                     ((SettingsContract.SettingsView) fragment));
+        }
+
+        if (mPresenter instanceof SettingsPresenter) {
+            mFab.setVisibility(View.GONE);
         }
     }
 

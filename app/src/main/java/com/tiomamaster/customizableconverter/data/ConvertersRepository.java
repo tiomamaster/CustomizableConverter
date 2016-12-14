@@ -28,6 +28,8 @@ public interface ConvertersRepository {
 
     void getEnabledConvertersTypes(@NonNull LoadEnabledConvertersTypesCallback callback);
 
+    List<Pair<String, Boolean>> getCachedConvertersTypes();
+
     void getAllConverterTypes(@NonNull LoadAllConvertersTypesCallback callback);
 
     void getConverter(@NonNull String name, @NonNull GetConverterCallback callback);

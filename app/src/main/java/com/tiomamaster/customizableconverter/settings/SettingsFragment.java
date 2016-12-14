@@ -16,7 +16,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by Artyom on 11.10.2016.
  */
-
 public class SettingsFragment extends PreferenceFragmentCompat implements SettingsContract.SettingsView {
 
     private SettingsContract.SettingsUal mActionListener;

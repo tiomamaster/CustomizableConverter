@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 
+import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.converter.Divider;
 import com.tiomamaster.customizableconverter.data.Repositories;
@@ -44,8 +45,6 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
 
     private SettingsActivity mParentActivity;
 
-    private RecyclerView mRecyclerView;
-
     private ConvertersAdapter mAdapter;
 
     private ItemTouchHelper mItemTouchHelper;
@@ -61,23 +60,23 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAdapter = new ConvertersAdapter();
+        mAdapter = new ConvertersAdapter(mActionListener.loadConverters());
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View root = inflater.inflate(R.layout.fragment_converters_edit, container, false);
+        final View root = inflater.inflate(R.layout.fragment_with_rw, container, false);
 
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(mAdapter);
+        RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         mItemTouchHelper = new ItemTouchHelper(new ItemTouchHelperCallback(mAdapter));
-        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+        mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         // draw divider between items
-        mRecyclerView.addItemDecoration(new Divider(getActivity(), 0));
+        recyclerView.addItemDecoration(new Divider(getActivity(), 0));
 
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -90,12 +89,6 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         super.onActivityCreated(savedInstanceState);
 
         mParentActivity = (SettingsActivity) getActivity();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mActionListener.loadConverters();
     }
 
     @Override
@@ -123,16 +116,15 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         mParentActivity.setFabVisibility(false);
     }
 
-    @Override
-    public void showConverters(List<Pair<String, Boolean>> data) {
-        mAdapter.setConverters(data);
-        mParentActivity.setFabVisibility(true);
-    }
-
     private class ConvertersAdapter extends RecyclerView.Adapter<ConvertersAdapter.ViewHolder>
             implements ItemTouchHelperAdapter {
 
-        private List<Pair<String, Boolean>> converters;
+        private List<Pair<String, Boolean>> mConverters;
+
+        ConvertersAdapter(List<Pair<String, Boolean>> converters) {
+            this.mConverters = converters;
+            notifyDataSetChanged();
+        }
 
         @Override
         public ConvertersAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -142,9 +134,9 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
 
         @Override
         public void onBindViewHolder(final ConvertersAdapter.ViewHolder holder, int position) {
-            holder.mText.setText(converters.get(position).first);
+            holder.mName.setText(mConverters.get(position).first);
 
-            holder.mHandle.setOnTouchListener(new View.OnTouchListener() {
+            holder.mHandleReorder.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (MotionEventCompat.getActionMasked(event) ==
@@ -155,20 +147,20 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                 }
             });
 
-            holder.mCheck.setChecked(converters.get(position).second);
+            holder.mCheck.setChecked(mConverters.get(position).second);
             holder.mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    converters.add(holder.getAdapterPosition(),
-                            new Pair<>(converters.remove(holder.getAdapterPosition()).first, isChecked));
+                    mConverters.add(holder.getAdapterPosition(),
+                            new Pair<>(mConverters.remove(holder.getAdapterPosition()).first, isChecked));
                 }
             });
         }
 
         @Override
         public int getItemCount() {
-            if (converters != null)
-                return converters.size();
+            if (mConverters != null)
+                return mConverters.size();
             return 0;
         }
 
@@ -176,11 +168,11 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         public boolean onItemMove(int fromPosition, int toPosition) {
             if (fromPosition < toPosition) {
                 for (int i = fromPosition; i < toPosition; i++) {
-                    Collections.swap(converters, i, i + 1);
+                    Collections.swap(mConverters, i, i + 1);
                 }
             } else {
                 for (int i = fromPosition; i > toPosition; i--) {
-                    Collections.swap(converters, i, i - 1);
+                    Collections.swap(mConverters, i, i - 1);
                 }
             }
             notifyItemMoved(fromPosition, toPosition);
@@ -194,7 +186,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case AlertDialog.BUTTON_POSITIVE:
-                            converters.remove(position);
+                            mConverters.remove(position);
                             break;
                         case AlertDialog.BUTTON_NEGATIVE:
                             notifyItemChanged(position);
@@ -210,24 +202,31 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                     .setCancelable(false).show();
         }
 
-        void setConverters(List<Pair<String, Boolean>> converters) {
-            this.converters = converters;
-            notifyDataSetChanged();
-        }
-
         class ViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
-            private AppCompatTextView mText;
+            private AppCompatTextView mName;
 
-            private ImageView mHandle;
+            private ImageView mHandleReorder;
 
             private AppCompatCheckBox mCheck;
 
             ViewHolder(View itemView) {
                 super(itemView);
 
-                mText = (AppCompatTextView) itemView.findViewById(R.id.text_view_name);
-                mHandle = (ImageView) itemView.findViewById(R.id.image_view_handle);
+                mName = (AppCompatTextView) itemView.findViewById(R.id.text_view_name);
+                mName.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        EditConverterFragment view = EditConverterFragment.newInstance();
+                        SettingsContract.UserActionListener presenter = new EditConverterPresenter(
+                                Injection.provideConvertersRepository(getContext()), view,
+                                mName.getText().toString());
+                        mParentActivity.showFragment(view);
+                        mParentActivity.setUserActionListener(presenter);
+                    }
+                });
+
+                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
                 mCheck = (AppCompatCheckBox) itemView.findViewById(R.id.check_box_enable);
             }
 
