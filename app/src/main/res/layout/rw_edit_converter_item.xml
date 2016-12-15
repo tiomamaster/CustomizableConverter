@@ -24,9 +24,9 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primary_text"
             android:textSize="16sp"
+            android:hint="@string/hint_unit_name"
             android:layout_toLeftOf="@+id/check_box_enable"
-            android:layout_toStartOf="@+id/check_box_enable"
-            tools:text="Name"/>
+            android:layout_toStartOf="@+id/check_box_enable" />
 
         <CheckBox
             android:id="@id/check_box_enable"
@@ -52,9 +52,9 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primary_text"
             android:textSize="16sp"
+            android:hint="@string/hint_unit_value"
             android:layout_toLeftOf="@+id/image_view_handle"
-            android:layout_toStartOf="@+id/image_view_handle"
-            tools:text="123.456"/>
+            android:layout_toStartOf="@+id/image_view_handle" />
 
         <ImageView
             android:id="@+id/image_view_handle"

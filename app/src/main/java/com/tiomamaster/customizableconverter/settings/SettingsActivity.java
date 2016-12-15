@@ -21,7 +21,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private static final String TITLE_KEY = "TITLE_KEY";
 
-    private SettingsContract.UserActionListener mPresenter;
+    private SettingsContract.UserActionListener mActionListener;
 
     private FloatingActionButton mFab;
 
@@ -36,7 +36,14 @@ public class SettingsActivity extends AppCompatActivity {
 
         mFab = (FloatingActionButton) findViewById(R.id.fab_add);
 
-        mPresenter = (SettingsContract.UserActionListener) getLastCustomNonConfigurationInstance();
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mActionListener.handleFabPressed();
+            }
+        });
+
+        mActionListener = (SettingsContract.UserActionListener) getLastCustomNonConfigurationInstance();
 
         // find fragment in the layout or create new settings fragment with it presenter
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contentFrame);
@@ -44,19 +51,19 @@ public class SettingsActivity extends AppCompatActivity {
             fragment = SettingsFragment.newInstance();
             initFragment(fragment);
 
-            mPresenter = new SettingsPresenter(
+            mActionListener = new SettingsPresenter(
                     Repositories.getInMemoryRepoInstance(getApplicationContext()),
                     ((SettingsContract.SettingsView) fragment));
         }
 
-        if (mPresenter instanceof SettingsPresenter) {
+        if (mActionListener instanceof SettingsPresenter) {
             mFab.setVisibility(View.GONE);
         }
     }
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
-        return mPresenter;
+        return mActionListener;
     }
 
 
@@ -74,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        mPresenter.handleHomePressed();
+        mActionListener.handleHomePressed();
     }
 
     private void initFragment(Fragment fragment) {
@@ -92,8 +99,8 @@ public class SettingsActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    void setUserActionListener(SettingsContract.UserActionListener userActionListener) {
-        mPresenter = userActionListener;
+    void setActionListener(SettingsContract.UserActionListener mActionListener) {
+        this.mActionListener = mActionListener;
     }
 
     void setFabVisibility(boolean visible) {

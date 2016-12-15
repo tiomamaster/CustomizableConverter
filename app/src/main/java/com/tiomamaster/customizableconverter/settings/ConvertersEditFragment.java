@@ -31,7 +31,6 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperAdap
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperCallback;
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperViewHolder;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -112,8 +111,39 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         SettingsContract.UserActionListener presenter = new SettingsPresenter(
                 Repositories.getInMemoryRepoInstance(getContext()), view);
         mParentActivity.showFragment(view);
-        mParentActivity.setUserActionListener(presenter);
+        mParentActivity.setActionListener(presenter);
         mParentActivity.setFabVisibility(false);
+    }
+
+    @Override
+    public void showAskDialog(@NonNull String name, @NonNull DialogInterface.OnClickListener listener) {
+        checkNotNull(name);
+        checkNotNull(listener);
+
+        new AlertDialog.Builder(mParentActivity).setMessage(
+                getString(R.string.msg_delete_converter) + " " + name + "?")
+                .setPositiveButton(android.R.string.ok, listener)
+                .setNegativeButton(android.R.string.cancel, listener)
+                .setCancelable(false).show();
+    }
+
+    @Override
+    public void notifyConverterRemoved(int position) {
+        mAdapter.notifyItemRemoved(position);
+    }
+
+    @Override
+    public void notifyConverterCancelRemove(int position) {
+        mAdapter.notifyItemChanged(position);
+    }
+
+    @Override
+    public void showEditConverter(@Nullable String name) {
+        EditConverterFragment view = EditConverterFragment.newInstance();
+        SettingsContract.UserActionListener presenter = new EditConverterPresenter(
+                Injection.provideConvertersRepository(getContext()), view, name);
+        mParentActivity.showFragment(view);
+        mParentActivity.setActionListener(presenter);
     }
 
     private class ConvertersAdapter extends RecyclerView.Adapter<ConvertersAdapter.ViewHolder>
@@ -151,8 +181,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
             holder.mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    mConverters.add(holder.getAdapterPosition(),
-                            new Pair<>(mConverters.remove(holder.getAdapterPosition()).first, isChecked));
+                    mActionListener.enableConverter(holder.getAdapterPosition(), isChecked);
                 }
             });
         }
@@ -166,40 +195,14 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
 
         @Override
         public boolean onItemMove(int fromPosition, int toPosition) {
-            if (fromPosition < toPosition) {
-                for (int i = fromPosition; i < toPosition; i++) {
-                    Collections.swap(mConverters, i, i + 1);
-                }
-            } else {
-                for (int i = fromPosition; i > toPosition; i--) {
-                    Collections.swap(mConverters, i, i - 1);
-                }
-            }
+            mActionListener.moveConverter(fromPosition, toPosition);
             notifyItemMoved(fromPosition, toPosition);
             return true;
         }
 
         @Override
         public void onItemDismiss(final int position) {
-            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case AlertDialog.BUTTON_POSITIVE:
-                            mConverters.remove(position);
-                            break;
-                        case AlertDialog.BUTTON_NEGATIVE:
-                            notifyItemChanged(position);
-                            break;
-                    }
-                }
-            };
-
-            new AlertDialog.Builder(mParentActivity).setMessage(
-                    getString(R.string.msg_delete_converter))
-                    .setPositiveButton(android.R.string.ok, listener)
-                    .setNegativeButton(android.R.string.cancel, listener)
-                    .setCancelable(false).show();
+            mActionListener.deleteConverter(position);
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
@@ -217,12 +220,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                 mName.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        EditConverterFragment view = EditConverterFragment.newInstance();
-                        SettingsContract.UserActionListener presenter = new EditConverterPresenter(
-                                Injection.provideConvertersRepository(getContext()), view,
-                                mName.getText().toString());
-                        mParentActivity.showFragment(view);
-                        mParentActivity.setUserActionListener(presenter);
+                    showEditConverter(mName.getText().toString());
                     }
                 });
 

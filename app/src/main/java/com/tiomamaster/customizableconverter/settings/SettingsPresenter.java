@@ -37,6 +37,11 @@ class SettingsPresenter implements SettingsContract.SettingsUal {
     }
 
     @Override
+    public void handleFabPressed() {
+        //there is no action button here need to handle
+    }
+
+    @Override
     public void loadSummaries() {
         mSettingsView.showSummaries(mSettingsRepo.getSummaries());
     }

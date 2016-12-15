@@ -9,7 +9,6 @@ import android.view.MenuItem;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
-import com.tiomamaster.customizableconverter.data.Repositories;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,7 +40,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
                 SettingsContract.UserActionListener presenter = new ConvertersEditPresenter(
                         Injection.provideConvertersRepository(getContext()), view);
                 mParentActivity.showFragment(view);
-                mParentActivity.setUserActionListener(presenter);
+                mParentActivity.setActionListener(presenter);
                 mParentActivity.setFabVisibility(true);
                 return true;
             }

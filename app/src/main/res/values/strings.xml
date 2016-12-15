@@ -20,7 +20,9 @@
     <string name="pref_summary_precision">decimal digits</string>
     <string name="app_language">English</string>
     <string name="msg_show_nothing">There are no enabled converters.</string>
-    <string name="msg_delete_converter">Are you sure want to delete this converter?</string>
+    <string name="msg_delete_converter">Are you sure want to delete this converter:</string>
     <string name="label_converter_name">Converter name:</string>
     <string name="hint_converter_name">Input converter name</string>
+    <string name="hint_unit_name">Input unit name</string>
+    <string name="hint_unit_value">Input unit value</string>
 </resources>

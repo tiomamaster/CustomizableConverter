@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.settings;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+import static android.os.Build.VERSION_CODES.N;
 
 /**
  * Created by Artyom on 27.10.2016.
@@ -27,6 +29,8 @@ interface SettingsContract {
     interface UserActionListener {
 
         void handleHomePressed();
+
+        void handleFabPressed();
     }
 
     interface SettingsView extends View {
@@ -47,16 +51,29 @@ interface SettingsContract {
 
     interface ConvertersEditView extends View {
 
+        void showAskDialog(@NonNull String name, @NonNull DialogInterface.OnClickListener listener);
+
+        void notifyConverterRemoved(int position);
+
+        void notifyConverterCancelRemove(int position);
+
+        void showEditConverter(@Nullable String name);
     }
 
     interface ConvertersEditUal extends UserActionListener {
 
         List<Pair<String, Boolean>> loadConverters();
+
+        void moveConverter(int fromPosition, int toPosition);
+
+        void deleteConverter(int position);
+
+        void enableConverter(int orderPosition , boolean enable);
     }
 
     interface EditConverterView extends View {
 
-        void showUnits(@Nullable List<Converter.Unit> units);
+        void showUnits(@NonNull List<Converter.Unit> units);
     }
 
     interface EditConverterUal extends UserActionListener {

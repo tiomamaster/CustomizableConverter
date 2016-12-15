@@ -21,6 +21,8 @@ import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.converter.Divider;
 import com.tiomamaster.customizableconverter.data.Converter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -103,11 +105,12 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         SettingsContract.UserActionListener presenter = new ConvertersEditPresenter(
                 Injection.provideConvertersRepository(getContext()), view);
         mParentActivity.showFragment(view);
-        mParentActivity.setUserActionListener(presenter);
+        mParentActivity.setActionListener(presenter);
     }
 
     @Override
-    public void showUnits(@Nullable List<Converter.Unit> units) {
+    public void showUnits(@NonNull List<Converter.Unit> units) {
+        checkNotNull(units);
         mAdapter.setUnits(units);
     }
 
@@ -142,7 +145,12 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             if (holder instanceof VHItem) {
                 int pos = position - 1;
                 ((VHItem) holder).mUnitName.setText(mUnits.get(pos).name);
-                ((VHItem) holder).mUnitValue.setText(String.valueOf(mUnits.get(pos).value));
+
+                double value = mUnits.get(pos).value;
+                if (value != 0d) {
+                    ((VHItem) holder).mUnitValue.setText(String.valueOf(value));
+                }
+
                 ((VHItem) holder).mCheck.setChecked(mUnits.get(pos).isEnabled);
             } else if (holder instanceof VHHeader) {
                 ((VHHeader) holder).mEditName.setText(mActionListener.getConverterName());
@@ -155,7 +163,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             return mUnits.size() + 1;
         }
 
-        void setUnits(@Nullable List<Converter.Unit> newData) {
+        void setUnits(@NonNull List<Converter.Unit> newData) {
             checkNotNull(newData);
             if (mUnits == null) {
                 mUnits = newData;
@@ -164,13 +172,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 mUnits = newData;
                 // because notifyItemChanged() cause bug inside recycler view
                 notifyDataSetChanged();
-            }
-        }
-
-        void clearDataSet() {
-            if (mUnits != null) {
-                notifyItemRangeRemoved(1, mUnits.size());
-                mUnits = null;
             }
         }
 

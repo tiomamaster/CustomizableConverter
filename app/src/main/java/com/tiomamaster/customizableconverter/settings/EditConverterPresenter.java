@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -34,6 +37,11 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         mView.showPreviousView();
     }
 
+    @Override
+    public void handleFabPressed() {
+
+    }
+
     @Nullable
     @Override
     public String getConverterName() {
@@ -42,7 +50,14 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void loadUnits() {
-        checkNotNull(mConverterName);
+        if (mConverterName == null) {
+            List<Converter.Unit> emptyUnits = new ArrayList<>(2);
+            emptyUnits.add(new Converter.Unit("", 0d, true));
+            emptyUnits.add(new Converter.Unit("", 0d, true));
+            mView.showUnits(emptyUnits);
+            return;
+        }
+
         mConvertersRepo.getConverter(mConverterName, new ConvertersRepository.GetConverterCallback() {
             @Override
             public void onConverterLoaded(@NonNull Converter converter) {
