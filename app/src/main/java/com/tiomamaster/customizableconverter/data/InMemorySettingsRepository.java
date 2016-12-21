@@ -48,7 +48,7 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(PREF_LANGUAGE)) {
-            // TODO: handle change language here
+            // TODO: handle change language
             mLanguage = sharedPreferences.getString(key, mLanguage);
         } else if (key.equals(PREF_GROUPING_SIZE)) {
             mGrSize = Integer.parseInt(sharedPreferences.getString(key, "3"));

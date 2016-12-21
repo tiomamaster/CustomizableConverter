@@ -74,12 +74,18 @@ interface SettingsContract {
     interface EditConverterView extends View {
 
         void showUnits(@NonNull List<Converter.Unit> units);
+
+        void error(boolean visible);
+
+        void setProgressIndicator(boolean active);
     }
 
     interface EditConverterUal extends UserActionListener {
 
         @Nullable
         String getConverterName();
+
+        void setConverterName(@NonNull String newName);
 
         void loadUnits();
     }

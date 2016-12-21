@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -7,7 +8,8 @@
     android:layout_marginLeft="16dp"
     android:layout_marginStart="16dp"
     android:layout_marginRight="16dp"
-    android:layout_marginEnd="16dp">
+    android:layout_marginEnd="16dp"
+    app:layout_collapseParallaxMultiplier="1.0">
 
     <TextView
         android:layout_width="wrap_content"
@@ -27,5 +29,37 @@
         android:inputType="text"
         tools:text="Converter Name"
         android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/text_msg_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="@string/msg_converter_exist"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:textSize="12sp"
+        android:textColor="@color/error"
+        android:labelFor="@+id/edit_text_name"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_units"
+        android:paddingTop="8dp"
+        android:textSize="12sp"
+        android:textColor="@color/secondary_text"
+        android:labelFor="@+id/edit_text_name"/>
+
+    <TextView
+        android:id="@+id/text_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="24dp"
+        android:text="@string/msg_loading"
+        android:gravity="center_vertical|center_horizontal"
+        android:visibility="gone"
+        tools:visibility="visible"/>
 
 </LinearLayout>
