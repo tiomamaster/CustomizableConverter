@@ -8,6 +8,7 @@ import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -26,6 +27,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     private String mInitialConverterName;
 
     private String mCurConverterName;
+
+    private List<Converter.Unit> mUnits;
 
     private boolean isNew;
 
@@ -82,10 +85,11 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void loadUnits() {
         if (isNew) {
-            List<Converter.Unit> emptyUnits = new ArrayList<>(2);
-            emptyUnits.add(new Converter.Unit("", 0d, true));
-            emptyUnits.add(new Converter.Unit("", 0d, true));
-            mView.showUnits(emptyUnits);
+            // when create new converter, produce list with 2 empty units to show for user
+            mUnits = new ArrayList<>(2);
+            mUnits.add(new Converter.Unit("", 0d, true));
+            mUnits.add(new Converter.Unit("", 0d, true));
+            mView.showUnits(mUnits);
             return;
         }
 
@@ -98,8 +102,38 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
                 mView.setProgressIndicator(false);
 
-                mView.showUnits(converter.getUnits());
+                mUnits = converter.getUnits();
+
+                mView.showUnits(mUnits);
             }
         });
+    }
+
+    @Override
+    public void moveUnit(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mUnits, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mUnits, i, i - 1);
+            }
+        }
+    }
+
+    @Override
+    public void deleteUnit(int position) {
+        if (mUnits.size() > 2) {
+            mUnits.remove(position);
+            mView.notifyUnitRemoved(position);
+        } else {
+            mView.showWarning(position);
+        }
+    }
+
+    @Override
+    public void enableUnit(int orderPosition, boolean enable) {
+        mUnits.get(orderPosition).isEnabled = enable;
     }
 }

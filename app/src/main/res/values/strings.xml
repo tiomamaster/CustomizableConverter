@@ -29,4 +29,5 @@
     <string name="hint_unit_value">Input unit value</string>
     <string name="msg_converter_exist">The converter with the same name already exist.</string>
     <string name="msg_loading">Loading units…</string>
+    <string name="msg_delete_all_units">Can not remove all units. At least two units should be present in the converter. You can delete entire converter.</string>
 </resources>

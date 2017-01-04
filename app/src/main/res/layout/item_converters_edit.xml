@@ -19,7 +19,9 @@
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        tools:text="Converter Name"/>
+        android:layout_toLeftOf="@+id/image_view_handle"
+        android:layout_toStartOf="@+id/image_view_handle"
+        tools:text="Converter Name" />
 
     <ImageView
         android:id="@+id/image_view_handle"

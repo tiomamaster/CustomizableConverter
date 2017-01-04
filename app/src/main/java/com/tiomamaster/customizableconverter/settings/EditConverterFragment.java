@@ -9,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +19,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -26,11 +29,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.converter.Divider;
 import com.tiomamaster.customizableconverter.data.Converter;
+import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperAdapter;
+import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperCallback;
+import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperViewHolder;
 
 import org.w3c.dom.Text;
 
@@ -38,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -81,7 +89,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mParentActivity = (SettingsActivity) getActivity();
 
         mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-
     }
 
 
@@ -93,6 +100,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(mAdapter);
+
+        mItemTouchHelper = new ItemTouchHelper(new ItemTouchHelperCallback(mAdapter));
+        mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         // draw divider between items
         recyclerView.addItemDecoration(new Divider(getActivity(), 1));
@@ -184,6 +194,21 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         else mTextLoading.setVisibility(View.GONE);
     }
 
+    @Override
+    public void notifyUnitRemoved(int position) {
+        mAdapter.notifyItemRemoved(position + 1);
+    }
+
+    @Override
+    public void showWarning(int position) {
+        new AlertDialog.Builder(mParentActivity).setMessage(
+                getString(R.string.msg_delete_all_units))
+                .setPositiveButton(android.R.string.ok, null)
+                .setCancelable(false).show();
+
+        mAdapter.notifyItemChanged(position + 1);
+    }
+
     private void hideSoftInput() {
         //Find the currently focused view, so we can grab the correct window token from it.
         View view = mParentActivity.getCurrentFocus();
@@ -194,7 +219,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    private class UnitsAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private class UnitsAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ItemTouchHelperAdapter {
 
         private final static int TYPE_ITEM = 0;
         private final static int TYPE_HEADER = 1;
@@ -220,7 +245,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof VHItem) {
                 int pos = position - 1;
                 ((VHItem) holder).mUnitName.setText(mUnits.get(pos).name);
@@ -231,6 +256,17 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 }
 
                 ((VHItem) holder).mCheck.setChecked(mUnits.get(pos).isEnabled);
+
+                ((VHItem) holder).mHandleReorder.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (MotionEventCompat.getActionMasked(event) ==
+                                MotionEvent.ACTION_DOWN) {
+                            mItemTouchHelper.startDrag(holder);
+                        }
+                        return false;
+                    }
+                });
             } else if (holder instanceof VHHeader) {
                 mEditName.setText(mActionListener.getConverterName());
             }
@@ -240,6 +276,20 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         public int getItemCount() {
             if (mUnits == null) return 1;
             return mUnits.size() + 1;
+        }
+
+        @Override
+        public boolean onItemMove(int fromPosition, int toPosition) {
+            if (toPosition == 0) return false;
+
+            mActionListener.moveUnit(fromPosition - 1, toPosition - 1);
+            notifyItemMoved(fromPosition, toPosition);
+            return true;
+        }
+
+        @Override
+        public void onItemDismiss(int position) {
+            mActionListener.deleteUnit(position - 1);
         }
 
         void setUnits(@NonNull List<Converter.Unit> newData) {
@@ -254,7 +304,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             }
         }
 
-        private class VHItem extends RecyclerView.ViewHolder {
+        private class VHItem extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
             private TextView mUnitName;
 
@@ -271,6 +321,16 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 mUnitValue = (TextView) itemView.findViewById(R.id.text_unit_value);
                 mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
                 mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
+            }
+
+            @Override
+            public void onItemSelected() {
+                itemView.setBackgroundColor(Color.LTGRAY);
+            }
+
+            @Override
+            public void onItemClear() {
+                itemView.setBackgroundColor(0);
             }
         }
 

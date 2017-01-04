@@ -78,6 +78,10 @@ interface SettingsContract {
         void error(boolean visible);
 
         void setProgressIndicator(boolean active);
+
+        void notifyUnitRemoved(int position);
+
+        void showWarning(int position);
     }
 
     interface EditConverterUal extends UserActionListener {
@@ -88,5 +92,11 @@ interface SettingsContract {
         void setConverterName(@NonNull String newName);
 
         void loadUnits();
+
+        void moveUnit(int fromPosition, int toPosition);
+
+        void deleteUnit(int position);
+
+        void enableUnit(int orderPosition , boolean enable);
     }
 }
