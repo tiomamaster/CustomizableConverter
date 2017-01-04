@@ -84,19 +84,20 @@ public class SettingsActivity extends AppCompatActivity {
         mActionListener.handleHomePressed();
     }
 
-    private void initFragment(Fragment fragment) {
-        // add the fragment to the fragment manager
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.contentFrame, fragment);
-        transaction.commit();
-    }
 
     void showFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.contentFrame, fragment);
         transaction.commit();
+
+        // set appropriate toolbar title
+        if (fragment instanceof SettingsFragment) {
+            getSupportActionBar().setTitle(getString(R.string.title_fragment_settings));
+        }
+        else {
+            getSupportActionBar().setTitle(getString(R.string.title_fragment_edit));
+        }
     }
 
     void setActionListener(SettingsContract.UserActionListener mActionListener) {
@@ -106,5 +107,13 @@ public class SettingsActivity extends AppCompatActivity {
     void setFabVisibility(boolean visible) {
         if (visible) mFab.setVisibility(View.VISIBLE);
         else mFab.setVisibility(View.GONE);
+    }
+
+    private void initFragment(Fragment fragment) {
+        // add the fragment to the fragment manager
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.contentFrame, fragment);
+        transaction.commit();
     }
 }
