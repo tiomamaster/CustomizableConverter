@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <EditText
+        android:id="@+id/edit_text_name"
+        android:hint="@string/hint_unit_name_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp"
+        android:inputType="text"
+        tools:text="Unit Name"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/text_msg_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="@string/msg_unit_exist"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:textSize="12sp"
+        android:textColor="@color/error"
+        android:labelFor="@+id/edit_text_name"
+        tools:visibility="visible"/>
+
+    <EditText
+        android:id="@+id/edit_text_value"
+        android:hint="@string/hint_unit_value_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        tools:text="Unit Value"
+        android:textSize="16sp"/>
+
+</LinearLayout>

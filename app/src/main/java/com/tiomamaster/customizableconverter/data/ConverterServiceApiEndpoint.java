@@ -145,7 +145,7 @@ public final class ConverterServiceApiEndpoint {
                         }
                     }
                 }
-                // update converter if any error occurs after reading asset file
+                // update converter if any showConverterExistError occurs after reading asset file
                 if (errors.length() != 0) {
                     // delete last \n
                     errors.deleteCharAt(errors.length() - 1);

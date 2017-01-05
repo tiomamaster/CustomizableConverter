@@ -30,4 +30,10 @@
     <string name="msg_converter_exist">The converter with the same name already exist.</string>
     <string name="msg_loading">Loading units…</string>
     <string name="msg_delete_all_units">Can not remove all units. At least two units should be present in the converter. You can delete entire converter.</string>
+    <string name="label_unit_name">Unit name:</string>
+    <string name="label_unit_value">Unit value:</string>
+    <string name="title_dialog_edit_unit">Edit unit</string>
+    <string name="hint_unit_name_et">Unit name</string>
+    <string name="hint_unit_value_et">Unit value</string>
+    <string name="msg_unit_exist">The unit with the same name already exist.</string>
 </resources>

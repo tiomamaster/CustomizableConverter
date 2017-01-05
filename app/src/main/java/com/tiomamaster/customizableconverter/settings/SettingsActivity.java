@@ -1,6 +1,7 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -13,11 +14,14 @@ import android.view.View;
 import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Repositories;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Created by Artyom on 11.10.2016.
  */
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity
+        implements EditUnitDialogFragment.EditUnitDialogListener {
 
     private static final String TITLE_KEY = "TITLE_KEY";
 
@@ -56,7 +60,7 @@ public class SettingsActivity extends AppCompatActivity {
                     ((SettingsContract.SettingsView) fragment));
         }
 
-        if (mActionListener instanceof SettingsPresenter) {
+        if (mActionListener instanceof SettingsContract.SettingsUal) {
             mFab.setVisibility(View.GONE);
         }
     }
@@ -84,6 +88,22 @@ public class SettingsActivity extends AppCompatActivity {
         mActionListener.handleHomePressed();
     }
 
+    @Override
+    public void onDialogPositiveClick(@NonNull String value) {
+        checkNotNull(value);
+
+        ((SettingsContract.EditConverterUal) mActionListener).saveUnit(value);
+    }
+
+    @Override
+    public void onDialogNegativeClick() {
+
+    }
+
+    @Override
+    public void onUnitTextChanged(String newName) {
+        ((SettingsContract.EditConverterUal) mActionListener).setUnitName(newName);
+    }
 
     void showFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();

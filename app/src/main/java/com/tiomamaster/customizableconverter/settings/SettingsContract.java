@@ -11,6 +11,8 @@ import com.tiomamaster.customizableconverter.data.Converter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.name;
+import static android.R.attr.value;
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static android.os.Build.VERSION_CODES.N;
 
@@ -75,13 +77,28 @@ interface SettingsContract {
 
         void showUnits(@NonNull List<Converter.Unit> units);
 
-        void error(boolean visible);
+        void showConverterExistError(boolean visible);
 
         void setProgressIndicator(boolean active);
 
         void notifyUnitRemoved(int position);
 
+        /**
+         * Show dialog with warning text when user want to delete unit from the converter
+         * when number of it is less then 3, because need at least 2 units.
+         *
+         * @param position The position of unit in the list which user want to delete,
+         *                 need for adapter notification.
+         */
         void showWarning(int position);
+
+        void showEditUnit(@Nullable String name, @Nullable String value);
+
+        /**
+         * Show error massage and disable save button.
+         * @param visible True if show error, false otherwise.
+         */
+        void showUnitExistError(boolean visible);
     }
 
     interface EditConverterUal extends UserActionListener {
@@ -98,5 +115,15 @@ interface SettingsContract {
         void deleteUnit(int position);
 
         void enableUnit(int orderPosition , boolean enable);
+
+        void editUnit(@NonNull String name, @NonNull String value);
+
+        void setUnitName(@NonNull String newName);
+
+        /**
+         * Save new or edited unit.
+         * @param value Pass only value, because name passed in {@link #setUnitName(String)}.
+         */
+        void saveUnit(@NonNull String value);
     }
 }

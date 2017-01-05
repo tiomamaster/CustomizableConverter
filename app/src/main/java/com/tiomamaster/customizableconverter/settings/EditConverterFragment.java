@@ -1,17 +1,15 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.app.Activity;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -22,14 +20,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
@@ -39,13 +34,8 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperAdap
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperCallback;
 import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperViewHolder;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -176,7 +166,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     }
 
     @Override
-    public void error(boolean visible) {
+    public void showConverterExistError(boolean visible) {
         if (visible) {
             mEditName.getBackground().mutate().setColorFilter(Color.parseColor("#d50000"),
                     PorterDuff.Mode.SRC_ATOP);
@@ -207,6 +197,23 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 .setCancelable(false).show();
 
         mAdapter.notifyItemChanged(position + 1);
+    }
+
+    @Override
+    public void showEditUnit(@Nullable String name, @Nullable String value) {
+        showEditUnitDialog(name, value);
+    }
+
+    @Override
+    public void showUnitExistError(boolean visible) {
+        ((EditUnitDialogFragment)mParentActivity.getSupportFragmentManager().
+                findFragmentByTag(EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG)).showError(visible);
+    }
+
+    private void showEditUnitDialog(String name, String value) {
+        DialogFragment editDialog = EditUnitDialogFragment.newInstance(name, value);
+        editDialog.show(mParentActivity.getSupportFragmentManager(),
+                EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG);
     }
 
     private void hideSoftInput() {
@@ -316,6 +323,14 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
             VHItem(View itemView) {
                 super(itemView);
+
+                itemView.findViewById(R.id.root).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mActionListener.editUnit(mUnitName.getText().toString(),
+                                mUnitValue.getText().toString());
+                    }
+                });
 
                 mUnitName = (TextView) itemView.findViewById(R.id.text_unit_name);
                 mUnitValue = (TextView) itemView.findViewById(R.id.text_unit_value);

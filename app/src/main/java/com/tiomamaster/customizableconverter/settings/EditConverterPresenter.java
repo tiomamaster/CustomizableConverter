@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.settings;
 
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -28,9 +30,15 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     private String mCurConverterName;
 
+    private Converter mCurConverter;
+
     private List<Converter.Unit> mUnits;
 
-    private boolean isNew;
+    private boolean isNewConverter;
+
+    private String mInitialUnitName;
+
+    private String mCurUnitName;
 
     EditConverterPresenter(@NonNull ConvertersRepository convertersRepository,
                            @NonNull SettingsContract.EditConverterView editConverterView,
@@ -39,7 +47,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         mView = checkNotNull(editConverterView, "editConverterView cannot be null");
         mCurConverterName = mInitialConverterName = initialConverterName;
 
-        if (initialConverterName == null) isNew = true;
+        if (initialConverterName == null) isNewConverter = true;
 
         mView.setPresenter(this);
     }
@@ -51,7 +59,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void handleFabPressed() {
-
+        // show dialog for creation new unit withe empty field
+        mView.showEditUnit(null, null);
     }
 
     @Nullable
@@ -66,25 +75,25 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
         mCurConverterName = newName;
 
-        if (isNew) {
+        if (isNewConverter) {
             if (mConvertersRepo.getCachedConvertersTypes().contains(new Pair<>(newName, true)) ||
                     mConvertersRepo.getCachedConvertersTypes().contains(new Pair<>(newName, false))) {
-                mView.error(true);
-            } else mView.error(false);
+                mView.showConverterExistError(true);
+            } else mView.showConverterExistError(false);
         } else {
             if (!mInitialConverterName.equals(newName) &&
                     mConvertersRepo.getCachedConvertersTypes().contains(new Pair<>(newName, true)) ||
                     mConvertersRepo.getCachedConvertersTypes().contains(new Pair<>(newName, false))) {
-                mView.error(true);
+                mView.showConverterExistError(true);
             } else {
-                mView.error(false);
+                mView.showConverterExistError(false);
             }
         }
     }
 
     @Override
     public void loadUnits() {
-        if (isNew) {
+        if (isNewConverter) {
             // when create new converter, produce list with 2 empty units to show for user
             mUnits = new ArrayList<>(2);
             mUnits.add(new Converter.Unit("", 0d, true));
@@ -101,6 +110,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 checkNotNull(converter);
 
                 mView.setProgressIndicator(false);
+
+                mCurConverter = converter;
 
                 mUnits = converter.getUnits();
 
@@ -127,6 +138,9 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         if (mUnits.size() > 2) {
             mUnits.remove(position);
             mView.notifyUnitRemoved(position);
+
+            // reset saved position to avoid index out of bounds
+            mCurConverter.setLastUnitPosition(0);
         } else {
             mView.showWarning(position);
         }
@@ -135,5 +149,33 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void enableUnit(int orderPosition, boolean enable) {
         mUnits.get(orderPosition).isEnabled = enable;
+    }
+
+    @Override
+    public void editUnit(@NonNull String name, @NonNull String value) {
+        checkNotNull(name);
+        checkNotNull(value);
+
+        mView.showEditUnit(name, value);
+
+        mInitialUnitName = name;
+    }
+
+    @Override
+    public void setUnitName(@NonNull String newName) {
+        checkNotNull(newName);
+
+        mCurUnitName = newName;
+
+        if (!mInitialUnitName.equals(newName)
+                && mUnits.contains(new Converter.Unit(newName, 0d, true)))
+            mView.showUnitExistError(true);
+        else mView.showUnitExistError(false);
+    }
+
+    @Override
+    public void saveUnit(@NonNull String value) {
+        checkNotNull(value);
+
     }
 }
