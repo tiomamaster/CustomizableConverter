@@ -36,6 +36,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     private boolean isNewConverter;
 
+    private boolean isNewUnit;
+
     private String mInitialUnitName;
 
     private String mCurUnitName;
@@ -61,6 +63,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     public void handleFabPressed() {
         // show dialog for creation new unit withe empty field
         mView.showEditUnit(null, null);
+
+        isNewUnit = true;
     }
 
     @Nullable
@@ -140,7 +144,9 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             mView.notifyUnitRemoved(position);
 
             // reset saved position to avoid index out of bounds
-            mCurConverter.setLastUnitPosition(0);
+            if (mCurConverter != null) { // may by null when create new converter
+                mCurConverter.setLastUnitPosition(0);
+            }
         } else {
             mView.showWarning(position);
         }
@@ -158,7 +164,9 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
         mView.showEditUnit(name, value);
 
-        mInitialUnitName = name;
+        mInitialUnitName = mCurUnitName = name;
+
+        isNewUnit = false;
     }
 
     @Override
@@ -176,6 +184,34 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void saveUnit(@NonNull String value) {
         checkNotNull(value);
+        if (isNewUnit) {
+            // create new unit
+            mUnits.add(new Converter.Unit(mCurUnitName, Double.valueOf(value), true));
 
+            // update view
+            mView.onUnitEdited(mUnits.size() - 1);
+        } else {
+            if (!mInitialUnitName.equals(mCurUnitName)) {
+                // update existing unit with new name and value
+                int index = mUnits.indexOf(new Converter.Unit(mInitialUnitName, 0d, true));
+                mUnits.get(index).name = mCurUnitName;
+                mUnits.get(index).value = Double.valueOf(value);
+
+                // update view
+                mView.onUnitEdited(index);
+            } else {
+                // update value of existing unit with new one
+                int index = mUnits.indexOf(new Converter.Unit(mCurUnitName, 0d, true));
+                mUnits.get(index).value = Double.valueOf(value);
+
+                // update view
+                mView.onUnitEdited(index);
+            }
+        }
+    }
+
+    @Override
+    public void cancelEditUnit() {
+        mView.onUnitEdited(0);
     }
 }

@@ -37,6 +37,7 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.tiomamaster.customizableconverter.R.id.root;
 
 /**
  * Created by Artyom on 07.12.2016.
@@ -94,26 +95,50 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mItemTouchHelper = new ItemTouchHelper(new ItemTouchHelperCallback(mAdapter));
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                clearEditText();
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+
         // draw divider between items
         recyclerView.addItemDecoration(new Divider(getActivity(), 1));
 
         mRecyclerViewHeader = inflater.inflate(R.layout.rw_edit_converter_header, container, false);
 
         mEditName = (EditText) mRecyclerViewHeader.findViewById(R.id.edit_text_name);
-        mEditName.addTextChangedListener(new TextWatcher() {
+
+        // to prevent focused when fragment start and give watcher when user touch
+        mEditName.setFocusableInTouchMode(false);
+        mEditName.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public boolean onTouch(View v, MotionEvent event) {
+                mEditName.setFocusableInTouchMode(true);
+                mEditName.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
+                    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-            }
+                    }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                mActionListener.setConverterName(s.toString());
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        mActionListener.setConverterName(s.toString());
+                    }
+                });
+                return false;
             }
         });
 
@@ -208,6 +233,18 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     public void showUnitExistError(boolean visible) {
         ((EditUnitDialogFragment)mParentActivity.getSupportFragmentManager().
                 findFragmentByTag(EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG)).showError(visible);
+    }
+
+    @Override
+    public void onUnitEdited(int position) {
+        mAdapter.notifyItemChanged(position + 1);
+        clearEditText();
+    }
+
+    private void clearEditText() {
+        mEditName.clearFocus();
+        mEditName.setFocusableInTouchMode(false);
+        hideSoftInput();
     }
 
     private void showEditUnitDialog(String name, String value) {
@@ -324,9 +361,10 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             VHItem(View itemView) {
                 super(itemView);
 
-                itemView.findViewById(R.id.root).setOnClickListener(new View.OnClickListener() {
+                itemView.findViewById(root).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         mActionListener.editUnit(mUnitName.getText().toString(),
                                 mUnitValue.getText().toString());
                     }

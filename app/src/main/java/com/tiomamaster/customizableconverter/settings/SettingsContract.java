@@ -99,6 +99,8 @@ interface SettingsContract {
          * @param visible True if show error, false otherwise.
          */
         void showUnitExistError(boolean visible);
+
+        void onUnitEdited(int position);
     }
 
     interface EditConverterUal extends UserActionListener {
@@ -125,5 +127,7 @@ interface SettingsContract {
          * @param value Pass only value, because name passed in {@link #setUnitName(String)}.
          */
         void saveUnit(@NonNull String value);
+
+        void cancelEditUnit();
     }
 }

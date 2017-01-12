@@ -117,12 +117,21 @@ public class EditUnitDialogFragment extends DialogFragment {
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         EditUnitDialogFragment.this.getDialog().cancel();
+
+                        mListener.onDialogNegativeClick();
                     }
                 });
 
         mDialog = builder.create();
 
         return mDialog;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        mListener.onDialogNegativeClick();
     }
 
     void showError(boolean visible){

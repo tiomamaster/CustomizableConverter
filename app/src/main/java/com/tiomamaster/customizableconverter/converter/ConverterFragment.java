@@ -92,6 +92,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
                 mQuantity.clearFocus();
                 mQuantity.setFocusableInTouchMode(false);
 

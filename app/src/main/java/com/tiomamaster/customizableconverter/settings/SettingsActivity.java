@@ -97,7 +97,7 @@ public class SettingsActivity extends AppCompatActivity
 
     @Override
     public void onDialogNegativeClick() {
-
+        ((SettingsContract.EditConverterUal) mActionListener).cancelEditUnit();
     }
 
     @Override
