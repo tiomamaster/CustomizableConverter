@@ -197,8 +197,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                     PorterDuff.Mode.SRC_ATOP);
             mTextError.setVisibility(View.VISIBLE);
         } else {
-            mEditName.getBackground().mutate().setColorFilter(Color.parseColor("#009688"),
-                    PorterDuff.Mode.SRC_ATOP);
+            mEditName.getBackground().clearColorFilter();
             mTextError.setVisibility(View.GONE);
         }
     }
@@ -236,12 +235,18 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     }
 
     @Override
+    public void enableSaveUnit(boolean enable) {
+        ((EditUnitDialogFragment)mParentActivity.getSupportFragmentManager().
+                findFragmentByTag(EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG)).enableSaveBtn(enable);
+    }
+
+    @Override
     public void onUnitEdited(int position) {
         mAdapter.notifyItemChanged(position + 1);
         clearEditText();
     }
 
-    private void clearEditText() {
+    void clearEditText() {
         mEditName.clearFocus();
         mEditName.setFocusableInTouchMode(false);
         hideSoftInput();

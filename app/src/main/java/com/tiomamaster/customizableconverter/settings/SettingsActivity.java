@@ -14,6 +14,7 @@ import android.view.View;
 import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Repositories;
 
+import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -89,20 +90,26 @@ public class SettingsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDialogPositiveClick(@NonNull String value) {
+    public void onDialogPositiveClick() {
         checkNotNull(value);
 
-        ((SettingsContract.EditConverterUal) mActionListener).saveUnit(value);
+        ((SettingsContract.EditConverterUal) mActionListener).saveUnit();
     }
 
     @Override
     public void onDialogNegativeClick() {
-        ((SettingsContract.EditConverterUal) mActionListener).cancelEditUnit();
+        ((EditConverterFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame))
+                .clearEditText();
     }
 
     @Override
-    public void onUnitTextChanged(String newName) {
+    public void onUnitNameChanged(String newName) {
         ((SettingsContract.EditConverterUal) mActionListener).setUnitName(newName);
+    }
+
+    @Override
+    public void onUnitValueChanged(String newValue) {
+        ((SettingsContract.EditConverterUal) mActionListener).setUnitValue(newValue);
     }
 
     void showFragment(Fragment fragment) {

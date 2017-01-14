@@ -1,9 +1,10 @@
 package com.tiomamaster.customizableconverter.settings;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -36,6 +37,8 @@ public class EditUnitDialogFragment extends DialogFragment {
 
     private EditUnitDialogListener mListener;
 
+    private EditText mTextName;
+
     private TextView mTextError;
 
     public static EditUnitDialogFragment newInstance(String name, String value) {
@@ -67,11 +70,11 @@ public class EditUnitDialogFragment extends DialogFragment {
 
         View dialogView = inflater.inflate(R.layout.dialog_edit_unit, null);
 
-        EditText name = (EditText) dialogView.findViewById(R.id.edit_text_name);
+        mTextName = (EditText) dialogView.findViewById(R.id.edit_text_name);
 
-        name.setText(getArguments().getString(ARGUMENT_UNIT_NAME));
+        mTextName.setText(getArguments().getString(ARGUMENT_UNIT_NAME));
 
-        name.addTextChangedListener(new TextWatcher() {
+        mTextName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -84,7 +87,7 @@ public class EditUnitDialogFragment extends DialogFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                mListener.onUnitTextChanged(s.toString());
+                mListener.onUnitNameChanged(s.toString());
             }
         });
 
@@ -93,6 +96,23 @@ public class EditUnitDialogFragment extends DialogFragment {
         final EditText value = (EditText) dialogView.findViewById(R.id.edit_text_value);
 
         value.setText(getArguments().getString(ARGUMENT_UNIT_VALUE));
+
+        value.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mListener.onUnitValueChanged(s.toString());
+            }
+        });
 
         InputFilter valueFilter = new InputFilter() {
             @Override
@@ -111,7 +131,7 @@ public class EditUnitDialogFragment extends DialogFragment {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDialogPositiveClick(value.getText().toString());
+                        mListener.onDialogPositiveClick();
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -135,13 +155,27 @@ public class EditUnitDialogFragment extends DialogFragment {
     }
 
     void showError(boolean visible){
-        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(!visible);
-        mTextError.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (visible) {
+            mTextName.getBackground().mutate().setColorFilter(Color.parseColor("#d50000"),
+                    PorterDuff.Mode.SRC_ATOP);
+            mTextError.setVisibility(View.VISIBLE);
+            enableSaveBtn(false);
+        } else {
+            mTextName.getBackground().clearColorFilter();
+            mTextError.setVisibility(View.GONE);
+            enableSaveBtn(true);
+        }
     }
 
+    void enableSaveBtn(boolean enabled) {
+        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(enabled);
+    }
+
+
     public interface EditUnitDialogListener {
-        public void onDialogPositiveClick(@NonNull String value);
-        public void onDialogNegativeClick();
-        public void onUnitTextChanged(String newName);
+        void onDialogPositiveClick();
+        void onDialogNegativeClick();
+        void onUnitNameChanged(String newName);
+        void onUnitValueChanged(String newValue);
     }
 }

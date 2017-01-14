@@ -95,10 +95,12 @@ interface SettingsContract {
         void showEditUnit(@Nullable String name, @Nullable String value);
 
         /**
-         * Show error massage and disable save button.
+         * Show error massage.
          * @param visible True if show error, false otherwise.
          */
         void showUnitExistError(boolean visible);
+
+        void enableSaveUnit(boolean enable);
 
         void onUnitEdited(int position);
     }
@@ -122,12 +124,8 @@ interface SettingsContract {
 
         void setUnitName(@NonNull String newName);
 
-        /**
-         * Save new or edited unit.
-         * @param value Pass only value, because name passed in {@link #setUnitName(String)}.
-         */
-        void saveUnit(@NonNull String value);
+        void setUnitValue(@NonNull String newValue);
 
-        void cancelEditUnit();
+        void saveUnit();
     }
 }
