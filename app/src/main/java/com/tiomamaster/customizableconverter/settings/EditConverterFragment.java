@@ -1,6 +1,7 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -16,15 +17,20 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
@@ -36,6 +42,8 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.List;
 
+import static android.R.attr.name;
+import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.R.id.root;
 
@@ -60,7 +68,14 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     private InputMethodManager mImm;
 
+    private TextView mTextHint;
+
     private TextView mTextLoading;
+
+    private MenuItem mItemSave;
+    private boolean mItemSaveVisible;
+
+    private AlertDialog mSavingDialog;
 
     public static EditConverterFragment newInstance() {
         return new EditConverterFragment();
@@ -142,7 +157,11 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             }
         });
 
+
+
         mTextError = (TextView) mRecyclerViewHeader.findViewById(R.id.text_msg_error);
+
+        mTextHint = (TextView) mRecyclerViewHeader.findViewById(R.id.text_hint);
 
         mTextLoading = (TextView) mRecyclerViewHeader.findViewById(R.id.text_loading);
 
@@ -160,13 +179,26 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_edit_converter, menu);
+
+        // we can save a new converter or changes in the existing
+        // only if some conditions are done, so by default disable this menu item
+        mItemSave = menu.findItem(R.id.save).setVisible(mItemSaveVisible);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 mActionListener.handleHomePressed();
                 return true;
+            case R.id.save:
+                mActionListener.saveConverter();
+                return true;
+            default: return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -203,7 +235,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     }
 
     @Override
-    public void setProgressIndicator(boolean active) {
+    public void setUnitsLoadingIndicator(boolean active) {
         if (active) mTextLoading.setVisibility(View.VISIBLE);
         else mTextLoading.setVisibility(View.GONE);
     }
@@ -244,6 +276,29 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     public void onUnitEdited(int position) {
         mAdapter.notifyItemChanged(position + 1);
         clearEditText();
+    }
+
+    @Override
+    public void enableSaveConverter(boolean enable) {
+        mItemSaveVisible = enable;
+        mItemSave.setVisible(enable);
+    }
+
+    @Override
+    public void showHint(boolean visible) {
+        mTextHint.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setConverterSavingIndicator(boolean active) {
+        if (mSavingDialog == null) {
+            mSavingDialog =new AlertDialog.Builder(mParentActivity)
+                    .setView(R.layout.dialog_progress)
+                    .setCancelable(false).create();
+        }
+
+        if (active) mSavingDialog.show();
+        else mSavingDialog.dismiss();
     }
 
     void clearEditText() {
@@ -305,6 +360,12 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 }
 
                 ((VHItem) holder).mCheck.setChecked(mUnits.get(pos).isEnabled);
+                ((VHItem) holder).mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        mActionListener.enableUnit(holder.getAdapterPosition() - 1, isChecked);
+                    }
+                });
 
                 ((VHItem) holder).mHandleReorder.setOnTouchListener(new View.OnTouchListener() {
                     @Override

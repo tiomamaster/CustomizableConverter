@@ -96,8 +96,8 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
             case android.R.id.home:
                 mActionListener.handleHomePressed();
                 return true;
+            default: return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

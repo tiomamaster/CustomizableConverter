@@ -36,4 +36,7 @@
     <string name="hint_unit_name_et">Unit name</string>
     <string name="hint_unit_value_et">Unit value</string>
     <string name="msg_unit_exist">The unit with the same name already exist.</string>
+    <string name="title_btn_save">Save</string>
+    <string name="hint_create_units">Create at least two units.</string>
+    <string name="title_saving_dialog">Saving…</string>
 </resources>

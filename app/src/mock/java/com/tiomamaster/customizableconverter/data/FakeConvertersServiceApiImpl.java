@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void getAllConvertersTypes(@NonNull final ConverterServiceCallback<List<Pair<String, Boolean>>> callback) {
+    public void getAllConvertersTypes(@NonNull final LoadCallback<List<Pair<String, Boolean>>> callback) {
         final List<Pair<String, Boolean>> converters = new ArrayList<>(CONVERTERS.size());
         for (Converter next : CONVERTERS.values()) {
             converters.add(new Pair<>(next.getName(), true));
@@ -58,7 +57,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void getConverter(@NonNull final String name, @NonNull final ConverterServiceCallback<Converter> callback) {
+    public void getConverter(@NonNull final String name, @NonNull final LoadCallback<Converter> callback) {
         checkNotNull(name);
         checkNotNull(callback);
 
@@ -71,11 +70,25 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void getLastConverter(@NonNull ConverterServiceCallback<Converter> callback) {
+    public void getLastConverter(@NonNull LoadCallback<Converter> callback) {
         checkNotNull(callback);
 
         String[] names = CONVERTERS.keySet().toArray(new String[]{});
 
         callback.onLoaded(CONVERTERS.get(names[new Random().nextInt(convertersCount)]));
+    }
+
+    @Override
+    public void saveConverter(@NonNull final SaveCallback callback, @NonNull final Converter converter) {
+        checkNotNull(callback);
+        checkNotNull(converter);
+
+        H.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                CONVERTERS.put(converter.getName(), converter);
+                callback.onSaved(true);
+            }
+        }, 1000);
     }
 }

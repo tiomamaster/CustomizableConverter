@@ -12,18 +12,19 @@ import java.util.List;
 public interface ConvertersRepository {
 
     interface LoadEnabledConvertersTypesCallback {
-
         void onConvertersTypesLoaded(@NonNull List<String> convertersTypes, int position);
     }
 
     interface LoadAllConvertersTypesCallback {
-
         void onConvertersTypesLoaded(@NonNull List<Pair<String, Boolean>> convertersTypes);
     }
 
     interface GetConverterCallback {
-
         void onConverterLoaded(@NonNull Converter converter);
+    }
+
+    interface SaveConverterCallback {
+        void onConverterSaved(boolean saved);
     }
 
     void getEnabledConvertersTypes(@NonNull LoadEnabledConvertersTypesCallback callback);
@@ -33,4 +34,6 @@ public interface ConvertersRepository {
     void getAllConverterTypes(@NonNull LoadAllConvertersTypesCallback callback);
 
     void getConverter(@NonNull String name, @NonNull GetConverterCallback callback);
+
+    void saveConverter(@NonNull SaveConverterCallback callback, @NonNull Converter converter);
 }

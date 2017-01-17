@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.R;
 
+import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -145,6 +146,19 @@ public class EditUnitDialogFragment extends DialogFragment {
         mDialog = builder.create();
 
         return mDialog;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Bundle args = getArguments();
+        String name = args.getString(ARGUMENT_UNIT_NAME);
+        String value = args.getString(ARGUMENT_UNIT_VALUE);
+
+        if (name == null || value == null || name.isEmpty() || value.isEmpty()) {
+            enableSaveBtn(false);
+        }
     }
 
     @Override

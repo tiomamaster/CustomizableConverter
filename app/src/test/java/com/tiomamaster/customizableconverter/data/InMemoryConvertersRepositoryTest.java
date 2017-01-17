@@ -7,11 +7,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -19,10 +17,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 
 /**
@@ -42,7 +38,7 @@ public class InMemoryConvertersRepositoryTest {
 
     @Mock private ConvertersRepository.GetConverterCallback mGetConverterCallback;
 
-    @Captor private ArgumentCaptor<ConvertersServiceApi.ConverterServiceCallback> mCaptor;
+    @Captor private ArgumentCaptor<ConvertersServiceApi.LoadCallback> mCaptor;
 
     @Before
     public void setUp() {
@@ -63,7 +59,7 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
 
         // check Api was called once
-        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.ConverterServiceCallback.class));
+        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.LoadCallback.class));
     }
 
     @Test
@@ -79,7 +75,7 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getAllConverterTypes(mLoadAllCallback);
 
         // check Api was called once
-        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.ConverterServiceCallback.class));
+        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.LoadCallback.class));
     }
 
     @Test
@@ -97,7 +93,7 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getConverter(name, mGetConverterCallback);
 
         // check Api was called once
-        verify(mServiceApi).getConverter(eq(name), any(ConvertersServiceApi.ConverterServiceCallback.class));
+        verify(mServiceApi).getConverter(eq(name), any(ConvertersServiceApi.LoadCallback.class));
     }
 
     @Test
@@ -116,7 +112,7 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
 
         // check Api was called once
-        verify(mServiceApi).getLastConverter(any(ConvertersServiceApi.ConverterServiceCallback.class));
+        verify(mServiceApi).getLastConverter(any(ConvertersServiceApi.LoadCallback.class));
     }
 
     @Test

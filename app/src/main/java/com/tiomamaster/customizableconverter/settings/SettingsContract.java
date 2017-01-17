@@ -79,7 +79,7 @@ interface SettingsContract {
 
         void showConverterExistError(boolean visible);
 
-        void setProgressIndicator(boolean active);
+        void setUnitsLoadingIndicator(boolean active);
 
         void notifyUnitRemoved(int position);
 
@@ -103,6 +103,12 @@ interface SettingsContract {
         void enableSaveUnit(boolean enable);
 
         void onUnitEdited(int position);
+
+        void enableSaveConverter(boolean enable);
+
+        void showHint(boolean visible);
+
+        void setConverterSavingIndicator(boolean active);
     }
 
     interface EditConverterUal extends UserActionListener {
@@ -127,5 +133,7 @@ interface SettingsContract {
         void setUnitValue(@NonNull String newValue);
 
         void saveUnit();
+
+        void saveConverter();
     }
 }

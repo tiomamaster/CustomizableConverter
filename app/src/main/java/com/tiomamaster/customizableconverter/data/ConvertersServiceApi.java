@@ -3,7 +3,6 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,13 +11,19 @@ import java.util.List;
  */
 public interface ConvertersServiceApi {
 
-    interface ConverterServiceCallback<T> {
+    interface LoadCallback<T> {
         void onLoaded(@NonNull T converters);
     }
 
-    void getAllConvertersTypes(@NonNull ConverterServiceCallback<List<Pair<String, Boolean>>> callback);
+    interface SaveCallback {
+        void onSaved(boolean saved);
+    }
 
-    void getConverter(@NonNull String name, @NonNull ConverterServiceCallback<Converter> callback);
+    void getAllConvertersTypes(@NonNull LoadCallback<List<Pair<String, Boolean>>> callback);
 
-    void getLastConverter(@NonNull ConverterServiceCallback<Converter> callback);
+    void getConverter(@NonNull String name, @NonNull LoadCallback<Converter> callback);
+
+    void getLastConverter(@NonNull LoadCallback<Converter> callback);
+
+    void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter);
 }

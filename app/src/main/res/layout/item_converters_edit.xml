@@ -27,7 +27,7 @@
         android:id="@+id/image_view_handle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_reorder_24px"
+        android:src="@drawable/ic_reorder"
         android:scaleType="center"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/check_box_enable"

@@ -40,7 +40,6 @@
         android:paddingBottom="8dp"
         android:textSize="12sp"
         android:textColor="@color/error"
-        android:labelFor="@+id/edit_text_name"
         tools:visibility="visible"/>
 
     <TextView
@@ -49,8 +48,18 @@
         android:text="@string/label_units"
         android:paddingTop="8dp"
         android:textSize="12sp"
-        android:textColor="@color/secondary_text"
-        android:labelFor="@+id/edit_text_name"/>
+        android:textColor="@color/secondary_text"/>
+
+    <TextView
+        android:id="@+id/text_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hint_create_units"
+        android:paddingTop="16dp"
+        android:textSize="16sp"
+        android:textColor="@color/primary_text"
+        android:visibility="gone"
+        tools:visibility="visible"/>
 
     <TextView
         android:id="@+id/text_loading"

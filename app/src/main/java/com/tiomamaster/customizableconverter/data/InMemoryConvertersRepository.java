@@ -3,14 +3,12 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -37,7 +35,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     @Override
     public void getEnabledConvertersTypes(@NonNull final LoadEnabledConvertersTypesCallback callback) {
         if (mFirstCall) {
-            mConvertersServiceApi.getLastConverter(new ConvertersServiceApi.ConverterServiceCallback<Converter>() {
+            mConvertersServiceApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
                 @Override
                 public void onLoaded(@NonNull Converter converter) {
                     cacheConverter(converter);
@@ -52,7 +50,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }
 
         mConvertersServiceApi.getAllConvertersTypes(
-                new ConvertersServiceApi.ConverterServiceCallback<List<Pair<String, Boolean>>>() {
+                new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
             @Override
             public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
                 mCachedConvertersTypes = converters;
@@ -74,7 +72,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
         // or load they from the API, cache and return through using callback
         mConvertersServiceApi.getAllConvertersTypes(
-                new ConvertersServiceApi.ConverterServiceCallback<List<Pair<String, Boolean>>>() {
+                new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
             @Override
             public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
                 mCachedConvertersTypes = converters;
@@ -93,7 +91,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }
 
         checkNotNull(callback);
-        mConvertersServiceApi.getConverter(name, new ConvertersServiceApi.ConverterServiceCallback<Converter>() {
+        mConvertersServiceApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 cacheConverter(converter);
@@ -106,6 +104,24 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     @Override
     public List<Pair<String, Boolean>> getCachedConvertersTypes() {
         return mCachedConvertersTypes;
+    }
+
+    @Override
+    public void saveConverter(@NonNull final SaveConverterCallback callback, @NonNull Converter converter) {
+        checkNotNull(callback);
+        checkNotNull(converter);
+
+        if (!mCachedConvertersTypes.contains(new Pair<>(converter.getName(), true))
+                && !mCachedConvertersTypes.contains(new Pair<>(converter.getName(), false))) {
+            mCachedConvertersTypes.add(new Pair<>(converter.getName(), true));
+        }
+
+        mConvertersServiceApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
+            @Override
+            public void onSaved(boolean saved) {
+                callback.onConverterSaved(saved);
+            }
+        }, converter);
     }
 
     private void cacheConverter(@NonNull Converter converter) {

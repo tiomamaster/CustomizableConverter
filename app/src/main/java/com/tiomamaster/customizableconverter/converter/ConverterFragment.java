@@ -212,7 +212,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.main, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -222,8 +222,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             case R.id.settings:
                 mActionsListener.openSettings();
                 return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            default: return super.onOptionsItemSelected(item);
         }
     }
 

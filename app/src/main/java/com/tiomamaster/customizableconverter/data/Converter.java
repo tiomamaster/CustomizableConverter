@@ -23,7 +23,7 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
     // counter for default ordering
     private static int count;
 
-    @NonNull private final String mName;
+    @NonNull private String mName;
 
     @NonNull private final List<Unit> mUnits;
 
@@ -59,30 +59,6 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
         this(name, units, null, count++, 0, "");
     }
 
-    @NonNull
-    public String getName() {
-        return mName;
-    }
-
-    @NonNull
-    public List<Unit> getUnits() {
-        return mUnits;
-    }
-
-    @NonNull
-    public List<Pair<String, String>> convertAll(double quantity, String fromUnit) {
-        List<Pair<String, String>> result = new ArrayList<>(mUnits.size());
-        Unit from = mUnits.get(mUnits.indexOf(new Unit(fromUnit, 1, true)));
-
-        for (Unit to : mUnits) {
-            if (to.isEnabled && !to.name.equals(from.name)) {
-                result.add(new Pair<>(to.name, convert(quantity, from.value, to.value)));
-            }
-        }
-
-        return result;
-    }
-
     @Override
     public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
         if (stForm) {
@@ -99,8 +75,34 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
         isDefaultForm = defForm;
     }
 
-    SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
-        return this;
+    @NonNull
+    public List<Pair<String, String>> convertAll(double quantity, String fromUnit) {
+        List<Pair<String, String>> result = new ArrayList<>(mUnits.size());
+        Unit from = mUnits.get(mUnits.indexOf(new Unit(fromUnit, 1, true)));
+
+        for (Unit to : mUnits) {
+            if (to.isEnabled && !to.name.equals(from.name)) {
+                result.add(new Pair<>(to.name, convert(quantity, from.value, to.value)));
+            }
+        }
+
+        return result;
+    }
+
+    @NonNull
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(@NonNull String name) {
+        checkNotNull(name);
+
+        mName = name;
+    }
+
+    @NonNull
+    public List<Unit> getUnits() {
+        return mUnits;
     }
 
     @NonNull
@@ -142,6 +144,10 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
 
     public void setLastQuantity(String mLastQuantity) {
         this.mLastQuantity = mLastQuantity;
+    }
+
+    SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
+        return this;
     }
 
     private String convert(double quantity, double from, double to){

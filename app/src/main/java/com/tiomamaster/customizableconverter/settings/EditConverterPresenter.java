@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -48,6 +49,10 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     private String mCurUnitValue;
 
+    private int mEnabledUnits;
+
+    private boolean mGoodName;
+
     EditConverterPresenter(@NonNull ConvertersRepository convertersRepository,
                            @NonNull SettingsContract.EditConverterView editConverterView,
                            @Nullable String initialConverterName) {
@@ -56,6 +61,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         mCurConverterName = mInitialConverterName = initialConverterName;
 
         if (initialConverterName == null) isNewConverter = true;
+        else mGoodName = true;
 
         // create converter lower case names set
         mConverterNames = createLowerCaseConverterNames();
@@ -73,6 +79,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         // show dialog for creation new unit withe empty field
         mView.showEditUnit(null, null);
 
+        mInitialUnitName = mCurUnitName = mCurUnitValue = "";
+
         isNewUnit = true;
     }
 
@@ -86,17 +94,39 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     public void setConverterName(@NonNull String newName) {
         checkNotNull(newName);
 
+        if (newName.isEmpty()) {
+            mView.showConverterExistError(false);
+            mView.enableSaveConverter(false);
+            mGoodName = false;
+            return;
+        }
+
         mCurConverterName = newName;
 
         if (isNewConverter) {
-            if (mConverterNames.contains(newName.toLowerCase())) mView.showConverterExistError(true);
-            else mView.showConverterExistError(false);
+            if (mConverterNames.contains(newName.toLowerCase())) {
+                mView.showConverterExistError(true);
+                mView.enableSaveConverter(false);
+                mGoodName = false;
+            } else {
+                mView.showConverterExistError(false);
+                mGoodName = true;
+                checkCanSave();
+            }
         } else {
             if (!mInitialConverterName.toLowerCase().equals(newName.toLowerCase())
                     && mConverterNames.contains(newName.toLowerCase())) {
                 mView.showConverterExistError(true);
+                mView.enableSaveConverter(false);
+                mGoodName = false;
             } else {
                 mView.showConverterExistError(false);
+
+                // update existing converter name
+                mCurConverter.setName(mCurConverterName);
+
+                mGoodName = true;
+                checkCanSave();
             }
         }
     }
@@ -104,19 +134,22 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void loadUnits() {
         if (isNewConverter) {
-            // when create new converter, produce list with 2 empty units to show for user
-            mUnits = new ArrayList<>(2);
-            mUnits.add(new Converter.Unit("", 0d, true));
-            mUnits.add(new Converter.Unit("", 0d, true));
+            if (mUnits == null) {
+                // when create new converter, produce empty units list
+                mUnits = new ArrayList<>();
 
-            // create empty unit lower case names set
-            mUnitNames = new HashSet<>();
+                // create empty unit lower case names set
+                mUnitNames = new HashSet<>();
+            }
 
+            if (mUnits.size() < 2) {
+                mView.showHint(true);
+            }
             mView.showUnits(mUnits);
             return;
         }
 
-        mView.setProgressIndicator(true);
+        mView.setUnitsLoadingIndicator(true);
 
         mConvertersRepo.getConverter(mInitialConverterName, new ConvertersRepository.GetConverterCallback() {
             @Override
@@ -130,9 +163,10 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 // create unit lower case names set
                 mUnitNames = createLowerCaseUnitNames();
 
-                mView.showUnits(mUnits);
+                mEnabledUnits = mCurConverter.getEnabledUnitsName().size();
 
-                mView.setProgressIndicator(false);
+                mView.showUnits(mUnits);
+                mView.setUnitsLoadingIndicator(false);
             }
         });
     }
@@ -148,6 +182,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 Collections.swap(mUnits, i, i - 1);
             }
         }
+        checkCanSave();
     }
 
     @Override
@@ -163,11 +198,18 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         } else {
             mView.showWarning(position);
         }
+        mEnabledUnits--;
+        checkCanSave();
     }
 
     @Override
     public void enableUnit(int orderPosition, boolean enable) {
         mUnits.get(orderPosition).isEnabled = enable;
+
+        if (enable) mEnabledUnits++;
+        else mEnabledUnits--;
+
+        checkCanSave();
     }
 
     @Override
@@ -193,9 +235,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         if (!mInitialUnitName.toLowerCase().equals(newName.toLowerCase())
                 && mUnitNames.contains(newName.toLowerCase())) {
             mView.showUnitExistError(true);
-            return;
-        }
-        mView.showUnitExistError(false);
+        } else mView.showUnitExistError(false);
 
         if (!mCurUnitValue.isEmpty() && !mCurUnitName.isEmpty()) mView.enableSaveUnit(true);
         else mView.enableSaveUnit(false);
@@ -214,11 +254,18 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void saveUnit() {
         if (isNewUnit) {
-            // create new unit
+            // create new unit and add it to the units list
             mUnits.add(new Converter.Unit(mCurUnitName, Double.valueOf(mCurUnitValue), true));
 
-            // update view
+            mUnitNames.add(mCurUnitName);
+
             mView.onUnitEdited(mUnits.size() - 1);
+            if (mUnits.size() > 1) {
+                mView.showHint(false);
+            }
+
+            mEnabledUnits++;
+            checkCanSave();
         } else {
             if (!mInitialUnitName.equals(mCurUnitName)) {
                 // update existing unit with new name and value
@@ -226,20 +273,34 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 mUnits.get(index).name = mCurUnitName;
                 mUnits.get(index).value = Double.valueOf(mCurUnitValue);
 
-                // add new unit name to the set
+                // add new unit name to the set and remove old name
                 mUnitNames.add(mCurUnitName.toLowerCase());
+                mUnitNames.remove(mInitialUnitName);
 
-                // update view
                 mView.onUnitEdited(index);
             } else {
                 // update value of existing unit with new one
                 int index = mUnits.indexOf(new Converter.Unit(mCurUnitName, 0d, true));
                 mUnits.get(index).value = Double.valueOf(mCurUnitValue);
 
-                // update view
                 mView.onUnitEdited(index);
             }
         }
+    }
+
+    @Override
+    public void saveConverter() {
+        mView.enableSaveConverter(false);
+        mView.setConverterSavingIndicator(true);
+
+        if (isNewConverter) mCurConverter = new Converter(mCurConverterName, mUnits);
+
+        mConvertersRepo.saveConverter(new ConvertersRepository.SaveConverterCallback() {
+            @Override
+            public void onConverterSaved(boolean saved) {
+                mView.setConverterSavingIndicator(false);
+            }
+        }, mCurConverter);
     }
 
     private Set<String> createLowerCaseUnitNames() {
@@ -256,5 +317,10 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             names.add(pair.first.toLowerCase());
         }
         return names;
+    }
+
+    private void checkCanSave() {
+        if (mEnabledUnits > 1 && mGoodName) mView.enableSaveConverter(true);
+        else mView.enableSaveConverter(false);
     }
 }
