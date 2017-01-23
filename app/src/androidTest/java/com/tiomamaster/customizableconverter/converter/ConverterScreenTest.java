@@ -247,17 +247,12 @@ public class ConverterScreenTest {
 
     @Test
     public void clickSettingsMenuItemOpenSettingsUi() {
-        selectSettingsFromMenu();
+
+        // Click on settings option
+        onView(withId(R.id.settings)).perform(click());
 
         // check that settings text in toolbar is visible
         onView(withText(R.string.title_fragment_settings)).check(matches(isDisplayed()));
-    }
-
-    private void selectSettingsFromMenu() {
-        openActionBarOverflowOrOptionsMenu(getTargetContext());
-
-        // Click on settings option
-        onView(withText(R.string.title_fragment_settings)).perform(click());
     }
 
     private void checkRecyclerView(List<Pair<String, String>> expected) {
