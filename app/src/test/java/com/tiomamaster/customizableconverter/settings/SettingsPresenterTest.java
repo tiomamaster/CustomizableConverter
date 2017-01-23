@@ -39,7 +39,6 @@ public class SettingsPresenterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
         mPresenter = new SettingsPresenter(mRepository, mView);
     }
 

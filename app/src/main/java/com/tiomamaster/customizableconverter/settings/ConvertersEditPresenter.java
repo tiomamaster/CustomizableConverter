@@ -3,6 +3,7 @@ package com.tiomamaster.customizableconverter.settings;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 
@@ -18,11 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
 
-    @NonNull
-    private ConvertersRepository mConvertersRepo;
+    @NonNull private ConvertersRepository mConvertersRepo;
 
-    @NonNull
-    private SettingsContract.ConvertersEditView mView;
+    @NonNull private SettingsContract.ConvertersEditView mView;
 
     private List<Pair<String, Boolean>> mAllConverters;
 
