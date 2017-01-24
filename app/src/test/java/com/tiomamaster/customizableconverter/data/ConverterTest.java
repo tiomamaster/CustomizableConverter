@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.asm.tree.InsnList.check;
 
 /**
  * Created by Artyom on 26.07.2016.
@@ -100,6 +101,28 @@ public class ConverterTest {
     }
 
     @Test
+    public void cloneConverter() {
+        Converter clone = (Converter) sConverter.clone();
+
+        clone.setName("Clone");
+        clone.setLastUnitPosition(10000);
+        clone.setLastQuantity("10000");
+        clone.setOrderPosition(10000);
+        clone.getUnits().get(0).name = "Clone";
+        clone.getUnits().get(0).value = 10000d;
+        clone.getUnits().get(0).isEnabled = false;
+
+        // check that changing of the clone does not affect to the original
+        assertNotEquals(sConverter.getName(), clone.getName());
+        assertNotEquals(sConverter.getLastUnitPosition(), clone.getLastUnitPosition());
+        assertNotEquals(sConverter.getLastQuantity(), clone.getLastQuantity());
+        assertNotEquals(sConverter.getOrderPosition(), clone.getOrderPosition());
+        assertNotEquals(sConverter.getUnits().get(0), clone.getUnits().get(0));
+        assertNotEquals(sConverter.getUnits().get(0).value, clone.getUnits().get(0).value);
+        assertNotEquals(sConverter.getUnits().get(0).isEnabled, clone.getUnits().get(0).isEnabled);
+    }
+
+    @Test
     public void equalsUnit() {
         List<Converter.Unit> units = new ArrayList<>();
         Converter.Unit u = new Converter.Unit("One", 1d, true);
@@ -109,5 +132,20 @@ public class ConverterTest {
         // check that double and boolean field not affect for equals
         u = new Converter.Unit(u.name, 2d, false);
         assertTrue(units.contains(u));
+    }
+
+    @Test
+    public void cloneUnit() {
+        Converter.Unit original = new Converter.Unit("Original", 1d, true);
+        Converter.Unit clone = (Converter.Unit) original.clone();
+
+        clone.name = "Clone";
+        clone.value = 2d;
+        clone.isEnabled = false;
+
+        // check that changing of the clone does not affect to the original
+        assertFalse(original.equals(clone));
+        assertFalse(original.value == clone.value);
+        assertFalse(original.isEnabled == clone.isEnabled);
     }
 }

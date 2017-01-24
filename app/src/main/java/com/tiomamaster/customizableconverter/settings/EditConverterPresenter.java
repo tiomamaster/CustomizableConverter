@@ -151,7 +151,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
                 mCurConverter = converter;
 
-                mUnits = converter.getUnits();
+                mUnits = mCurConverter.getUnits();
 
                 // create unit lower case names set
                 mUnitNames = createLowerCaseUnitNames();

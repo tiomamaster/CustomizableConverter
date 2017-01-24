@@ -85,7 +85,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     public void getConverter(@NonNull final String name, @NonNull final GetConverterCallback callback) {
         checkNotNull(name);
         if (mCachedConverters != null && mCachedConverters.containsKey(name)) {
-            callback.onConverterLoaded(mCachedConverters.get(name));
+            callback.onConverterLoaded((Converter) mCachedConverters.get(name).clone());
             mLastConverterName = mCachedConverters.get(name).getName();
             return;
         }
@@ -96,7 +96,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             public void onLoaded(@NonNull Converter converter) {
                 cacheConverter(converter);
 
-                callback.onConverterLoaded(converter);
+                callback.onConverterLoaded((Converter) converter.clone());
             }
         });
     }

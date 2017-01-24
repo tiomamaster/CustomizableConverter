@@ -5,27 +5,33 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.tiomamaster.customizableconverter.R.id.quantity;
 
 /**
  * Created by Artyom on 14.07.2016.
  */
-public class Converter implements SettingsRepository.OnSettingsChangeListener {
+public class Converter implements SettingsRepository.OnSettingsChangeListener, Cloneable {
 
     // counter for default ordering
-    private static int count;
+    private static int sCount;
+
+    private static  DecimalFormat sDecimalFormat;
+
+    private static boolean isDefaultForm;
 
     @NonNull private String mName;
 
-    @NonNull private final List<Unit> mUnits;
+    @NonNull private List<Unit> mUnits;
 
     @Nullable private final String mErrors;
 
@@ -34,10 +40,6 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
     private int mLastUnitPosition;
 
     @Nullable private String mLastQuantity;
-
-    private static  DecimalFormat sDecimalFormat;
-
-    private static boolean isDefaultForm;
 
     public Converter(@NonNull String name, @NonNull List<Unit> units,
                      @Nullable String errors, int orderPosition, int lastUnit,
@@ -52,11 +54,11 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units, String errors) {
-        this(name, units, errors, count++, 0, "");
+        this(name, units, errors, sCount++, 0, "");
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units) {
-        this(name, units, null, count++, 0, "");
+        this(name, units, null, sCount++, 0, "");
     }
 
     @Override
@@ -73,6 +75,21 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
         sDecimalFormat.setGroupingSize(grSize);
         sDecimalFormat.setMaximumFractionDigits(maxFrDigits);
         isDefaultForm = defForm;
+    }
+
+    @Override
+    public Object clone() {
+        Converter o = null;
+        try {
+            o = (Converter) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        o.mUnits = new ArrayList<>(mUnits.size());
+        for (Unit unit : mUnits) {
+            o.mUnits.add((Unit) unit.clone());
+        }
+        return o;
     }
 
     @NonNull
@@ -155,7 +172,7 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
         return sDecimalFormat.format(quantity * from / to);
     }
 
-    public static class Unit {
+    public static class Unit implements Cloneable {
         public @NonNull String name;
         public double value;
         public boolean isEnabled;
@@ -172,6 +189,17 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener {
             if (o == null || getClass() != o.getClass()) return false;
             Unit unit = (Unit) o;
             return Objects.equal(name, unit.name);
+        }
+
+        @Override
+        public Object clone() {
+            Object o = null;
+            try {
+                o = super.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            return o;
         }
     }
 }
