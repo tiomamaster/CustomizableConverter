@@ -109,6 +109,8 @@ interface SettingsContract {
         void showHint(boolean visible);
 
         void setConverterSavingIndicator(boolean active);
+
+        void showAskDialog();
     }
 
     interface EditConverterUal extends UserActionListener {
@@ -134,6 +136,6 @@ interface SettingsContract {
 
         void saveUnit();
 
-        void saveConverter();
+        void saveConverter(boolean closeEditor);
     }
 }

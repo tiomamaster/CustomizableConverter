@@ -39,4 +39,5 @@
     <string name="title_btn_save">Save</string>
     <string name="hint_create_units">Create at least two units.</string>
     <string name="title_saving_dialog">Saving…</string>
+    <string name="msg_save_changes">Save changes?</string>
 </resources>

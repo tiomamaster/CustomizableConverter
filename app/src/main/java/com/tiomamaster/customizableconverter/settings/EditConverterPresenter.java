@@ -20,9 +20,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
-    @NonNull private ConvertersRepository mConvertersRepo;
+    @NonNull
+    private ConvertersRepository mConvertersRepo;
 
-    @NonNull private SettingsContract.EditConverterView mView;
+    @NonNull
+    private SettingsContract.EditConverterView mView;
 
     private String mInitialConverterName;
 
@@ -50,6 +52,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     private boolean mGoodConverterName;
 
+    private boolean mHaveUnsavedChanges;
+
     EditConverterPresenter(@NonNull ConvertersRepository convertersRepository,
                            @NonNull SettingsContract.EditConverterView editConverterView,
                            @Nullable String initialConverterName) {
@@ -68,7 +72,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void handleHomePressed() {
-        mView.showPreviousView();
+        if (mHaveUnsavedChanges) mView.showAskDialog();
+        else mView.showPreviousView();
     }
 
     @Override
@@ -243,7 +248,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         mCurUnitValue = newValue;
 
         if (!mCurUnitValue.isEmpty() && !mUnitNames.contains(mCurUnitName.toLowerCase()) ||
-            mInitialUnitName.toLowerCase().equals(mCurUnitName.toLowerCase())) mView.enableSaveUnit(true);
+                mInitialUnitName.toLowerCase().equals(mCurUnitName.toLowerCase()))
+            mView.enableSaveUnit(true);
         else mView.enableSaveUnit(false);
     }
 
@@ -289,7 +295,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     }
 
     @Override
-    public void saveConverter() {
+    public void saveConverter(final boolean closeEditor) {
         mView.enableSaveConverter(false);
         mView.setConverterSavingIndicator(true);
 
@@ -299,6 +305,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             @Override
             public void onConverterSaved(boolean saved) {
                 mView.setConverterSavingIndicator(false);
+                if (closeEditor) mView.showPreviousView();
+                mHaveUnsavedChanges = false;
             }
         }, mCurConverter);
     }
@@ -320,8 +328,15 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     }
 
     private void checkCanSave() {
-        if (mEnabledUnits > 1 && mGoodConverterName) mView.enableSaveConverter(true);
-        else mView.enableSaveConverter(false);
+        if (mEnabledUnits > 1 && mGoodConverterName) {
+            mView.enableSaveConverter(true);
+
+            mHaveUnsavedChanges = true;
+        } else {
+            mView.enableSaveConverter(false);
+
+            mHaveUnsavedChanges = false;
+        }
     }
 
     private void converterExist() {

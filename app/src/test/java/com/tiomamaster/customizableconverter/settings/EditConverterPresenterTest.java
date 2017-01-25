@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static android.R.attr.name;
+import static android.R.attr.transitionName;
 import static android.R.attr.value;
 import static android.os.Build.VERSION_CODES.N;
 import static org.junit.Assert.*;
@@ -82,8 +83,28 @@ public class EditConverterPresenterTest {
 
     @Test
     public void handleHomePressed() {
-        mPresenter.handleHomePressed();
-        verify(mView).showPreviousView();
+        if (mInitialConverterName.equals(NEW_CONVERTER)) {
+            // add converter name and two units to enable save
+            mPresenter.setConverterName("New");
+
+            addNewUnit("One", "1");
+
+            addNewUnit("Two", "2");
+
+            mPresenter.handleHomePressed();
+
+            verify(mView).showAskDialog();
+        } else {
+            // no need to show dialog if no changes are done
+            mPresenter.handleHomePressed();
+
+            verify(mView).showPreviousView();
+
+            mPresenter.enableUnit(2, true);
+            mPresenter.handleHomePressed();
+
+            verify(mView).showAskDialog();
+        }
     }
 
     @Test
@@ -186,9 +207,7 @@ public class EditConverterPresenterTest {
     public void editUnit() {
         if (mInitialConverterName.equals(NEW_CONVERTER)) {
             // crete new unit
-            mPresenter.editUnit("", "");
-
-            verify(mView).showEditUnit("", "");
+            mPresenter.handleFabPressed();
 
             mPresenter.setUnitName("Unit");
 
@@ -225,7 +244,8 @@ public class EditConverterPresenterTest {
 
     @Test
     public void saveUnit() {
-        String[] names = {"Name0", "Name1"}; String[] values = {"1", "2"};
+        String[] names = {"Name0", "Name1"};
+        String[] values = {"1", "2"};
         if (mInitialConverterName.equals(NEW_CONVERTER)) {
             // add new unit
             addNewUnit(names[0], values[0]);
@@ -262,7 +282,7 @@ public class EditConverterPresenterTest {
 
     @Test
     public void saveConverter() {
-        mPresenter.saveConverter();
+        mPresenter.saveConverter(true);
 
         verify(mView).enableSaveConverter(false);
         verify(mView).setConverterSavingIndicator(true);
@@ -274,11 +294,11 @@ public class EditConverterPresenterTest {
         verify(mRepository).saveConverter(callbackCaptor.capture(), converterCaptor.capture());
         callbackCaptor.getValue().onConverterSaved(true);
         verify(mView).setConverterSavingIndicator(false);
+        verify(mView).showPreviousView();
 
         if (mInitialConverterName.equals(NEW_CONVERTER)) {
             assertEquals(NEW_CONVERTER, converterCaptor.getValue().getName());
-        }
-        else {
+        } else {
             assertEquals(OLD_CONVERTER, converterCaptor.getValue().getName());
         }
     }

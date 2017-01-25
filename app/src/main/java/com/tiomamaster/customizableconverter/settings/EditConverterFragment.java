@@ -2,6 +2,7 @@ package com.tiomamaster.customizableconverter.settings;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -42,10 +43,12 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.List;
 
+import static android.R.attr.animationDuration;
 import static android.R.attr.name;
 import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.R.id.root;
+import static com.tiomamaster.customizableconverter.R.id.transition_current_scene;
 
 /**
  * Created by Artyom on 07.12.2016.
@@ -195,7 +198,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 mActionListener.handleHomePressed();
                 return true;
             case R.id.save:
-                mActionListener.saveConverter();
+                mActionListener.saveConverter(false);
                 return true;
             default: return super.onOptionsItemSelected(item);
         }
@@ -299,6 +302,31 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
         if (active) mSavingDialog.show();
         else mSavingDialog.dismiss();
+    }
+
+    @Override
+    public void showAskDialog() {
+        new AlertDialog.Builder(mParentActivity).setMessage(
+                getString(R.string.msg_save_changes))
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mActionListener.saveConverter(true);
+                    }
+                })
+                .setNeutralButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showPreviousView();
+                    }
+                })
+                .setCancelable(false).show();
     }
 
     void clearEditText() {
