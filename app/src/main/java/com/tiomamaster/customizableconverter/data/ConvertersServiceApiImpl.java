@@ -37,7 +37,8 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter) {
+    public void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter,
+                              @NonNull String oldName) {
 
     }
 }

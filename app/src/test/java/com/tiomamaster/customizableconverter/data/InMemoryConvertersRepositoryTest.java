@@ -2,23 +2,31 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.support.v4.util.Pair;
 
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -135,7 +143,7 @@ public class InMemoryConvertersRepositoryTest {
 
         startName = mRepository.mLastConverterName;
 
-        // both converter already caching
+        // both converters already caching
 
         // retrieve first converter again
         mRepository.getConverter(names[0], mGetConverterCallback);
@@ -181,5 +189,48 @@ public class InMemoryConvertersRepositoryTest {
         assertEquals(listResult.get(1), second.first);
         assertEquals(listResult.get(2), third.first);
         assertEquals(2, intResult);
+    }
+
+    @Test
+    public void saveConverter() {
+        String[] names = {"One", "Two"};
+
+        mRepository.mCachedConvertersTypes = new ArrayList<>(2);
+        mRepository.mCachedConvertersTypes.addAll(Arrays.asList(new Pair<>(names[0], true),
+                new Pair<>(names[1], true)));
+
+        mRepository.mCachedConverters = new HashMap<>(2);
+        mRepository.mCachedConverters.put(names[0],
+                new Converter(names[0], new ArrayList<Converter.Unit>()));
+        mRepository.mCachedConverters.put(names[1],
+                new Converter(names[1], new ArrayList<Converter.Unit>()));
+
+        ConvertersRepository.SaveConverterCallback saveConverterCallback =
+                Mockito.mock(ConvertersRepository.SaveConverterCallback.class);
+        // crete new converter
+        String converterName = "Three";
+        when(mConverter.getName()).thenReturn(converterName);
+        mRepository.saveConverter(saveConverterCallback, mConverter, "");
+
+        // check cache contains new converter
+        assertEquals(mRepository.mCachedConvertersTypes.get(2), new Pair<>(converterName, true));
+        assertEquals(mRepository.mCachedConverters.get(converterName).getName(), mConverter.getName());
+
+        ArgumentCaptor<ConvertersServiceApi.SaveCallback> saveCaptor =
+                ArgumentCaptor.forClass(ConvertersServiceApi.SaveCallback.class);
+        verify(mServiceApi).saveConverter(saveCaptor.capture(), eq(mConverter), eq(""));
+
+        saveCaptor.getValue().onSaved(true);
+
+        verify(saveConverterCallback).onConverterSaved(true);
+
+        // edit existing converter
+        converterName = "Edited name";
+        when(mConverter.getName()).thenReturn(converterName);
+        mRepository.saveConverter(saveConverterCallback, mConverter, "One"); // edit converter One
+
+        // check cache
+        assertEquals(mRepository.mCachedConvertersTypes.get(0), new Pair<>(converterName, true));
+        assertEquals(mRepository.mCachedConverters.get(converterName).getName(), mConverter.getName());
     }
 }

@@ -252,7 +252,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     public void showWarning(int position) {
         new AlertDialog.Builder(mParentActivity).setMessage(
                 getString(R.string.msg_delete_all_units))
-                .setPositiveButton(android.R.string.ok, null)
+                .setPositiveButton(R.string.ok, null)
                 .setCancelable(false).show();
 
         mAdapter.notifyItemChanged(position + 1);
@@ -308,19 +308,19 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     public void showAskDialog() {
         new AlertDialog.Builder(mParentActivity).setMessage(
                 getString(R.string.msg_save_changes))
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mActionListener.saveConverter(true);
                     }
                 })
-                .setNeutralButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         showPreviousView();

@@ -35,5 +35,6 @@ public interface ConvertersRepository {
 
     void getConverter(@NonNull String name, @NonNull GetConverterCallback callback);
 
-    void saveConverter(@NonNull SaveConverterCallback callback, @NonNull Converter converter);
+    void saveConverter(@NonNull SaveConverterCallback callback, @NonNull Converter converter,
+                       @NonNull String oldName);
 }

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.system.Os.fstat;
+import static android.system.Os.remove;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -18,13 +20,13 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     private final ConvertersServiceApi mConvertersServiceApi;
 
-    @VisibleForTesting int mLastPos;
+    private int mLastPos;
 
     @VisibleForTesting String mLastConverterName;
 
-    private List<Pair<String,Boolean>> mCachedConvertersTypes;
+    @VisibleForTesting List<Pair<String,Boolean>> mCachedConvertersTypes;
 
-    private Map<String, Converter> mCachedConverters;
+    @VisibleForTesting Map<String, Converter> mCachedConverters;
 
     private boolean mFirstCall = true;
 
@@ -107,13 +109,25 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     }
 
     @Override
-    public void saveConverter(@NonNull final SaveConverterCallback callback, @NonNull Converter converter) {
+    public void saveConverter(@NonNull final SaveConverterCallback callback,
+                              @NonNull Converter converter, @NonNull String oldName) {
         checkNotNull(callback);
         checkNotNull(converter);
+        checkNotNull(oldName);
 
-        if (!mCachedConvertersTypes.contains(new Pair<>(converter.getName(), true))
-                && !mCachedConvertersTypes.contains(new Pair<>(converter.getName(), false))) {
+        if (oldName.isEmpty()) {
+            // in this case create new converter
             mCachedConvertersTypes.add(new Pair<>(converter.getName(), true));
+            mCachedConverters.put(converter.getName(), converter);
+        } else {
+            // edit existing
+            mCachedConverters.remove(oldName);
+            mCachedConverters.put(converter.getName(), converter);
+
+            int index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, true));
+            if (index == -1) index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, false));
+            mCachedConvertersTypes.add(index,
+                    new Pair<>(converter.getName(), mCachedConvertersTypes.remove(index).second));
         }
 
         mConvertersServiceApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
@@ -121,7 +135,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             public void onSaved(boolean saved) {
                 callback.onConverterSaved(saved);
             }
-        }, converter);
+        }, converter, oldName);
     }
 
     private void cacheConverter(@NonNull Converter converter) {

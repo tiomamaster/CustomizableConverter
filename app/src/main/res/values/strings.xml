@@ -40,4 +40,8 @@
     <string name="hint_create_units">Create at least two units.</string>
     <string name="title_saving_dialog">Saving…</string>
     <string name="msg_save_changes">Save changes?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
 </resources>

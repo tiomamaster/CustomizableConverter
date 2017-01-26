@@ -79,7 +79,8 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void saveConverter(@NonNull final SaveCallback callback, @NonNull final Converter converter) {
+    public void saveConverter(@NonNull final SaveCallback callback,
+                              @NonNull final Converter converter, @NonNull String oldName) {
         checkNotNull(callback);
         checkNotNull(converter);
 

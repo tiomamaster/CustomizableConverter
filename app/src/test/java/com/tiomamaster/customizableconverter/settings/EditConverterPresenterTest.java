@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -291,14 +292,19 @@ public class EditConverterPresenterTest {
         ArgumentCaptor<ConvertersRepository.SaveConverterCallback> callbackCaptor =
                 ArgumentCaptor.forClass(ConvertersRepository.SaveConverterCallback.class);
 
-        verify(mRepository).saveConverter(callbackCaptor.capture(), converterCaptor.capture());
-        callbackCaptor.getValue().onConverterSaved(true);
-        verify(mView).setConverterSavingIndicator(false);
-        verify(mView).showPreviousView();
-
         if (mInitialConverterName.equals(NEW_CONVERTER)) {
+            verify(mRepository).saveConverter(callbackCaptor.capture(), converterCaptor.capture(),
+                    eq(NEW_CONVERTER));
+            callbackCaptor.getValue().onConverterSaved(true);
+            verify(mView).setConverterSavingIndicator(false);
+            verify(mView).showPreviousView();
             assertEquals(NEW_CONVERTER, converterCaptor.getValue().getName());
         } else {
+            verify(mRepository).saveConverter(callbackCaptor.capture(), converterCaptor.capture(),
+                    eq(OLD_CONVERTER));
+            callbackCaptor.getValue().onConverterSaved(true);
+            verify(mView).setConverterSavingIndicator(false);
+            verify(mView).showPreviousView();
             assertEquals(OLD_CONVERTER, converterCaptor.getValue().getName());
         }
     }

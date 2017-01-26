@@ -306,9 +306,10 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             public void onConverterSaved(boolean saved) {
                 mView.setConverterSavingIndicator(false);
                 if (closeEditor) mView.showPreviousView();
+                mInitialConverterName = mCurConverterName;
                 mHaveUnsavedChanges = false;
             }
-        }, mCurConverter);
+        }, mCurConverter, mInitialConverterName);
     }
 
     private Set<String> createLowerCaseUnitNames() {
