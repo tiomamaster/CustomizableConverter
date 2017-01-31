@@ -32,7 +32,6 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
             }
             Converter test = new Converter("Fake converter" + j, units);
             test.setLastUnitPosition(new Random().nextInt(test.getUnits().size()));
-            test.setLastQuantity("1");
             CONVERTERS.put(test.getName(), test);
         }
     }
@@ -80,7 +79,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
 
     @Override
     public void saveConverter(@NonNull final SaveCallback callback,
-                              @NonNull final Converter converter, @NonNull String oldName) {
+                              @NonNull final Converter converter, @NonNull final String oldName) {
         checkNotNull(callback);
         checkNotNull(converter);
 

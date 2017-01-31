@@ -91,14 +91,14 @@ public class InMemoryConvertersRepositoryTest {
         String name = "Test";
 
         //first call to the repository
-        mRepository.getConverter(name, mGetConverterCallback);
+        mRepository.getConverter(name, false, mGetConverterCallback);
 
         // verify that service api was called enables repository caching
         verify(mServiceApi).getConverter(eq(name), mCaptor.capture());
         mCaptor.getValue().onLoaded(new Converter(name, new ArrayList<Converter.Unit>()));
 
         // second call to repository
-        mRepository.getConverter(name, mGetConverterCallback);
+        mRepository.getConverter(name, false, mGetConverterCallback);
 
         // check Api was called once
         verify(mServiceApi).getConverter(eq(name), any(ConvertersServiceApi.LoadCallback.class));
@@ -128,14 +128,14 @@ public class InMemoryConvertersRepositoryTest {
         String[] names = {"Test0", "Test1"};
 
         // retrieve first converter
-        mRepository.getConverter(names[0], mGetConverterCallback);
+        mRepository.getConverter(names[0], false, mGetConverterCallback);
         verify(mServiceApi).getConverter(eq(names[0]), mCaptor.capture());
         mCaptor.getValue().onLoaded(new Converter(names[0], new ArrayList<Converter.Unit>()));
 
         String startName = mRepository.mLastConverterName;
 
         // retrieve second converter
-        mRepository.getConverter(names[1], mGetConverterCallback);
+        mRepository.getConverter(names[1], false, mGetConverterCallback);
         verify(mServiceApi).getConverter(eq(names[1]), mCaptor.capture());
         mCaptor.getValue().onLoaded(new Converter(names[1], new ArrayList<Converter.Unit>()));
 
@@ -146,7 +146,7 @@ public class InMemoryConvertersRepositoryTest {
         // both converters already caching
 
         // retrieve first converter again
-        mRepository.getConverter(names[0], mGetConverterCallback);
+        mRepository.getConverter(names[0], false, mGetConverterCallback);
 
         assertNotEquals(startName, mRepository.mLastConverterName);
     }
@@ -212,15 +212,14 @@ public class InMemoryConvertersRepositoryTest {
         when(mConverter.getName()).thenReturn(converterName);
         mRepository.saveConverter(saveConverterCallback, mConverter, "");
 
-        // check cache contains new converter
-        assertEquals(mRepository.mCachedConvertersTypes.get(2), new Pair<>(converterName, true));
-        assertEquals(mRepository.mCachedConverters.get(converterName).getName(), mConverter.getName());
-
         ArgumentCaptor<ConvertersServiceApi.SaveCallback> saveCaptor =
                 ArgumentCaptor.forClass(ConvertersServiceApi.SaveCallback.class);
         verify(mServiceApi).saveConverter(saveCaptor.capture(), eq(mConverter), eq(""));
-
         saveCaptor.getValue().onSaved(true);
+
+        // check cache contains new converter
+        assertEquals(mRepository.mCachedConvertersTypes.get(2), new Pair<>(converterName, true));
+        assertEquals(mRepository.mCachedConverters.get(converterName).getName(), mConverter.getName());
 
         verify(saveConverterCallback).onConverterSaved(true);
 
@@ -229,8 +228,11 @@ public class InMemoryConvertersRepositoryTest {
         when(mConverter.getName()).thenReturn(converterName);
         mRepository.saveConverter(saveConverterCallback, mConverter, "One"); // edit converter One
 
+        verify(mServiceApi).saveConverter(saveCaptor.capture(), eq(mConverter), eq("One"));
+        saveCaptor.getValue().onSaved(true);
+
         // check cache
-        assertEquals(mRepository.mCachedConvertersTypes.get(0), new Pair<>(converterName, true));
-        assertEquals(mRepository.mCachedConverters.get(converterName).getName(), mConverter.getName());
+        assertEquals(new Pair<>(converterName, true), mRepository.mCachedConvertersTypes.get(0));
+        assertEquals(mConverter.getName(), mRepository.mCachedConverters.get(converterName).getName());
     }
 }

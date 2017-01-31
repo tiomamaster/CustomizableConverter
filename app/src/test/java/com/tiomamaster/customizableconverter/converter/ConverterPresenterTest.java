@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -82,7 +84,7 @@ public class ConverterPresenterTest {
 
         verify(mView).setProgressIndicator(true);
 
-        verify(mRepository).getConverter(eq(name), mGetConverterCaptor.capture());
+        verify(mRepository).getConverter(eq(name), anyBoolean(), mGetConverterCaptor.capture());
         Converter converter = new Converter(name, new ArrayList<Converter.Unit>());
         mGetConverterCaptor.getValue().onConverterLoaded(converter);
 
@@ -152,7 +154,7 @@ public class ConverterPresenterTest {
     private void loadConverter() {
         mPresenter.loadConverter(anyString());
 
-        verify(mRepository).getConverter(anyString(), mGetConverterCaptor.capture());
+        verify(mRepository).getConverter(anyString(), anyBoolean(), mGetConverterCaptor.capture());
         mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
     }
 }

@@ -33,7 +33,7 @@ public interface ConvertersRepository {
 
     void getAllConverterTypes(@NonNull LoadAllConvertersTypesCallback callback);
 
-    void getConverter(@NonNull String name, @NonNull GetConverterCallback callback);
+    void getConverter(@NonNull String name, boolean clone, @NonNull GetConverterCallback callback);
 
     void saveConverter(@NonNull SaveConverterCallback callback, @NonNull Converter converter,
                        @NonNull String oldName);

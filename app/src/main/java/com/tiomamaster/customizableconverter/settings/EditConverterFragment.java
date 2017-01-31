@@ -1,7 +1,6 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -29,9 +28,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
@@ -43,12 +40,9 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.List;
 
-import static android.R.attr.animationDuration;
-import static android.R.attr.name;
-import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.tiomamaster.customizableconverter.R.id.middle;
 import static com.tiomamaster.customizableconverter.R.id.root;
-import static com.tiomamaster.customizableconverter.R.id.transition_current_scene;
 
 /**
  * Created by Artyom on 07.12.2016.
@@ -75,10 +69,12 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     private TextView mTextLoading;
 
-    private MenuItem mItemSave;
+    private MenuItem mBtnSave;
     private boolean mItemSaveVisible;
 
     private AlertDialog mSavingDialog;
+
+    private boolean isConverterExist;
 
     public static EditConverterFragment newInstance() {
         return new EditConverterFragment();
@@ -179,6 +175,10 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         super.onResume();
 
         mActionListener.loadUnits();
+
+        if (isConverterExist) {
+            showConverterExistError(true);
+        }
     }
 
     @Override
@@ -187,7 +187,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
         // we can save a new converter or changes in the existing
         // only if some conditions are done, so by default disable this menu item
-        mItemSave = menu.findItem(R.id.save).setVisible(mItemSaveVisible);
+        mBtnSave = menu.findItem(R.id.save).setVisible(mItemSaveVisible);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -227,6 +227,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     @Override
     public void showConverterExistError(boolean visible) {
+        isConverterExist = visible;
         if (visible) {
             mEditName.getBackground().mutate().setColorFilter(Color.parseColor("#d50000"),
                     PorterDuff.Mode.SRC_ATOP);
@@ -284,7 +285,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     @Override
     public void enableSaveConverter(boolean enable) {
         mItemSaveVisible = enable;
-        mItemSave.setVisible(enable);
+        mBtnSave.setVisible(enable);
     }
 
     @Override
@@ -295,7 +296,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     @Override
     public void setConverterSavingIndicator(boolean active) {
         if (mSavingDialog == null) {
-            mSavingDialog =new AlertDialog.Builder(mParentActivity)
+            mSavingDialog = new AlertDialog.Builder(mParentActivity)
                     .setView(R.layout.dialog_progress)
                     .setCancelable(false).create();
         }
@@ -314,13 +315,13 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                         mActionListener.saveConverter(true);
                     }
                 })
-                .setNeutralButton(R.string.no, new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         showPreviousView();

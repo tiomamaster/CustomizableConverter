@@ -84,10 +84,13 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     }
 
     @Override
-    public void getConverter(@NonNull final String name, @NonNull final GetConverterCallback callback) {
+    public void getConverter(@NonNull final String name, final boolean clone,
+                             @NonNull final GetConverterCallback callback) {
         checkNotNull(name);
         if (mCachedConverters != null && mCachedConverters.containsKey(name)) {
-            callback.onConverterLoaded((Converter) mCachedConverters.get(name).clone());
+            if (clone) callback.onConverterLoaded((Converter) mCachedConverters.get(name).clone());
+            else callback.onConverterLoaded(mCachedConverters.get(name));
+
             mLastConverterName = mCachedConverters.get(name).getName();
             return;
         }
@@ -98,7 +101,8 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             public void onLoaded(@NonNull Converter converter) {
                 cacheConverter(converter);
 
-                callback.onConverterLoaded((Converter) converter.clone());
+                if (clone) callback.onConverterLoaded((Converter) mCachedConverters.get(name).clone());
+                else callback.onConverterLoaded(mCachedConverters.get(name));
             }
         });
     }
@@ -110,29 +114,28 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     @Override
     public void saveConverter(@NonNull final SaveConverterCallback callback,
-                              @NonNull Converter converter, @NonNull String oldName) {
+                              @NonNull final Converter converter, @NonNull final String oldName) {
         checkNotNull(callback);
         checkNotNull(converter);
         checkNotNull(oldName);
 
-        if (oldName.isEmpty()) {
-            // in this case create new converter
-            mCachedConvertersTypes.add(new Pair<>(converter.getName(), true));
-            mCachedConverters.put(converter.getName(), converter);
-        } else {
-            // edit existing
-            mCachedConverters.remove(oldName);
-            mCachedConverters.put(converter.getName(), converter);
-
-            int index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, true));
-            if (index == -1) index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, false));
-            mCachedConvertersTypes.add(index,
-                    new Pair<>(converter.getName(), mCachedConvertersTypes.remove(index).second));
-        }
-
         mConvertersServiceApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
             @Override
             public void onSaved(boolean saved) {
+                if (oldName.isEmpty()) {
+                    // in this case create new converter
+                    mCachedConvertersTypes.add(new Pair<>(converter.getName(), true));
+                    mCachedConverters.put(converter.getName(), converter);
+                } else {
+                    // edit existing
+                    mCachedConverters.put(converter.getName(), converter);
+
+                    int index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, true));
+                    if (index == -1) index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, false));
+                    mCachedConvertersTypes.add(index,
+                            new Pair<>(converter.getName(), mCachedConvertersTypes.remove(index).second));
+                }
+
                 callback.onConverterSaved(saved);
             }
         }, converter, oldName);

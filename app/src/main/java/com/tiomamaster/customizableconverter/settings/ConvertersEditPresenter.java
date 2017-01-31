@@ -40,7 +40,7 @@ class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
 
     @Override
     public void handleFabPressed() {
-        mView.showEditConverter(null);
+        mView.showEditConverter("");
     }
 
     @Override

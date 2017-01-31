@@ -63,7 +63,7 @@ public class ConvertersEditPresenterTest {
     public void handleFabShowEditConverter() {
         mPresenter.handleFabPressed();
 
-        mView.showEditConverter(null);
+        verify(mView).showEditConverter("");
     }
 
     @Test

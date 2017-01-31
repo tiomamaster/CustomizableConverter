@@ -24,6 +24,7 @@ import static android.R.attr.value;
 import static android.os.Build.VERSION_CODES.N;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -167,7 +168,7 @@ public class EditConverterPresenterTest {
     }
 
     @Test
-    public void deleteUnit() throws Exception {
+    public void deleteUnit() {
         if (mInitialConverterName.equals(OLD_CONVERTER)) {
             mPresenter.deleteUnit(1);
 
@@ -187,6 +188,19 @@ public class EditConverterPresenterTest {
 
             // show warning when attempt to delete from last two units
             verify(mView).showWarning(1);
+        }
+    }
+
+    @Test
+    public void deleteUnitEnableSave() {
+        if (mInitialConverterName.equals(OLD_CONVERTER)) {
+            // attempt delete three units
+            mPresenter.deleteUnit(1);
+            mPresenter.deleteUnit(2);
+            mPresenter.deleteUnit(3);
+
+            // check that save is enabled
+            verify(mView).enableSaveConverter(true);
         }
     }
 
@@ -278,6 +292,7 @@ public class EditConverterPresenterTest {
             assertEquals(Double.parseDouble(values[1]), mUnits.get(1).value, 0);
 
             verify(mView).onUnitEdited(1);
+            verify(mView, times(2)).enableSaveConverter(true);
         }
     }
 
@@ -318,7 +333,7 @@ public class EditConverterPresenterTest {
         } else {
             ArgumentCaptor<ConvertersRepository.GetConverterCallback> captor =
                     ArgumentCaptor.forClass(ConvertersRepository.GetConverterCallback.class);
-            verify(mRepository).getConverter(anyString(), captor.capture());
+            verify(mRepository).getConverter(anyString(), anyBoolean(), captor.capture());
             captor.getValue().onConverterLoaded(mCurConverter);
         }
     }

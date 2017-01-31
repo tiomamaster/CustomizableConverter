@@ -57,7 +57,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
         mConverterView.setProgressIndicator(true);
 
-        mConvertersRepository.getConverter(name, new ConvertersRepository.GetConverterCallback() {
+        mConvertersRepository.getConverter(name, false, new ConvertersRepository.GetConverterCallback() {
             @Override
             public void onConverterLoaded(@NonNull Converter converter) {
                 checkNotNull(converter);

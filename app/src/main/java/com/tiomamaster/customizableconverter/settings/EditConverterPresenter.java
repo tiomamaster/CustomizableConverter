@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static android.R.attr.name;
+import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -149,7 +151,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
         mView.setUnitsLoadingIndicator(true);
 
-        mConvertersRepo.getConverter(mInitialConverterName, new ConvertersRepository.GetConverterCallback() {
+        mConvertersRepo.getConverter(mInitialConverterName, true, new ConvertersRepository.GetConverterCallback() {
             @Override
             public void onConverterLoaded(@NonNull Converter converter) {
                 checkNotNull(converter);
@@ -180,6 +182,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 Collections.swap(mUnits, i, i - 1);
             }
         }
+        if (mCurConverter != null) mCurConverter.setLastUnitPosition(0);
         checkCanSave();
     }
 
@@ -190,13 +193,12 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             mView.notifyUnitRemoved(position);
 
             // reset saved position to avoid index out of bounds
-            if (mCurConverter != null) { // may by null when create new converter
-                mCurConverter.setLastUnitPosition(0);
-            }
+            // may by null when create new converter
+            if (mCurConverter != null) mCurConverter.setLastUnitPosition(0);
+            mEnabledUnits--;
         } else {
             mView.showWarning(position);
         }
-        mEnabledUnits--;
         checkCanSave();
     }
 
@@ -207,6 +209,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             if (enable) mEnabledUnits++;
             else mEnabledUnits--;
 
+            if (mCurConverter != null) mCurConverter.setLastUnitPosition(0);
             checkCanSave();
         }
     }

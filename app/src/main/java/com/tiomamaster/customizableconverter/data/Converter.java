@@ -54,11 +54,11 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units, String errors) {
-        this(name, units, errors, sCount++, 0, "");
+        this(name, units, errors, sCount++, 0, "1");
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units) {
-        this(name, units, null, sCount++, 0, "");
+        this(name, units, null);
     }
 
     @Override
