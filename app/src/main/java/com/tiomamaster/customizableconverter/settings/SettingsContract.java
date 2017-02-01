@@ -4,17 +4,10 @@ import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import android.support.v7.preference.Preference;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static android.R.attr.name;
-import static android.R.attr.value;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
-import static android.os.Build.VERSION_CODES.N;
 
 /**
  * Created by Artyom on 27.10.2016.
@@ -86,7 +79,6 @@ interface SettingsContract {
         /**
          * Show dialog with warning text when user want to delete unit from the converter
          * when number of it is less then 3, because need at least 2 units.
-         *
          * @param position The position of unit in the list which user want to delete,
          *                 need for adapter notification.
          */

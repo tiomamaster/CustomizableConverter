@@ -2,8 +2,6 @@ package com.tiomamaster.customizableconverter.settings;
 
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 
@@ -59,6 +57,7 @@ class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
                 Collections.swap(mAllConverters, i, i - 1);
             }
         }
+        mConvertersRepo.saveConvertersOrder();
     }
 
     @Override
@@ -68,6 +67,7 @@ class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case AlertDialog.BUTTON_POSITIVE:
+                        mConvertersRepo.saveConverterDeletion(position);
                         mAllConverters.remove(position);
                         mView.notifyConverterRemoved(position);
                         break;
@@ -83,6 +83,8 @@ class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
 
     @Override
     public void enableConverter(int orderPosition, boolean enable) {
+        mConvertersRepo.saveConverterState(orderPosition);
+
         mAllConverters.add(orderPosition,
                 new Pair<>(mAllConverters.remove(orderPosition).first, enable));
     }

@@ -37,4 +37,21 @@ public interface ConvertersRepository {
 
     void saveConverter(@NonNull SaveConverterCallback callback, @NonNull Converter converter,
                        @NonNull String oldName);
+
+    /**
+     * Save order of converters to the persistent storage.
+     */
+    void saveConvertersOrder();
+
+    /**
+     * Save that converter is enable or disable to the persistent storage.
+     * @param position The order position of converter.
+     */
+    void saveConverterState(int position);
+
+    /**
+     * Delete the converter from the persistent storage.
+     * @param position The order position of converter.
+     */
+    void saveConverterDeletion(int position);
 }

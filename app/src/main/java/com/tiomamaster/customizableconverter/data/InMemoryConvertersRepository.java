@@ -141,6 +141,21 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }, converter, oldName);
     }
 
+    @Override
+    public void saveConvertersOrder() {
+
+    }
+
+    @Override
+    public void saveConverterState(int position) {
+
+    }
+
+    @Override
+    public void saveConverterDeletion(int position) {
+
+    }
+
     private void cacheConverter(@NonNull Converter converter) {
         checkNotNull(converter);
 

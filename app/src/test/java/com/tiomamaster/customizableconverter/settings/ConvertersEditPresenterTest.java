@@ -91,6 +91,8 @@ public class ConvertersEditPresenterTest {
         // move up
         mPresenter.moveConverter(2, 1);
 
+        verify(mRepository, times(2)).saveConvertersOrder();
+
         // check result of moving
         assertEquals(mAllConverters.get(1), beforeMove.get(2));
         assertEquals(mAllConverters.get(2), beforeMove.get(1));
@@ -111,6 +113,8 @@ public class ConvertersEditPresenterTest {
 
         // click delete btn
         onClickListenerArgumentCaptor.getValue().onClick(any(DialogInterface.class), AlertDialog.BUTTON_POSITIVE);
+
+        verify(mRepository).saveConverterDeletion(0);
 
         verify(mView).notifyConverterRemoved(0);
 
@@ -137,6 +141,8 @@ public class ConvertersEditPresenterTest {
 
         mPresenter.enableConverter(2, false);
         assertFalse(mAllConverters.get(2).second);
+
+        verify(mRepository, times(2)).saveConverterState(2);
     }
 
 }

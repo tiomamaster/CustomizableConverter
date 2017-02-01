@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static android.R.attr.name;
-import static android.R.attr.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
