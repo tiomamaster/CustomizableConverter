@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.system.Os.fstat;
-import static android.system.Os.remove;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -18,7 +16,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class InMemoryConvertersRepository implements ConvertersRepository {
 
-    private final ConvertersServiceApi mConvertersServiceApi;
+    private final ConvertersServiceApi mServiceApi;
 
     private int mLastPos;
 
@@ -30,14 +28,14 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     private boolean mFirstCall = true;
 
-    InMemoryConvertersRepository(@NonNull ConvertersServiceApi mConvertersServiceApi) {
-        this.mConvertersServiceApi = checkNotNull(mConvertersServiceApi);
+    InMemoryConvertersRepository(@NonNull ConvertersServiceApi serviceApi) {
+        this.mServiceApi = checkNotNull(serviceApi);
     }
 
     @Override
     public void getEnabledConvertersTypes(@NonNull final LoadEnabledConvertersTypesCallback callback) {
         if (mFirstCall) {
-            mConvertersServiceApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+            mServiceApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
                 @Override
                 public void onLoaded(@NonNull Converter converter) {
                     cacheConverter(converter);
@@ -51,7 +49,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             return;
         }
 
-        mConvertersServiceApi.getAllConvertersTypes(
+        mServiceApi.getAllConvertersTypes(
                 new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
             @Override
             public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
@@ -73,7 +71,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }
 
         // or load they from the API, cache and return through using callback
-        mConvertersServiceApi.getAllConvertersTypes(
+        mServiceApi.getAllConvertersTypes(
                 new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
             @Override
             public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
@@ -96,7 +94,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }
 
         checkNotNull(callback);
-        mConvertersServiceApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
+        mServiceApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 cacheConverter(converter);
@@ -119,7 +117,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         checkNotNull(converter);
         checkNotNull(oldName);
 
-        mConvertersServiceApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
+        mServiceApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
             @Override
             public void onSaved(boolean saved) {
                 if (oldName.isEmpty()) {
@@ -143,17 +141,18 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     @Override
     public void saveConvertersOrder() {
-
+        mServiceApi.writeConvertersOrder(mCachedConvertersTypes);
     }
 
     @Override
     public void saveConverterState(int position) {
-
+        Pair<String, Boolean> pair = mCachedConvertersTypes.get(position);
+        mServiceApi.writeConverterState(pair.first, pair.second);
     }
 
     @Override
     public void saveConverterDeletion(int position) {
-
+        mServiceApi.deleteConverter(mCachedConvertersTypes.get(position).first);
     }
 
     private void cacheConverter(@NonNull Converter converter) {

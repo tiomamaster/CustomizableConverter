@@ -2,12 +2,17 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
 
 import com.tiomamaster.customizableconverter.R;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,13 +32,13 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
 
     private SharedPreferences mPrefs;
 
-    private OnSettingsChangeListener mChangeListener;
+    private Map<String, OnSettingsChangeListener> mChangeListeners;
 
     private String mLanguage;
-    private int mGrSize = 3;
-    private int mPrecision = 5;
-    private boolean isStandardForm = false;
-    private boolean isDefaultForm = false;
+    private int mGrSize;
+    private int mPrecision;
+    private boolean isStandardForm;
+    private boolean isDefaultForm;
 
     InMemorySettingsRepository(@NonNull Context c) {
         mContext = checkNotNull(c, "need Context");
@@ -41,26 +46,37 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
 
         if (Locale.getDefault().equals(new Locale("ru"))) mLanguage = "ru";
         else mLanguage = "en";
+        mGrSize = Integer.parseInt(mPrefs.getString(PREF_GROUPING_SIZE, "3"));
+        mPrecision = Integer.parseInt(mPrefs.getString(PREF_PRECISION, "5"));
+        isStandardForm = mPrefs.getBoolean(PREF_STANDARD_FORM, false);
+        isDefaultForm = mPrefs.getBoolean(PREF_DEFAULT_FORM, false);
 
         mPrefs.registerOnSharedPreferenceChangeListener(this);
+
+        mChangeListeners = new HashMap<>(2);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(PREF_LANGUAGE)) {
-            // TODO: handle change language
-            mLanguage = sharedPreferences.getString(key, mLanguage);
-        } else if (key.equals(PREF_GROUPING_SIZE)) {
-            mGrSize = Integer.parseInt(sharedPreferences.getString(key, "3"));
-        } else if (key.equals(PREF_PRECISION)) {
-            mPrecision = Integer.parseInt(sharedPreferences.getString(key, "5"));
-        } else if (key.equals(PREF_STANDARD_FORM)) {
-            isStandardForm = sharedPreferences.getBoolean(key, false);
-        } else if (key.equals(PREF_DEFAULT_FORM)) {
-            isDefaultForm = sharedPreferences.getBoolean(key, false);
+        switch (key) {
+            case PREF_LANGUAGE:
+                // TODO: handle change language
+                mLanguage = sharedPreferences.getString(key, mLanguage);
+                break;
+            case PREF_GROUPING_SIZE:
+                mGrSize = Integer.parseInt(sharedPreferences.getString(key, "3"));
+                break;
+            case PREF_PRECISION:
+                mPrecision = Integer.parseInt(sharedPreferences.getString(key, "5"));
+                break;
+            case PREF_STANDARD_FORM:
+                isStandardForm = sharedPreferences.getBoolean(key, false);
+                break;
+            case PREF_DEFAULT_FORM:
+                isDefaultForm = sharedPreferences.getBoolean(key, false);
+                break;
         }
-
-        mChangeListener.onSettingsChange(mGrSize, mPrecision, isStandardForm, isDefaultForm);
+        notifyListeners();
     }
 
     @Override
@@ -98,9 +114,16 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
 
     @Override
     public void setOnSettingsChangeListener(@NonNull OnSettingsChangeListener listener) {
-        mChangeListener = checkNotNull(listener);
+        checkNotNull(listener);
+        mChangeListeners.put(listener.getClass().getCanonicalName(), listener);
 
-        // to initialize settings properties in converters
+        // to initialize settings properties in converters and summaries in fragment
         listener.onSettingsChange(mGrSize, mPrecision, isStandardForm, isDefaultForm);
+    }
+
+    private void notifyListeners() {
+        for (OnSettingsChangeListener listener : mChangeListeners.values()) {
+            listener.onSettingsChange(mGrSize, mPrecision, isStandardForm, isDefaultForm);
+        }
     }
 }

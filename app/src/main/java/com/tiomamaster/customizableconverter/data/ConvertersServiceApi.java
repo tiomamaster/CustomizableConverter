@@ -27,4 +27,10 @@ public interface ConvertersServiceApi {
 
     void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter,
                        @NonNull String oldName);
+
+    void writeConvertersOrder(@NonNull List<Pair<String, Boolean>> converters);
+
+    void writeConverterState(@NonNull String name, boolean state);
+
+    void deleteConverter(@NonNull String name);
 }

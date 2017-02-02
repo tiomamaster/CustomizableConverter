@@ -5,13 +5,9 @@ import android.content.SharedPreferences;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -26,7 +22,7 @@ import static org.mockito.Mockito.when;
  */
 public class InMemorySettingsRepositoryTest {
 
-    private SettingsRepository mSettingsRepo;
+    private SettingsRepository mRepository;
 
     @Mock private SettingsRepository.OnSettingsChangeListener mSettingsChangeListener;
 
@@ -37,13 +33,15 @@ public class InMemorySettingsRepositoryTest {
         SharedPreferences sp = mock(SharedPreferences.class);
         when(c.getSharedPreferences(anyString(), anyInt())).thenReturn(sp);
         when(sp.getString(anyString(), anyString())).thenReturn("1");
-        mSettingsRepo = new InMemorySettingsRepository(c);
-        mSettingsRepo.setOnSettingsChangeListener(mSettingsChangeListener);
+        mRepository = new InMemorySettingsRepository(c);
+        mRepository.setOnSettingsChangeListener(mSettingsChangeListener);
+        mRepository.setOnSettingsChangeListener(mSettingsChangeListener);
     }
 
     @Test
-    public void setOnSettingsChangeListenerShouldCallIt() {
-        // check that listener was called
-        verify(mSettingsChangeListener).onSettingsChange(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+    public void setOnSettingsChangeListenerShouldCallAll() {
+        // check that all listener was called
+        verify(mSettingsChangeListener, times(2))
+                .onSettingsChange(anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
 }

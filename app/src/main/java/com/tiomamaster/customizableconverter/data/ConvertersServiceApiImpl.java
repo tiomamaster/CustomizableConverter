@@ -13,8 +13,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
-    public ConvertersServiceApiImpl(Context c) {
-        ConverterServiceApiEndpoint.initialize(c);
+    ConvertersServiceApiImpl(Context c) {
+        ConvertersDatabaseHelper.initialize(c);
     }
 
 
@@ -28,7 +28,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         checkNotNull(name);
         checkNotNull(callback);
 
-        callback.onLoaded(ConverterServiceApiEndpoint.createConverter(name));
+//        callback.onLoaded(ConvertersDatabaseHelper.createConverter(name));
     }
 
     @Override
@@ -39,6 +39,21 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     @Override
     public void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter,
                               @NonNull String oldName) {
+
+    }
+
+    @Override
+    public void writeConvertersOrder(@NonNull List<Pair<String, Boolean>> converters) {
+
+    }
+
+    @Override
+    public void writeConverterState(@NonNull String name, boolean state) {
+
+    }
+
+    @Override
+    public void deleteConverter(@NonNull String name) {
 
     }
 }

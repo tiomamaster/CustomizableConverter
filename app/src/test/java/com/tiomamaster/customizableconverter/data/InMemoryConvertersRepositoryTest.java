@@ -2,8 +2,6 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.support.v4.util.Pair;
 
-import com.google.common.collect.Maps;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -23,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -234,5 +231,43 @@ public class InMemoryConvertersRepositoryTest {
         // check cache
         assertEquals(new Pair<>(converterName, true), mRepository.mCachedConvertersTypes.get(0));
         assertEquals(mConverter.getName(), mRepository.mCachedConverters.get(converterName).getName());
+    }
+
+    @Test
+    public void saveConvertersOrderCallServiceApi() {
+        List<Pair<String, Boolean>> types = cacheTypes();
+
+        mRepository.saveConvertersOrder();
+
+        verify(mServiceApi).writeConvertersOrder(types);
+    }
+
+    @Test
+    public void saveConverterStateCallServiceApi() {
+        List<Pair<String, Boolean>> types = cacheTypes();
+
+        int index = 1;
+
+        mRepository.saveConverterState(index);
+
+        verify(mServiceApi).writeConverterState(types.get(index).first, types.get(index).second);
+    }
+
+    @Test
+    public void saveConverterDeletionCallServiceApi() {
+        List<Pair<String, Boolean>> types = cacheTypes();
+
+        int index = 0;
+        mRepository.saveConverterDeletion(0);
+
+        verify(mServiceApi).deleteConverter(types.get(index).first);
+    }
+
+    private List<Pair<String, Boolean>> cacheTypes() {
+        mRepository.getAllConverterTypes(mLoadAllCallback);
+        List<Pair<String, Boolean>> types = Arrays.asList(new Pair<>("One", true), new Pair<>("Two", false));
+        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
+        mCaptor.getValue().onLoaded(types);
+        return types;
     }
 }

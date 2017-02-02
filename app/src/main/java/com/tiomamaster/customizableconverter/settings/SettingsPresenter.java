@@ -16,12 +16,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by Artyom on 27.10.2016.
  */
 
-class SettingsPresenter implements SettingsContract.SettingsUal {
+class SettingsPresenter implements SettingsContract.SettingsUal, SettingsRepository.OnSettingsChangeListener {
 
-    @NonNull private SettingsRepository mSettingsRepo;
+    @NonNull
+    private SettingsRepository mSettingsRepo;
 
-    @NonNull private SettingsContract.SettingsView mSettingsView;
-
+    @NonNull
+    private SettingsContract.SettingsView mSettingsView;
 
     SettingsPresenter(@NonNull SettingsRepository settingsRepository,
                       @NonNull SettingsContract.SettingsView settingsView) {
@@ -43,7 +44,7 @@ class SettingsPresenter implements SettingsContract.SettingsUal {
 
     @Override
     public void loadSummaries() {
-        mSettingsView.showSummaries(mSettingsRepo.getSummaries());
+        mSettingsRepo.setOnSettingsChangeListener(this);
     }
 
     @Override
@@ -56,5 +57,14 @@ class SettingsPresenter implements SettingsContract.SettingsUal {
         }
 
         mSettingsView.enableGrSizeOption(!mSettingsRepo.getStandardForm());
+    }
+
+    @Override
+    public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
+        showSummaries();
+    }
+
+    private void showSummaries() {
+        mSettingsView.showSummaries(mSettingsRepo.getSummaries());
     }
 }

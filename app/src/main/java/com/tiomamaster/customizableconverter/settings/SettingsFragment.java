@@ -64,6 +64,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
             }
         });
 
+        // enable or disable options at startup according to the preferences
+        mActionListener.standardOrDefaultClicked();
+
         setRetainInstance(true);
         setHasOptionsMenu(true);
     }
@@ -73,6 +76,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         super.onActivityCreated(savedInstanceState);
 
         mParentActivity = (SettingsActivity) getActivity();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         mActionListener.loadSummaries();
     }

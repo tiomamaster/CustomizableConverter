@@ -28,10 +28,10 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     private static final Handler H = new Handler();
 
     static {
-        for (int j = 0; j < convertersCount; j ++) {
+        for (int j = 0; j < convertersCount; j++) {
             List<Converter.Unit> units = new ArrayList<>();
             for (int i = 0; i < unitsCount - j; i++) {
-                units.add(new Converter.Unit("Unit" + i + j, (double) i + 1 + j*5, true));
+                units.add(new Converter.Unit("Unit" + i + j, (double) i + 1 + j * 5, true));
             }
             Converter test = new Converter("Fake converter" + j, units);
             test.setLastUnitPosition(new Random().nextInt(test.getUnits().size()));
@@ -44,6 +44,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
         Repositories.getInMemoryRepoInstance(context).
                 setOnSettingsChangeListener(CONVERTERS.get("Fake converter0").
                         getOnSettingsChangeListener());
+
     }
 
     @Override
@@ -54,7 +55,9 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
         }
         H.postDelayed(new Runnable() {
             @Override
-            public void run() {callback.onLoaded(converters);}
+            public void run() {
+                callback.onLoaded(converters);
+            }
         }, 1000);
     }
 
@@ -93,5 +96,20 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
                 callback.onSaved(true);
             }
         }, 1000);
+    }
+
+    @Override
+    public void writeConvertersOrder(@NonNull List<Pair<String, Boolean>> converters) {
+
+    }
+
+    @Override
+    public void writeConverterState(@NonNull String name, boolean state) {
+
+    }
+
+    @Override
+    public void deleteConverter(@NonNull String name) {
+
     }
 }
