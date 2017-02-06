@@ -6,6 +6,7 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,7 +16,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,9 +57,12 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
     private Context mContext;
 
-    ConvertersDatabaseHelper(Context c) {
-        super(c, DATABASE_NAME, null, DATABASE_VERSION);
+    private String mDbLang;
+
+    ConvertersDatabaseHelper(Context c, String dbLang) {
+        super(c, DATABASE_NAME + dbLang, null, DATABASE_VERSION);
         mContext = c;
+        mDbLang = dbLang;
     }
 
     @Override
@@ -71,19 +76,19 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         AssetManager am = mContext.getAssets();
         String[] assets = null;
         try {
-            assets = am.list(DATABASE_NAME);
+            assets = am.list(mDbLang);
         } catch (IOException e) {
             e.printStackTrace();
         }
         String[] translate = null;
-        if (TextUtils.equals(DATABASE_NAME, "ru")) {
+        if (TextUtils.equals(mDbLang, "ru")) {
             translate = mContext.getResources().getStringArray(R.array.translation_for_files_ru);
         }
         int i = 0;
         for (String s : assets) {
             // insert into table converter
             ContentValues contentValues = new ContentValues();
-            if (TextUtils.equals(DATABASE_NAME, "ru"))
+            if (TextUtils.equals(mDbLang, "ru"))
                 contentValues.put("Name", translate[i]);
             else
                 contentValues.put("Name", s);
@@ -95,7 +100,7 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             BufferedReader reader = null;
             StringBuilder errors = new StringBuilder();
             try {
-                reader = new BufferedReader(new InputStreamReader(am.open(DATABASE_NAME + "/" + s)));
+                reader = new BufferedReader(new InputStreamReader(am.open(mDbLang + "/" + s)));
                 String line;
                 Pattern pattern = Pattern.compile(" +\\d+([.]|[,])?\\d* *");
                 Matcher matcher = pattern.matcher("");
@@ -154,6 +159,13 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
                         new String[]{String.valueOf(i)});
             }
         }
+
+        // TODO: delete this after adding and testing asynchronous call
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -166,37 +178,64 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    String[] getAllConvertersName() {
+    List<Pair<String, Boolean>> getAllConverters() {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{"Name"},
+        String name = "Name";
+        String isEnabled = "IsEnabled";
+        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{name, isEnabled},
                 null, null, null, null, "OrderPosition");
-        String[] result = new String[c.getCount()];
-        int i = 0;
+        int nameInd = c.getColumnIndex(name);
+        int isEnabledInd = c.getColumnIndex(isEnabled);
+        List<Pair<String, Boolean>> result = new ArrayList<>(c.getCount());
         while (c.moveToNext()) {
-            result[i++] = c.getString(0);
+            result.add(new Pair<>(c.getString(nameInd), Boolean.parseBoolean(c.getString(isEnabledInd))));
         }
         c.close();
         db.close();
+
+        // TODO: delete this after adding and testing asynchronous call
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return result;
     }
 
     Converter createConverter(String name) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{"Id", "Errors"},
+        String idCol = "Id";
+        String errorsCol = "Errors";
+        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{idCol, errorsCol},
                 "Name = ?", new String[]{name}, null, null, null);
         c.moveToFirst();
-        int converterId = c.getInt(0);
-        String errors = c.getString(1);
+        int converterId = c.getInt(c.getColumnIndex(idCol));
+        String errors = c.getString(c.getColumnIndex(errorsCol));
         c.close();
-        c = db.query(UNIT_TABLE_NAME, new String[]{"Name", "Value"},
+
+        String nameCol = "Name";
+        String valueCol = "Value";
+        String isEnabledCol = "IsEnabled";
+        c = db.query(UNIT_TABLE_NAME, new String[]{nameCol, valueCol, isEnabledCol},
                 "ConverterId = ?", new String[]{String.valueOf(converterId)}, null, null, "OrderPosition");
-        LinkedHashMap<String, Double> units = new LinkedHashMap<>();
+        int nameColInd = c.getColumnIndex(nameCol);
+        int valueColInd = c.getColumnIndex(valueCol);
+        int isEnabledColInd = c.getColumnIndex(isEnabledCol);
+        List<Converter.Unit> units = new ArrayList<>();
         while(c.moveToNext()) {
-            units.put(c.getString(0), c.getDouble(1));
+            units.add(new Converter.Unit(c.getString(nameColInd), c.getDouble(valueColInd),
+                    Boolean.parseBoolean(c.getString(isEnabledColInd))));
         }
         c.close();
         db.close();
-        return new Converter(name, new ArrayList<Converter.Unit>(), errors);
+
+        // TODO: delete this after adding and testing asynchronous call
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new Converter(name, units, errors);
     }
 
     private void enableFk(SQLiteDatabase db) {
