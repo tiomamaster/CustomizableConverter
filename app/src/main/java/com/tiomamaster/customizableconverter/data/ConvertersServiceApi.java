@@ -9,7 +9,7 @@ import java.util.List;
  * Defines an interface to the service API that is used by this application. All data request should
  * be piped through this interface.
  */
-public interface ConvertersServiceApi {
+interface ConvertersServiceApi {
 
     interface LoadCallback<T> {
         void onLoaded(@NonNull T converters);

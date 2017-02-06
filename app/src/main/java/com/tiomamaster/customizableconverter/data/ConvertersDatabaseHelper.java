@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,13 +24,12 @@ import java.util.regex.Pattern;
  */
 final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String TAG = "ServiceApiEndpoint";
+    private static final String TAG = "DatabaseHelper";
 
     private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "ConvertersDB";
     private static final String CONVERTER_TABLE_NAME = "Converter";
     private static final String UNIT_TABLE_NAME = "Unit";
-
-    private String mDBName;
 
     private static final String CONVERTER_TABLE_CREATE = "create table " + CONVERTER_TABLE_NAME +
             " (Id  integer primary key, " +
@@ -49,38 +47,43 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             "Value double not null check(Value > 0), " +
             "OrderPosition integer not null, " +
             "IsEnabled boolean default true, " +
-            "ConverterId integer not null)";
+            "ConverterId integer not null, "  +
+            "foreign key(ConverterId) references " + CONVERTER_TABLE_NAME + "(Id) " +
+            "on delete cascade)";
 
+    private static final String ENABLE_FK = "PRAGMA foreign_keys=ON;";
 
-    private static Context c;
+    private Context mContext;
 
-    public ConvertersDatabaseHelper(String name) {
-        super(c, name, null, DATABASE_VERSION);
-        mDBName = name;
+    ConvertersDatabaseHelper(Context c) {
+        super(c, DATABASE_NAME, null, DATABASE_VERSION);
+        mContext = c;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        enableFk(db);
+
         // create tables
         db.execSQL(CONVERTER_TABLE_CREATE);
         db.execSQL(UNIT_TABLE_CREATE);
 
-        AssetManager am = c.getAssets();
+        AssetManager am = mContext.getAssets();
         String[] assets = null;
         try {
-            assets = am.list(mDBName);
+            assets = am.list(DATABASE_NAME);
         } catch (IOException e) {
             e.printStackTrace();
         }
         String[] translate = null;
-        if (TextUtils.equals(mDBName, "ru")) {
-            translate = c.getResources().getStringArray(R.array.translation_for_files_ru);
+        if (TextUtils.equals(DATABASE_NAME, "ru")) {
+            translate = mContext.getResources().getStringArray(R.array.translation_for_files_ru);
         }
         int i = 0;
         for (String s : assets) {
             // insert into table converter
             ContentValues contentValues = new ContentValues();
-            if (TextUtils.equals(mDBName, "ru"))
+            if (TextUtils.equals(DATABASE_NAME, "ru"))
                 contentValues.put("Name", translate[i]);
             else
                 contentValues.put("Name", s);
@@ -92,7 +95,7 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             BufferedReader reader = null;
             StringBuilder errors = new StringBuilder();
             try {
-                reader = new BufferedReader(new InputStreamReader(am.open(mDBName + "/" + s)));
+                reader = new BufferedReader(new InputStreamReader(am.open(DATABASE_NAME + "/" + s)));
                 String line;
                 Pattern pattern = Pattern.compile(" +\\d+([.]|[,])?\\d* *");
                 Matcher matcher = pattern.matcher("");
@@ -154,8 +157,13 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        enableFk(db);
+    }
 
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
     String[] getAllConvertersName() {
@@ -191,8 +199,9 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         return new Converter(name, new ArrayList<Converter.Unit>(), errors);
     }
 
-     static void initialize(Context context) {
-         c = context;
-         String language = Locale.getDefault().getLanguage();
+    private void enableFk(SQLiteDatabase db) {
+        if (!db.isReadOnly()) {
+            db.execSQL(ENABLE_FK);
+        }
     }
 }
