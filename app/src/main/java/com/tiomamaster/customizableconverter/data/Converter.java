@@ -50,7 +50,6 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
         mOrderPosition = orderPosition;
         mLastUnitPosition = lastUnit;
         mLastQuantity = lastQuantity;
-        sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units, String errors) {
@@ -63,6 +62,9 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
 
     @Override
     public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
+        // initialize at first call and further update DecimalFormat instance if app lang change
+        sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+
         if (stForm) {
             sDecimalFormat.applyPattern("0.0E0");
             DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
