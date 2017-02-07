@@ -38,11 +38,9 @@ import static org.mockito.Mockito.when;
 @RunWith(Parameterized.class)
 public class EditConverterPresenterTest {
 
-    @Mock
-    private SettingsContract.EditConverterView mView;
+    @Mock private SettingsContract.EditConverterView mView;
 
-    @Mock
-    private ConvertersRepository mRepository;
+    @Mock private ConvertersRepository mRepository;
 
     private EditConverterPresenter mPresenter;
 

@@ -25,6 +25,8 @@ interface ConvertersServiceApi {
 
     void getLastConverter(@NonNull LoadCallback<Converter> callback);
 
+    void setLastConverter(@NonNull String name);
+
     void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter,
                        @NonNull String oldName);
 

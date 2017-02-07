@@ -99,8 +99,8 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             public void onLoaded(@NonNull Converter converter) {
                 cacheConverter(converter);
 
-                if (clone) callback.onConverterLoaded((Converter) mCachedConverters.get(name).clone());
-                else callback.onConverterLoaded(mCachedConverters.get(name));
+                if (clone) callback.onConverterLoaded((Converter) converter.clone());
+                else callback.onConverterLoaded(converter);
             }
         });
     }

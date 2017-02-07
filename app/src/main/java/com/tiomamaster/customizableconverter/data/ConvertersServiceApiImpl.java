@@ -7,14 +7,17 @@ import android.support.v4.util.Pair;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by Artyom on 16.07.2016.
  */
 public class ConvertersServiceApiImpl implements ConvertersServiceApi {
+
+    private static ExecutorService sSingle = Executors.newSingleThreadExecutor();
 
     private ConvertersDatabaseHelper mDbHelper;
 
@@ -34,8 +37,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     public void getAllConvertersTypes(@NonNull final LoadCallback<List<Pair<String, Boolean>>> callback) {
         checkNotNull(callback);
 
-        AsyncTask<Void, Void, List<Pair<String, Boolean>>> task =
-                new AsyncTask<Void, Void, List<Pair<String, Boolean>>>() {
+        new AsyncTask<Void, Void, List<Pair<String, Boolean>>>() {
             @Override
             protected List<Pair<String, Boolean>> doInBackground(Void... params) {
                 return mDbHelper.getAllConverters();
@@ -45,8 +47,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             protected void onPostExecute(List<Pair<String, Boolean>> converters) {
                 callback.onLoaded(converters);
             }
-        };
-        task.execute();
+        }.execute();
     }
 
     @Override
@@ -54,15 +55,49 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         checkNotNull(name);
         checkNotNull(callback);
 
-        Converter converter = mDbHelper.createConverter(name);
-        Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
-                converter.getOnSettingsChangeListener());
-        callback.onLoaded(converter);
+        new AsyncTask<Void, Void, Converter>() {
+            @Override
+            protected Converter doInBackground(Void... params) {
+                return mDbHelper.createConverter(name);
+            }
+
+            @Override
+            protected void onPostExecute(Converter converter) {
+                callback.onLoaded(converter);
+            }
+        }.execute();
     }
 
     @Override
-    public void getLastConverter(@NonNull LoadCallback<Converter> callback) {
+    public void getLastConverter(@NonNull final LoadCallback<Converter> callback) {
         checkNotNull(callback);
+
+        new AsyncTask<Void, Void, Converter>() {
+            @Override
+            protected Converter doInBackground(Void... params) {
+                Converter converter = mDbHelper.createLastConverter();
+                Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
+                        converter.getOnSettingsChangeListener());
+                return converter;
+            }
+
+            @Override
+            protected void onPostExecute(Converter converter) {
+                callback.onLoaded(converter);
+            }
+        }.execute();
+    }
+
+    @Override
+    public void setLastConverter(@NonNull String name) {
+        checkNotNull(name);
+
+        sSingle.execute(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
     }
 
     @Override

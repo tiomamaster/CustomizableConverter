@@ -6,6 +6,7 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
@@ -53,7 +54,7 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             "foreign key(ConverterId) references " + CONVERTER_TABLE_NAME + "(Id) " +
             "on delete cascade)";
 
-    private static final String ENABLE_FK = "PRAGMA foreign_keys=ON;";
+    private static final String ENABLE_FK = "PRAGMA foreign_keys = ON;";
 
     private Context mContext;
 
@@ -73,6 +74,9 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CONVERTER_TABLE_CREATE);
         db.execSQL(UNIT_TABLE_CREATE);
 
+        // TODO: trigger for update IsLastSelected in Converter
+
+        // inflate db
         AssetManager am = mContext.getAssets();
         String[] assets = null;
         try {
@@ -212,7 +216,44 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         int converterId = c.getInt(c.getColumnIndex(idCol));
         String errors = c.getString(c.getColumnIndex(errorsCol));
         c.close();
+        return new Converter(name, getUnits(db, converterId), errors);
+    }
 
+    Converter createLastConverter() {
+        SQLiteDatabase db = getReadableDatabase();
+        String idCol = "Id";
+        String nameCol = "Name";
+        String errorsCol = "Errors";
+        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{idCol, nameCol, errorsCol},
+                "IsLastSelected = ?", new String[]{"true"}, null, null, null);
+        if (!c.moveToFirst()) {
+            // this case is first run, so simply return first converter
+            c = db.query(CONVERTER_TABLE_NAME, new String[]{idCol, nameCol, errorsCol},
+                    "Id = ?", new String[]{"1"}, null, null, null);
+        }
+        int converterId = c.getInt(c.getColumnIndex(idCol));
+        String name = c.getString(c.getColumnIndex(nameCol));
+        String errors = c.getString(c.getColumnIndex(errorsCol));
+        c.close();
+        return new Converter(name, getUnits(db, converterId), errors);
+    }
+
+    void saveLastConverter(String name) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("IsLastSelected", true);
+            db.update(CONVERTER_TABLE_CREATE, values, "Name = ?", new String[]{name});
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    @NonNull
+    private List<Converter.Unit> getUnits(SQLiteDatabase db, int converterId) {
+        Cursor c;
         String nameCol = "Name";
         String valueCol = "Value";
         String isEnabledCol = "IsEnabled";
@@ -235,7 +276,8 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return new Converter(name, units, errors);
+
+        return units;
     }
 
     private void enableFk(SQLiteDatabase db) {
