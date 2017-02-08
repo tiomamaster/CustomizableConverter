@@ -34,7 +34,10 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
     private static final String CONVERTER_TABLE_NAME = "Converter";
     private static final String UNIT_TABLE_NAME = "Unit";
 
-    private static final String CONVERTER_TABLE_CREATE = "create table " + CONVERTER_TABLE_NAME +
+    // TODO: use contract
+
+    private static final String CONVERTER_TABLE_CREATE =
+            "create table " + ConvertersDbContract.ConverterEntry.TABLE_NAME +
             " (Id  integer primary key, " +
             "Name text unique not null check(Name not like ''), " +
             "OrderPosition integer not null, " +
@@ -44,7 +47,8 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             "LastQuantityText text default '', " +
             "Errors text default null)";
 
-    private static final String UNIT_TABLE_CREATE = "create table " + UNIT_TABLE_NAME +
+    private static final String UNIT_TABLE_CREATE =
+            "create table " + ConvertersDbContract.UnitEntry.TABLE_NAME +
             " (Id  integer primary key, " +
             "Name text not null check(Name not like ''), " +
             "Value double not null check(Value > 0), " +
