@@ -19,15 +19,15 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     private static ExecutorService sSingle = Executors.newSingleThreadExecutor();
 
-    private ConvertersDatabaseHelper mDbHelper;
+    private ConvertersDbHelper mDbHelper;
 
     private Context mContext;
 
     public ConvertersServiceApiImpl(Context c) {
         if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
-            mDbHelper = new ConvertersDatabaseHelper(c, "ru");
+            mDbHelper = new ConvertersDbHelper(c, "ru");
         } else {
-            mDbHelper = new ConvertersDatabaseHelper(c, "en");
+            mDbHelper = new ConvertersDbHelper(c, "en");
         }
 
         mContext = c;

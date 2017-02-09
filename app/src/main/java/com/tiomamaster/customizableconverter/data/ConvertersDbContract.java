@@ -5,27 +5,27 @@ import android.provider.BaseColumns;
 /**
  * Created by Artyom on 08.02.2017.
  */
-public final class ConvertersDbContract {
+final class ConvertersDbContract {
 
     private ConvertersDbContract() {}
 
-    public static abstract class ConverterEntry implements BaseColumns {
-        public static final String TABLE_NAME = "Converter";
-        public static final String COLUMN_NAME_NAME = "Name";
-        public static final String COLUMN_NAME_ORDER_POSITION = "OrderPosition";
-        public static final String COLUMN_NAME_IS_ENABLED = "IsEnabled";
-        public static final String COLUMN_NAME_IS_LAST_SELECTED = "IsLastSelected";
-        public static final String COLUMN_NAME_LAST_SELECTED_UNIT_ID = "LastSelectedUnitId";
-        public static final String COLUMN_NAME_LAST_QUANTITY_TEXT = "LastQuantityText";
-        public static final String COLUMN_NAME_ERRORS = "Errors";
+    static abstract class ConverterEntry implements BaseColumns {
+        static final String TABLE_NAME = "Converter";
+        static final String COLUMN_NAME_NAME = "Name";
+        static final String COLUMN_NAME_ORDER_POSITION = "OrderPosition";
+        static final String COLUMN_NAME_IS_ENABLED = "IsEnabled";
+        static final String COLUMN_NAME_IS_LAST_SELECTED = "IsLastSelected";
+        static final String COLUMN_NAME_LAST_SELECTED_UNIT_ID = "LastSelectedUnitId";
+        static final String COLUMN_NAME_LAST_QUANTITY_TEXT = "LastQuantityText";
+        static final String COLUMN_NAME_ERRORS = "Errors";
     }
 
-    public static abstract class UnitEntry implements BaseColumns {
-        public static final String TABLE_NAME = "Unit";
-        public static final String COLUMN_NAME_NAME = "Name";
-        public static final String COLUMN_NAME_VALUE = "Value";
-        public static final String COLUMN_NAME_ORDER_POSITION = "OrderPosition";
-        public static final String COLUMN_NAME_IS_ENABLED = "IsEnabled";
-        public static final String COLUMN_NAME_CONVERTER_ID= "ConverterId";
+    static abstract class UnitEntry implements BaseColumns {
+        static final String TABLE_NAME = "Unit";
+        static final String COLUMN_NAME_NAME = "Name";
+        static final String COLUMN_NAME_VALUE = "Value";
+        static final String COLUMN_NAME_ORDER_POSITION = "OrderPosition";
+        static final String COLUMN_NAME_IS_ENABLED = "IsEnabled";
+        static final String COLUMN_NAME_CONVERTER_ID= "ConverterId";
     }
 }

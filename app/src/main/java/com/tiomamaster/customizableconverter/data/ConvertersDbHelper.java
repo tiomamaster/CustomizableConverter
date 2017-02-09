@@ -12,6 +12,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.tiomamaster.customizableconverter.R;
+import com.tiomamaster.customizableconverter.data.ConvertersDbContract.ConverterEntry;
+import com.tiomamaster.customizableconverter.data.ConvertersDbContract.UnitEntry;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,37 +27,37 @@ import java.util.regex.Pattern;
 /**
  * Created by Artyom on 26.08.2016.
  */
-final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
+final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "ConvertersDB";
-    private static final String CONVERTER_TABLE_NAME = "Converter";
-    private static final String UNIT_TABLE_NAME = "Unit";
+    private static final String DATABASE_NAME = "Converters.db";
 
-    // TODO: use contract
+    private static final String CREATE_TABLE_CONVERTER =
+            "create table " + ConverterEntry.TABLE_NAME +
+            " (" + ConverterEntry._ID + " integer primary key, " +
+            ConverterEntry.COLUMN_NAME_NAME + " text unique not null" +
+            " check(" + ConverterEntry.COLUMN_NAME_NAME + " not like ''), " +
+            ConverterEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
+            ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
+            ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
+            ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_ID + " integer default 1, " +
+            ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text default '', " +
+            ConverterEntry.COLUMN_NAME_ERRORS + " text default null)";
 
-    private static final String CONVERTER_TABLE_CREATE =
-            "create table " + ConvertersDbContract.ConverterEntry.TABLE_NAME +
-            " (Id  integer primary key, " +
-            "Name text unique not null check(Name not like ''), " +
-            "OrderPosition integer not null, " +
-            "IsEnabled boolean default true, " +
-            "IsLastSelected boolean default false, " +
-            "LastSelectedUnitId integer default 1, " +
-            "LastQuantityText text default '', " +
-            "Errors text default null)";
-
-    private static final String UNIT_TABLE_CREATE =
-            "create table " + ConvertersDbContract.UnitEntry.TABLE_NAME +
-            " (Id  integer primary key, " +
-            "Name text not null check(Name not like ''), " +
-            "Value double not null check(Value > 0), " +
-            "OrderPosition integer not null, " +
-            "IsEnabled boolean default true, " +
-            "ConverterId integer not null, "  +
-            "foreign key(ConverterId) references " + CONVERTER_TABLE_NAME + "(Id) " +
+    private static final String CREATE_TABLE_UNIT =
+            "create table " + UnitEntry.TABLE_NAME +
+            " (" + UnitEntry._ID + "  integer primary key, " +
+            UnitEntry.COLUMN_NAME_NAME + " text not null " +
+            "check(" + UnitEntry.COLUMN_NAME_NAME + " not like ''), " +
+            UnitEntry.COLUMN_NAME_VALUE + " double not null " +
+            "check(" + UnitEntry.COLUMN_NAME_VALUE + " > 0), " +
+            UnitEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
+            UnitEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
+            UnitEntry.COLUMN_NAME_CONVERTER_ID + " integer not null, "  +
+            "foreign key(" + UnitEntry.COLUMN_NAME_CONVERTER_ID + ") " +
+            "references " + ConverterEntry.TABLE_NAME + "(" + ConverterEntry._ID + ") " +
             "on delete cascade)";
 
     private static final String ENABLE_FK = "PRAGMA foreign_keys = ON;";
@@ -64,8 +66,8 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
     private String mDbLang;
 
-    ConvertersDatabaseHelper(Context c, String dbLang) {
-        super(c, DATABASE_NAME + dbLang, null, DATABASE_VERSION);
+    ConvertersDbHelper(Context c, String dbLang) {
+        super(c, dbLang + DATABASE_NAME, null, DATABASE_VERSION);
         mContext = c;
         mDbLang = dbLang;
     }
@@ -75,8 +77,8 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         enableFk(db);
 
         // create tables
-        db.execSQL(CONVERTER_TABLE_CREATE);
-        db.execSQL(UNIT_TABLE_CREATE);
+        db.execSQL(CREATE_TABLE_CONVERTER);
+        db.execSQL(CREATE_TABLE_UNIT);
 
         // TODO: trigger for update IsLastSelected in Converter
 
@@ -97,11 +99,11 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             // insert into table converter
             ContentValues contentValues = new ContentValues();
             if (TextUtils.equals(mDbLang, "ru"))
-                contentValues.put("Name", translate[i]);
+                contentValues.put(ConverterEntry.COLUMN_NAME_NAME, translate[i]);
             else
-                contentValues.put("Name", s);
-            contentValues.put("OrderPosition", ++i);
-            db.insert(CONVERTER_TABLE_NAME, null, contentValues);
+                contentValues.put(ConverterEntry.COLUMN_NAME_NAME, s);
+            contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, ++i);
+            db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
             contentValues.clear();
 
             // read file line by line and insert into table unit
@@ -120,11 +122,11 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
                         if (value != 0) {
                             String name = matcher.replaceAll("").trim();
                             if (!TextUtils.isEmpty(name)) {
-                                contentValues.put("Name", name);
-                                contentValues.put("Value", value);
-                                contentValues.put("ConverterId", i);
-                                contentValues.put("OrderPosition", lineNum);
-                                db.insert(UNIT_TABLE_NAME, null, contentValues);
+                                contentValues.put(UnitEntry.COLUMN_NAME_NAME, name);
+                                contentValues.put(UnitEntry.COLUMN_NAME_VALUE, value);
+                                contentValues.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, i);
+                                contentValues.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, lineNum);
+                                db.insert(UnitEntry.TABLE_NAME, null, contentValues);
                                 contentValues.clear();
                             }
                             else {
@@ -162,8 +164,8 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
             if (errors.length() != 0) {
                 // delete last \n
                 errors.deleteCharAt(errors.length() - 1);
-                contentValues.put("Errors", errors.toString());
-                db.update(CONVERTER_TABLE_NAME, contentValues, "Id = ?",
+                contentValues.put(ConverterEntry.COLUMN_NAME_ERRORS, errors.toString());
+                db.update(ConverterEntry.TABLE_NAME, contentValues, ConverterEntry._ID + " = ?",
                         new String[]{String.valueOf(i)});
             }
         }
@@ -188,12 +190,13 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
     List<Pair<String, Boolean>> getAllConverters() {
         SQLiteDatabase db = getReadableDatabase();
-        String name = "Name";
-        String isEnabled = "IsEnabled";
-        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{name, isEnabled},
-                null, null, null, null, "OrderPosition");
-        int nameInd = c.getColumnIndex(name);
-        int isEnabledInd = c.getColumnIndex(isEnabled);
+        Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                new String[]{ConverterEntry.COLUMN_NAME_NAME,
+                        ConverterEntry.COLUMN_NAME_IS_ENABLED},
+                null, null, null, null, ConverterEntry.COLUMN_NAME_ORDER_POSITION);
+
+        int nameInd = c.getColumnIndex(ConverterEntry.COLUMN_NAME_NAME);
+        int isEnabledInd = c.getColumnIndex(ConverterEntry.COLUMN_NAME_IS_ENABLED);
         List<Pair<String, Boolean>> result = new ArrayList<>(c.getCount());
         while (c.moveToNext()) {
             result.add(new Pair<>(c.getString(nameInd), Boolean.parseBoolean(c.getString(isEnabledInd))));
@@ -203,7 +206,7 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
         // TODO: delete this after adding and testing asynchronous call
         try {
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.SECONDS.sleep(3);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -212,32 +215,36 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
     Converter createConverter(String name) {
         SQLiteDatabase db = getReadableDatabase();
-        String idCol = "Id";
-        String errorsCol = "Errors";
-        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{idCol, errorsCol},
-                "Name = ?", new String[]{name}, null, null, null);
+        Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                new String[]{ConverterEntry._ID, ConverterEntry.COLUMN_NAME_ERRORS},
+                ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name}, null, null, null);
         c.moveToFirst();
-        int converterId = c.getInt(c.getColumnIndex(idCol));
-        String errors = c.getString(c.getColumnIndex(errorsCol));
+        int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
+        String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         c.close();
         return new Converter(name, getUnits(db, converterId), errors);
     }
 
     Converter createLastConverter() {
         SQLiteDatabase db = getReadableDatabase();
-        String idCol = "Id";
-        String nameCol = "Name";
-        String errorsCol = "Errors";
-        Cursor c = db.query(CONVERTER_TABLE_NAME, new String[]{idCol, nameCol, errorsCol},
-                "IsLastSelected = ?", new String[]{"true"}, null, null, null);
+        Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                new String[]{ConverterEntry._ID,
+                        ConverterEntry.COLUMN_NAME_NAME,
+                        ConverterEntry.COLUMN_NAME_ERRORS},
+                ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = ?", new String[]{"true"},
+                null, null, null);
         if (!c.moveToFirst()) {
             // this case is first run, so simply return first converter
-            c = db.query(CONVERTER_TABLE_NAME, new String[]{idCol, nameCol, errorsCol},
-                    "Id = ?", new String[]{"1"}, null, null, null);
+            c = db.query(ConverterEntry.TABLE_NAME,
+                    new String[]{ConverterEntry._ID,
+                            ConverterEntry.COLUMN_NAME_NAME,
+                            ConverterEntry.COLUMN_NAME_ERRORS},
+                    ConverterEntry._ID + " = ?", new String[]{"1"}, null, null, null);
         }
-        int converterId = c.getInt(c.getColumnIndex(idCol));
-        String name = c.getString(c.getColumnIndex(nameCol));
-        String errors = c.getString(c.getColumnIndex(errorsCol));
+        c.moveToFirst();
+        int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
+        String name = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_NAME));
+        String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         c.close();
         return new Converter(name, getUnits(db, converterId), errors);
     }
@@ -247,8 +254,9 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put("IsLastSelected", true);
-            db.update(CONVERTER_TABLE_CREATE, values, "Name = ?", new String[]{name});
+            values.put(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED, true);
+            db.update(CREATE_TABLE_CONVERTER, values,
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -257,15 +265,17 @@ final class ConvertersDatabaseHelper extends SQLiteOpenHelper {
 
     @NonNull
     private List<Converter.Unit> getUnits(SQLiteDatabase db, int converterId) {
-        Cursor c;
-        String nameCol = "Name";
-        String valueCol = "Value";
-        String isEnabledCol = "IsEnabled";
-        c = db.query(UNIT_TABLE_NAME, new String[]{nameCol, valueCol, isEnabledCol},
-                "ConverterId = ?", new String[]{String.valueOf(converterId)}, null, null, "OrderPosition");
-        int nameColInd = c.getColumnIndex(nameCol);
-        int valueColInd = c.getColumnIndex(valueCol);
-        int isEnabledColInd = c.getColumnIndex(isEnabledCol);
+        Cursor c = db.query(UnitEntry.TABLE_NAME,
+                new String[]{UnitEntry.COLUMN_NAME_NAME,
+                        UnitEntry.COLUMN_NAME_VALUE,
+                        UnitEntry.COLUMN_NAME_IS_ENABLED},
+                UnitEntry.COLUMN_NAME_CONVERTER_ID + " = ?",
+                new String[]{String.valueOf(converterId)}, null, null,
+                UnitEntry.COLUMN_NAME_ORDER_POSITION);
+
+        int nameColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_NAME);
+        int valueColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_VALUE);
+        int isEnabledColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_IS_ENABLED);
         List<Converter.Unit> units = new ArrayList<>();
         while(c.moveToNext()) {
             units.add(new Converter.Unit(c.getString(nameColInd), c.getDouble(valueColInd),

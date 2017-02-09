@@ -191,8 +191,10 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mParentActivity = (ConverterActivity) getActivity();
 
-        mActionsListener = new ConverterPresenter(Injection.
-                provideConvertersRepository(mParentActivity.getApplicationContext()), this);
+        if (mActionsListener == null) {
+            mActionsListener = new ConverterPresenter(Injection.
+                    provideConvertersRepository(mParentActivity.getApplicationContext()), this);
+        }
 
         mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 
