@@ -60,6 +60,14 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             "references " + ConverterEntry.TABLE_NAME + "(" + ConverterEntry._ID + ") " +
             "on delete cascade)";
 
+    private static final String TRIGGER_UPDATE_CONVERTER =
+            "create trigger ConverterIsLastSelectedUpdateToTrue before " +
+            "update of " + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED +
+            " on " + ConverterEntry.TABLE_NAME +
+            " when new." + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = 'true' " +
+            "begin update " + ConverterEntry.TABLE_NAME +
+            " set " + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = 'false'; end";
+
     private static final String ENABLE_FK = "PRAGMA foreign_keys = ON;";
 
     private Context mContext;
@@ -80,7 +88,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_CONVERTER);
         db.execSQL(CREATE_TABLE_UNIT);
 
-        // TODO: trigger for update IsLastSelected in Converter
+        // trigger for update IsLastSelected in Converter
+        db.execSQL(TRIGGER_UPDATE_CONVERTER);
 
         // inflate db
         AssetManager am = mContext.getAssets();
@@ -206,7 +215,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
         // TODO: delete this after adding and testing asynchronous call
         try {
-            TimeUnit.SECONDS.sleep(3);
+            TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

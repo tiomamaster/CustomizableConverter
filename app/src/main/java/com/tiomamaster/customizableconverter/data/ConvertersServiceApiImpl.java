@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
-    private static ExecutorService sSingle = Executors.newSingleThreadExecutor();
+    private static ExecutorService sSingleExecutor = Executors.newSingleThreadExecutor();
 
     private ConvertersDbHelper mDbHelper;
 
@@ -92,7 +92,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     public void setLastConverter(@NonNull String name) {
         checkNotNull(name);
 
-        sSingle.execute(new Runnable() {
+        sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
 

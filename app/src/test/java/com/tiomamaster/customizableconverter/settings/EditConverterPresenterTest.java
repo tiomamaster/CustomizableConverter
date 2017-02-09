@@ -1,6 +1,5 @@
 package com.tiomamaster.customizableconverter.settings;
 
-import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
 import com.tiomamaster.customizableconverter.data.Converter;
@@ -18,12 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static android.R.attr.name;
-import static android.R.attr.transitionName;
-import static android.R.attr.value;
-import static android.os.Build.VERSION_CODES.N;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;

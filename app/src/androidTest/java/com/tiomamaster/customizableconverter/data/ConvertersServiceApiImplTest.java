@@ -3,6 +3,7 @@ package com.tiomamaster.customizableconverter.data;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
 import android.support.test.filters.MediumTest;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
@@ -18,18 +19,18 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Created by Artyom on 27.08.2016.
  */
 @RunWith(Parameterized.class)
-@MediumTest
+@LargeTest
 public class ConvertersServiceApiImplTest {
 
     private Context mContext;
@@ -55,10 +56,7 @@ public class ConvertersServiceApiImplTest {
 
     @Test
     public void getAllConvertersTypes() throws Exception {
-        final String[] expected;
-        if (TextUtils.equals(language, "ru"))
-            expected = mContext.getResources().getStringArray(R.array.translation_for_files_ru);
-        else expected = mContext.getAssets().list(language);
+        final String[] expected = getConvertersNames(language);
 
         mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
             @Override
@@ -69,15 +67,15 @@ public class ConvertersServiceApiImplTest {
                 }
             }
         });
+
+        TimeUnit.SECONDS.sleep(5);
     }
 
     @Test
-    public void getConverter() throws IOException {
-        String[] expectedFilesNames;
-        if (TextUtils.equals(language, "ru"))
-            expectedFilesNames = mContext.getResources().getStringArray(R.array.translation_for_files_ru);
-        else expectedFilesNames = mContext.getAssets().list(language);
-        for (final String name : expectedFilesNames) {
+    public void getConverter() throws Exception {
+        String[] expected = getConvertersNames(language);
+
+        for (final String name : expected) {
             mApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
                 @Override
                 public void onLoaded(@NonNull Converter converter) {
@@ -89,5 +87,30 @@ public class ConvertersServiceApiImplTest {
                 }
             });
         }
+
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    @Test
+    public void setGetLastConverter() throws Exception {
+        final String[] expected = getConvertersNames(language);
+
+        mApi.setLastConverter(expected[expected.length - 1]);
+
+        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertEquals(expected[expected.length - 1], converter.getName());
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    private String[] getConvertersNames(String language) throws IOException {
+        if (TextUtils.equals(language, "ru")) {
+            return mContext.getResources().getStringArray(R.array.translation_for_files_ru);
+        }
+        else return mContext.getAssets().list(language);
     }
 }
