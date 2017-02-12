@@ -118,7 +118,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void saveLastUnitPosCallCurConverter() {
+    public void saveLastUnitPosCallCurConverterAndRepo() {
         loadConverter();
 
         mPresenter.saveLastUnitPos(1);
@@ -127,10 +127,12 @@ public class ConverterPresenterTest {
 
         verify(mCurConverter).setLastUnitPosition(captor.capture());
         assertEquals(1, captor.getValue().intValue());
+
+        verify(mRepository).saveLastUnit();
     }
 
     @Test
-    public void saveLastQuantityCallCurConverter() {
+    public void saveLastQuantityCallCurConverterAndRepo() {
         loadConverter();
 
         String quantity = "100";
@@ -142,6 +144,8 @@ public class ConverterPresenterTest {
         verify(mCurConverter).setLastQuantity(captor.capture());
 
         assertEquals(quantity, captor.getValue());
+
+        verify(mRepository).saveLastQuantity();
     }
 
     @Test

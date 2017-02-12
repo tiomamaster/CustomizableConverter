@@ -85,6 +85,11 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     public void getConverter(@NonNull final String name, final boolean clone,
                              @NonNull final GetConverterCallback callback) {
         checkNotNull(name);
+        // save last selected converter
+        if (!mLastConverterName.equals(name)) {
+            mServiceApi.setLastConverter(name);
+        }
+
         if (mCachedConverters != null && mCachedConverters.containsKey(name)) {
             if (clone) callback.onConverterLoaded((Converter) mCachedConverters.get(name).clone());
             else callback.onConverterLoaded(mCachedConverters.get(name));
@@ -137,6 +142,18 @@ class InMemoryConvertersRepository implements ConvertersRepository {
                 callback.onConverterSaved(saved);
             }
         }, converter, oldName);
+    }
+
+    @Override
+    public void saveLastUnit() {
+        mServiceApi.setLastUnit(mLastConverterName,
+                mCachedConverters.get(mLastConverterName).getLastUnitPosition());
+    }
+
+    @Override
+    public void saveLastQuantity() {
+        mServiceApi.setLastQuantity(mLastConverterName,
+                mCachedConverters.get(mLastConverterName).getLastQuantity());
     }
 
     @Override

@@ -22,9 +22,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Converter implements SettingsRepository.OnSettingsChangeListener, Cloneable {
 
-    // counter for default ordering
-    private static int sCount;
-
     private static  DecimalFormat sDecimalFormat;
 
     private static boolean isDefaultForm;
@@ -35,25 +32,22 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
 
     @Nullable private final String mErrors;
 
-    private int mOrderPosition;
-
     private int mLastUnitPosition;
 
     @Nullable private String mLastQuantity;
 
     public Converter(@NonNull String name, @NonNull List<Unit> units,
-                     @Nullable String errors, int orderPosition, int lastUnit,
+                     @Nullable String errors, int lastUnit,
                      @Nullable String lastQuantity) {
         mName = checkNotNull(name, "name cannot be null");
         mUnits = checkNotNull(units, "units cannot be null");
         mErrors = errors;
-        mOrderPosition = orderPosition;
         mLastUnitPosition = lastUnit;
         mLastQuantity = lastQuantity;
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units, String errors) {
-        this(name, units, errors, sCount++, 0, "1");
+        this(name, units, errors, 0, "1");
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units) {
@@ -138,20 +132,12 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
         return mErrors;
     }
 
-    public int getOrderPosition() {
-        return mOrderPosition;
-    }
-
-    public void setOrderPosition(int orderPosition) {
-        mOrderPosition = orderPosition;
-    }
-
     public int getLastUnitPosition() {
         return mLastUnitPosition;
     }
 
-    public void setLastUnitPosition(int mLastUnit) {
-        this.mLastUnitPosition = mLastUnit;
+    public void setLastUnitPosition(int lastUnit) {
+        mLastUnitPosition = lastUnit;
     }
 
     @NonNull

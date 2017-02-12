@@ -27,6 +27,10 @@ interface ConvertersServiceApi {
 
     void setLastConverter(@NonNull String name);
 
+    void setLastUnit(@NonNull String converterName, int unitPos);
+
+    void setLastQuantity(@NonNull String converterName, @NonNull String quantity);
+
     void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter,
                        @NonNull String oldName);
 

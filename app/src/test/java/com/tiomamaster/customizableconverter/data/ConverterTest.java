@@ -107,7 +107,6 @@ public class ConverterTest {
         clone.setName("Clone");
         clone.setLastUnitPosition(10000);
         clone.setLastQuantity("10000");
-        clone.setOrderPosition(10000);
         clone.getUnits().get(0).name = "Clone";
         clone.getUnits().get(0).value = 10000d;
         clone.getUnits().get(0).isEnabled = false;
@@ -116,7 +115,6 @@ public class ConverterTest {
         assertNotEquals(sConverter.getName(), clone.getName());
         assertNotEquals(sConverter.getLastUnitPosition(), clone.getLastUnitPosition());
         assertNotEquals(sConverter.getLastQuantity(), clone.getLastQuantity());
-        assertNotEquals(sConverter.getOrderPosition(), clone.getOrderPosition());
         assertNotEquals(sConverter.getUnits().get(0), clone.getUnits().get(0));
         assertNotEquals(sConverter.getUnits().get(0).value, clone.getUnits().get(0).value);
         assertNotEquals(sConverter.getUnits().get(0).isEnabled, clone.getUnits().get(0).isEnabled);

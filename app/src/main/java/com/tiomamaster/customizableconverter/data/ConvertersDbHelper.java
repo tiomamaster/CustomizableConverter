@@ -42,7 +42,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             ConverterEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
             ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
             ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
-            ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_ID + " integer default 1, " +
+            ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 1, " +
             ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text default '', " +
             ConverterEntry.COLUMN_NAME_ERRORS + " text default null)";
 
@@ -225,13 +225,18 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
     Converter createConverter(String name) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(ConverterEntry.TABLE_NAME,
-                new String[]{ConverterEntry._ID, ConverterEntry.COLUMN_NAME_ERRORS},
+                new String[]{ConverterEntry._ID,
+                        ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
+                        ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
+                        ConverterEntry.COLUMN_NAME_ERRORS},
                 ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name}, null, null, null);
         c.moveToFirst();
         int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
+        int lastSelUnitPos = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS));
+        String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         c.close();
-        return new Converter(name, getUnits(db, converterId), errors);
+        return new Converter(name, getUnits(db, converterId), errors, lastSelUnitPos, lastQuantity);
     }
 
     Converter createLastConverter() {
@@ -239,6 +244,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         Cursor c = db.query(ConverterEntry.TABLE_NAME,
                 new String[]{ConverterEntry._ID,
                         ConverterEntry.COLUMN_NAME_NAME,
+                        ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
+                        ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
                         ConverterEntry.COLUMN_NAME_ERRORS},
                 ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = ?", new String[]{"true"},
                 null, null, null);
@@ -247,15 +254,19 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             c = db.query(ConverterEntry.TABLE_NAME,
                     new String[]{ConverterEntry._ID,
                             ConverterEntry.COLUMN_NAME_NAME,
+                            ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
+                            ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
                             ConverterEntry.COLUMN_NAME_ERRORS},
                     ConverterEntry._ID + " = ?", new String[]{"1"}, null, null, null);
         }
         c.moveToFirst();
         int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
         String name = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_NAME));
+        int lastSelUnitPos = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS));
+        String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         c.close();
-        return new Converter(name, getUnits(db, converterId), errors);
+        return new Converter(name, getUnits(db, converterId), errors, lastSelUnitPos, lastQuantity);
     }
 
     void saveLastConverter(String name) {
@@ -263,8 +274,36 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED, true);
-            db.update(CREATE_TABLE_CONVERTER, values,
+            values.put(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED, "true");
+            db.update(ConverterEntry.TABLE_NAME, values,
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    void saveLastUnit(String name, int pos) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS, pos);
+            db.update(ConverterEntry.TABLE_NAME, values,
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    void saveLastQuantity(String name, String quantity) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT, quantity);
+            db.update(ConverterEntry.TABLE_NAME, values,
                     ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
             db.setTransactionSuccessful();
         } finally {

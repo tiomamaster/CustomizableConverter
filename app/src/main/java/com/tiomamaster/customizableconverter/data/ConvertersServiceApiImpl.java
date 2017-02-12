@@ -89,13 +89,38 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void setLastConverter(@NonNull String name) {
+    public void setLastConverter(@NonNull final String name) {
         checkNotNull(name);
 
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                mDbHelper.saveLastConverter(name);
+            }
+        });
+    }
 
+    @Override
+    public void setLastUnit(@NonNull final String converterName, final int unitPos) {
+        checkNotNull(converterName);
+
+        sSingleExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDbHelper.saveLastUnit(converterName, unitPos);
+            }
+        });
+    }
+
+    @Override
+    public void setLastQuantity(@NonNull final String converterName, @NonNull final String quantity) {
+        checkNotNull(converterName);
+        checkNotNull(quantity);
+
+        sSingleExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDbHelper.saveLastQuantity(converterName, quantity);
             }
         });
     }

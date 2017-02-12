@@ -38,6 +38,10 @@ public interface ConvertersRepository {
     void saveConverter(@NonNull SaveConverterCallback callback, @NonNull Converter converter,
                        @NonNull String oldName);
 
+    void saveLastUnit();
+
+    void saveLastQuantity();
+
     /**
      * Save order of converters to the persistent storage.
      */

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
-import android.support.test.filters.MediumTest;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -32,6 +31,8 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(Parameterized.class)
 @LargeTest
 public class ConvertersServiceApiImplTest {
+
+    private static final int timeout = 3;
 
     private Context mContext;
 
@@ -68,7 +69,7 @@ public class ConvertersServiceApiImplTest {
             }
         });
 
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(timeout);
     }
 
     @Test
@@ -88,7 +89,7 @@ public class ConvertersServiceApiImplTest {
             });
         }
 
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(timeout);
     }
 
     @Test
@@ -104,7 +105,39 @@ public class ConvertersServiceApiImplTest {
             }
         });
 
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+    @Test
+    public void setLastUnit() throws Exception {
+        String[] names = getConvertersNames(language);
+
+        mApi.setLastUnit(names[5], 5);
+
+        mApi.getConverter(names[5], new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertEquals(5, converter.getLastUnitPosition());
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+    @Test
+    public void setLastQuantity() throws Exception {
+        String[] names = getConvertersNames(language);
+
+        mApi.setLastQuantity(names[9], "9999.99999");
+
+        mApi.getConverter(names[9], new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertEquals("9999.99999", converter.getLastQuantity());
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
     }
 
     private String[] getConvertersNames(String language) throws IOException {

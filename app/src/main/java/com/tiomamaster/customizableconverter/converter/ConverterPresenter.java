@@ -82,11 +82,13 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
     @Override
     public void saveLastUnitPos(int pos) {
         mCurConverter.setLastUnitPosition(pos);
+        mConvertersRepository.saveLastUnit();
     }
 
     @Override
     public void saveLastQuantity(@NonNull String quantity) {
         mCurConverter.setLastQuantity(quantity);
+        mConvertersRepository.saveLastQuantity();
     }
 
     @Override

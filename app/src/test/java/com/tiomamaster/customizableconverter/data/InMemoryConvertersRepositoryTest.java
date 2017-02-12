@@ -88,6 +88,7 @@ public class InMemoryConvertersRepositoryTest {
         String name = "Test";
 
         //first call to the repository
+        mRepository.mLastConverterName = name;
         mRepository.getConverter(name, false, mGetConverterCallback);
 
         // verify that service api was called enables repository caching
@@ -125,6 +126,7 @@ public class InMemoryConvertersRepositoryTest {
         String[] names = {"Test0", "Test1"};
 
         // retrieve first converter
+        mRepository.mLastConverterName = names[0];
         mRepository.getConverter(names[0], false, mGetConverterCallback);
         verify(mServiceApi).getConverter(eq(names[0]), mCaptor.capture());
         mCaptor.getValue().onLoaded(new Converter(names[0], new ArrayList<Converter.Unit>()));
@@ -146,6 +148,16 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getConverter(names[0], false, mGetConverterCallback);
 
         assertNotEquals(startName, mRepository.mLastConverterName);
+    }
+
+    @Test
+    public void getConverterCallSetLastConverter() {
+        mRepository.mLastConverterName = "Test";
+
+        mRepository.getConverter("Test1", false, mGetConverterCallback);
+
+        // set last converter if last converter name and new name are not equals
+        verify(mServiceApi).setLastConverter("Test1");
     }
 
     @Test
@@ -231,6 +243,30 @@ public class InMemoryConvertersRepositoryTest {
         // check cache
         assertEquals(new Pair<>(converterName, true), mRepository.mCachedConvertersTypes.get(0));
         assertEquals(mConverter.getName(), mRepository.mCachedConverters.get(converterName).getName());
+    }
+
+    @Test
+    public void saveLastUnit() {
+        mRepository.mLastConverterName = "Test";
+        mRepository.mCachedConverters = new HashMap<>();
+        mRepository.mCachedConverters.put(mRepository.mLastConverterName, mConverter);
+        when(mConverter.getLastUnitPosition()).thenReturn(0);
+
+        mRepository.saveLastUnit();
+
+        verify(mServiceApi).setLastUnit(mRepository.mLastConverterName, 0);
+    }
+
+    @Test
+    public void saveLastQuantity() {
+        mRepository.mLastConverterName = "Test";
+        mRepository.mCachedConverters = new HashMap<>();
+        mRepository.mCachedConverters.put(mRepository.mLastConverterName, mConverter);
+        when(mConverter.getLastQuantity()).thenReturn("1");
+
+        mRepository.saveLastQuantity();
+
+        verify(mServiceApi).setLastQuantity(mRepository.mLastConverterName, "1");
     }
 
     @Test

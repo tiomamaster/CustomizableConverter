@@ -15,7 +15,7 @@ final class ConvertersDbContract {
         static final String COLUMN_NAME_ORDER_POSITION = "OrderPosition";
         static final String COLUMN_NAME_IS_ENABLED = "IsEnabled";
         static final String COLUMN_NAME_IS_LAST_SELECTED = "IsLastSelected";
-        static final String COLUMN_NAME_LAST_SELECTED_UNIT_ID = "LastSelectedUnitId";
+        static final String COLUMN_NAME_LAST_SELECTED_UNIT_POS = "LastSelectedUnitPos";
         static final String COLUMN_NAME_LAST_QUANTITY_TEXT = "LastQuantityText";
         static final String COLUMN_NAME_ERRORS = "Errors";
     }
