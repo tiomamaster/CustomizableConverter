@@ -18,11 +18,17 @@ import com.tiomamaster.customizableconverter.data.ConvertersDbContract.UnitEntry
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static android.R.attr.name;
+import static android.R.attr.value;
+import static android.R.attr.y;
+import static com.tiomamaster.customizableconverter.R.id.quantity;
 
 /**
  * Created by Artyom on 26.08.2016.
@@ -283,32 +289,87 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    void saveLastUnit(String name, int pos) {
+    void saveLastUnit(String converterName, int pos) {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS, pos);
             db.update(ConverterEntry.TABLE_NAME, values,
-                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{converterName});
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
     }
 
-    void saveLastQuantity(String name, String quantity) {
+    void saveLastQuantity(String converterName, String quantity) {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT, quantity);
             db.update(ConverterEntry.TABLE_NAME, values,
-                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{converterName});
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
+    }
+
+    void delete(String converterName) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.delete(ConverterEntry.TABLE_NAME,
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?",
+                    new String[]{converterName});
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    boolean save(Converter converter, String oldName) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        if (oldName.isEmpty()) {
+            // save new converter
+            Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                    new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
+                    null, null, null, null, null);
+            c.moveToFirst();
+            values.put(ConverterEntry.COLUMN_NAME_NAME, converter.getName());
+            values.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, c.getInt(0));
+            c.close();
+
+            db.beginTransaction();
+            try {
+                // insert into Converter table
+                long converterId = db.insert(ConverterEntry.TABLE_NAME, null, values);
+                if (converterId == -1) return false; // error occurred, so return false
+                values.clear();
+
+                int unitOrderPos = 1;
+                for (Converter.Unit unit : converter.getUnits()) {
+                    values.put(UnitEntry.COLUMN_NAME_NAME, unit.name);
+                    values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
+                    values.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
+                    values.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, unitOrderPos++);
+                    // check that insertion is successful
+                    if (db.insert(UnitEntry.TABLE_NAME, null, values) == -1) return false;
+                    values.clear();
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } else {
+            // update existing one
+        }
+        return true;
     }
 
     @NonNull

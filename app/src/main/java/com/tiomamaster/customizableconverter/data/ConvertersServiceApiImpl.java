@@ -126,11 +126,23 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void saveConverter(@NonNull SaveCallback callback, @NonNull Converter converter,
-                              @NonNull String oldName) {
+    public void saveConverter(@NonNull final SaveCallback callback, @NonNull final Converter converter,
+                              @NonNull final String oldName) {
         checkNotNull(callback);
         checkNotNull(converter);
         checkNotNull(oldName);
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return mDbHelper.save(converter, oldName);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean saved) {
+                callback.onSaved(saved);
+            }
+        }.execute();
     }
 
     @Override
@@ -144,7 +156,14 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void deleteConverter(@NonNull String name) {
+    public void deleteConverter(@NonNull final String name) {
         checkNotNull(name);
+
+        sSingleExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDbHelper.delete(name);
+            }
+        });
     }
 }

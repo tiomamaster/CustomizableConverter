@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.data;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
@@ -15,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -46,8 +48,11 @@ public class ConvertersServiceApiImplTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
+        //delete databases before each test
+        mContext.deleteDatabase("ruConverters.db");
+        mContext.deleteDatabase("enConverters.db");
 
         Locale l = new Locale(language);
         Locale.setDefault(l);
@@ -136,6 +141,37 @@ public class ConvertersServiceApiImplTest {
                 assertEquals("9999.99999", converter.getLastQuantity());
             }
         });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+//    @Test
+//    public void deleteConverter() throws Exception {
+//        final String[] names = getConvertersNames(language);
+//
+//        mApi.deleteConverter(names[0]);
+//
+//        TimeUnit.SECONDS.sleep(timeout);
+//    }
+
+
+    @Test
+    public void saveNewConverter() throws Exception {
+        String name = "Test";
+        List<Converter.Unit> units = new ArrayList<>();
+        units.add(new Converter.Unit("One", 1d, true));
+        units.add(new Converter.Unit("Two", 2d, true));
+        units.add(new Converter.Unit("Three", 3d, true));
+
+        Converter converter = new Converter(name, units);
+
+        mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
+            @Override
+            public void onSaved(boolean saved) {
+                assertTrue(saved);
+            }
+        }, converter, "");
+
 
         TimeUnit.SECONDS.sleep(timeout);
     }
