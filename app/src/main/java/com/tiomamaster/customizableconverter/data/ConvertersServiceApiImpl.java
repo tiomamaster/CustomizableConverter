@@ -77,7 +77,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             protected Converter doInBackground(Void... params) {
                 Converter converter = mDbHelper.createLastConverter();
                 Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
-                        converter.getOnSettingsChangeListener());
+                        Converter.getOnSettingsChangeListener());
                 return converter;
             }
 

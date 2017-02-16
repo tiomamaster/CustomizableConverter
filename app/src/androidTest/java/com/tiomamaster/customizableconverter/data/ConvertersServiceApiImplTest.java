@@ -154,7 +154,6 @@ public class ConvertersServiceApiImplTest {
 //        TimeUnit.SECONDS.sleep(timeout);
 //    }
 
-
     @Test
     public void saveNewConverter() throws Exception {
         String name = "Test";

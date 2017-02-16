@@ -42,8 +42,7 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
     public FakeConvertersServiceApiImpl(Context context) {
         // set listener only for one converter instance
         Repositories.getInMemoryRepoInstance(context).
-                setOnSettingsChangeListener(CONVERTERS.get("Fake converter0").
-                        getOnSettingsChangeListener());
+                setOnSettingsChangeListener(Converter.getOnSettingsChangeListener());
 
     }
 
@@ -96,6 +95,21 @@ public class FakeConvertersServiceApiImpl implements ConvertersServiceApi {
                 callback.onSaved(true);
             }
         }, 1000);
+    }
+
+    @Override
+    public void setLastConverter(@NonNull String name) {
+
+    }
+
+    @Override
+    public void setLastUnit(@NonNull String converterName, int unitPos) {
+
+    }
+
+    @Override
+    public void setLastQuantity(@NonNull String converterName, @NonNull String quantity) {
+
     }
 
     @Override

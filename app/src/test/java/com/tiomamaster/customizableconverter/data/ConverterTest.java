@@ -56,7 +56,7 @@ public class ConverterTest {
     @Test
     public void convertAllCheckResult() {
         // set default form to unsure correct testing
-        sConverter.onSettingsChange(0,0,false,true);
+        Converter.getOnSettingsChangeListener().onSettingsChange(0,0,false,true);
 
         String from = sUnitsName[1];
         double quantity = 5.2225;
@@ -76,7 +76,7 @@ public class ConverterTest {
     @Test
     public void changeSettingsCheckConversionResult() {
         // try to get standard form
-        sConverter.onSettingsChange(3, 5, true, false);
+        Converter.getOnSettingsChangeListener().onSettingsChange(3, 5, true, false);
         List<Pair<String, String>> actual = sConverter.convertAll(5, sUnitsName[0]);
 
         // check conversion result contains ×10 in each string
@@ -85,7 +85,7 @@ public class ConverterTest {
         }
 
         // try to get default view of result
-        sConverter.onSettingsChange(3, 5, false, false);
+        Converter.getOnSettingsChangeListener().onSettingsChange(3, 5, false, false);
         actual = sConverter.convertAll(5, sUnitsName[0]);
 
         // check conversion result not contains ×10
