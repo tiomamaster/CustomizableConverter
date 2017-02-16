@@ -29,6 +29,7 @@ import static android.R.attr.name;
 import static android.R.attr.value;
 import static android.R.attr.y;
 import static com.tiomamaster.customizableconverter.R.id.quantity;
+import static com.tiomamaster.customizableconverter.R.id.transition_current_scene;
 
 /**
  * Created by Artyom on 26.08.2016.
@@ -42,37 +43,37 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_CONVERTER =
             "create table " + ConverterEntry.TABLE_NAME +
-            " (" + ConverterEntry._ID + " integer primary key, " +
-            ConverterEntry.COLUMN_NAME_NAME + " text unique not null" +
-            " check(" + ConverterEntry.COLUMN_NAME_NAME + " not like ''), " +
-            ConverterEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
-            ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
-            ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
-            ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 1, " +
-            ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text default '', " +
-            ConverterEntry.COLUMN_NAME_ERRORS + " text default null)";
+                    " (" + ConverterEntry._ID + " integer primary key, " +
+                    ConverterEntry.COLUMN_NAME_NAME + " text unique not null" +
+                    " check(" + ConverterEntry.COLUMN_NAME_NAME + " not like ''), " +
+                    ConverterEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
+                    ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
+                    ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
+                    ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 1, " +
+                    ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text default '1', " +                 // TODO: set default empty and handle this case in ConverterPresenter
+                    ConverterEntry.COLUMN_NAME_ERRORS + " text default null)";
 
     private static final String CREATE_TABLE_UNIT =
             "create table " + UnitEntry.TABLE_NAME +
-            " (" + UnitEntry._ID + "  integer primary key, " +
-            UnitEntry.COLUMN_NAME_NAME + " text not null " +
-            "check(" + UnitEntry.COLUMN_NAME_NAME + " not like ''), " +
-            UnitEntry.COLUMN_NAME_VALUE + " double not null " +
-            "check(" + UnitEntry.COLUMN_NAME_VALUE + " > 0), " +
-            UnitEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
-            UnitEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
-            UnitEntry.COLUMN_NAME_CONVERTER_ID + " integer not null, "  +
-            "foreign key(" + UnitEntry.COLUMN_NAME_CONVERTER_ID + ") " +
-            "references " + ConverterEntry.TABLE_NAME + "(" + ConverterEntry._ID + ") " +
-            "on delete cascade)";
+                    " (" + UnitEntry._ID + "  integer primary key, " +
+                    UnitEntry.COLUMN_NAME_NAME + " text not null " +
+                    "check(" + UnitEntry.COLUMN_NAME_NAME + " not like ''), " +
+                    UnitEntry.COLUMN_NAME_VALUE + " double not null " +
+                    "check(" + UnitEntry.COLUMN_NAME_VALUE + " > 0), " +
+                    UnitEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
+                    UnitEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
+                    UnitEntry.COLUMN_NAME_CONVERTER_ID + " integer not null, " +
+                    "foreign key(" + UnitEntry.COLUMN_NAME_CONVERTER_ID + ") " +
+                    "references " + ConverterEntry.TABLE_NAME + "(" + ConverterEntry._ID + ") " +
+                    "on delete cascade)";
 
     private static final String TRIGGER_UPDATE_CONVERTER =
             "create trigger ConverterIsLastSelectedUpdateToTrue before " +
-            "update of " + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED +
-            " on " + ConverterEntry.TABLE_NAME +
-            " when new." + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = 'true' " +
-            "begin update " + ConverterEntry.TABLE_NAME +
-            " set " + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = 'false'; end";
+                    "update of " + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED +
+                    " on " + ConverterEntry.TABLE_NAME +
+                    " when new." + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = 'true' " +
+                    "begin update " + ConverterEntry.TABLE_NAME +
+                    " set " + ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = 'false'; end";
 
     private static final String ENABLE_FK = "PRAGMA foreign_keys = ON;";
 
@@ -132,7 +133,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                 int lineNum = 1;
                 while ((line = reader.readLine()) != null) {
                     matcher.reset(line);
-                    if(matcher.find()) {
+                    if (matcher.find()) {
                         Double value = Double.valueOf(matcher.group().trim());
                         if (value != 0) {
                             String name = matcher.replaceAll("").trim();
@@ -143,8 +144,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                                 contentValues.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, lineNum);
                                 db.insert(UnitEntry.TABLE_NAME, null, contentValues);
                                 contentValues.clear();
-                            }
-                            else {
+                            } else {
                                 Log.e(TAG, "onCreate: unit name is empty in line "
                                         + lineNum + " in file " + s);
                                 errors.append("Unit name is empty in line "
@@ -332,42 +332,126 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     boolean save(Converter converter, String oldName) {
         SQLiteDatabase db = getWritableDatabase();
-
-        ContentValues values = new ContentValues();
+        db.beginTransaction();
 
         if (oldName.isEmpty()) {
-            // save new converter
-            Cursor c = db.query(ConverterEntry.TABLE_NAME,
-                    new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
-                    null, null, null, null, null);
-            c.moveToFirst();
-            values.put(ConverterEntry.COLUMN_NAME_NAME, converter.getName());
-            values.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, c.getInt(0));
-            c.close();
-
-            db.beginTransaction();
-            try {
-                // insert into Converter table
-                long converterId = db.insert(ConverterEntry.TABLE_NAME, null, values);
-                if (converterId == -1) return false; // error occurred, so return false
-                values.clear();
-
-                int unitOrderPos = 1;
-                for (Converter.Unit unit : converter.getUnits()) {
-                    values.put(UnitEntry.COLUMN_NAME_NAME, unit.name);
-                    values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
-                    values.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
-                    values.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, unitOrderPos++);
-                    // check that insertion is successful
-                    if (db.insert(UnitEntry.TABLE_NAME, null, values) == -1) return false;
-                    values.clear();
-                }
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
+            return saveNewConverter(converter, db);
         } else {
-            // update existing one
+            return updateConverter(converter, oldName, db);
+        }
+    }
+
+    void saveOrder(List<Pair<String, Boolean>> converters) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (int i = 0; i < converters.size(); i++) {
+                String name = converters.get(i).first;
+                ContentValues values = new ContentValues();
+                values.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, i + 1);
+                db.update(ConverterEntry.TABLE_NAME, values,
+                        ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    void saveState(String name, boolean state) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(ConverterEntry.COLUMN_NAME_IS_ENABLED, String.valueOf(state));
+            db.update(ConverterEntry.TABLE_NAME, values,
+                    ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name});
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    private boolean saveNewConverter(Converter converter, SQLiteDatabase db) {
+        // save new converter at the bottom by order position, of the converters list
+        ContentValues values = new ContentValues();
+        Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
+                null, null, null, null, null);
+        if (!c.moveToFirst()) return false;
+        values.put(ConverterEntry.COLUMN_NAME_NAME, converter.getName());
+        values.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, c.getInt(0));
+        c.close();
+
+        try {
+            // insert into Converter table
+            long converterId = db.insert(ConverterEntry.TABLE_NAME, null, values);
+            if (converterId == -1) return false;
+            values.clear();
+
+            int unitOrderPos = 1;
+            for (Converter.Unit unit : converter.getUnits()) {
+                values.put(UnitEntry.COLUMN_NAME_NAME, unit.name);
+                values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
+                values.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, unitOrderPos++);
+                values.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
+                // check that insertion is successful
+                if (db.insert(UnitEntry.TABLE_NAME, null, values) == -1) return false;
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        return true;
+    }
+
+    private boolean updateConverter(Converter converter, String oldName, SQLiteDatabase db) {
+        // update existing one
+        // get useful information about old edited converter before delete it
+        Cursor c = db.query(ConverterEntry.TABLE_NAME, new String[]{
+                        ConverterEntry.COLUMN_NAME_ORDER_POSITION,
+                        ConverterEntry.COLUMN_NAME_IS_ENABLED,
+                        ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED},
+                ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{oldName}, null, null, null);
+        if (!c.moveToFirst()) return false;
+        int orderPosition = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ORDER_POSITION));
+        boolean isEnabled = Boolean.parseBoolean(
+                c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_IS_ENABLED)));
+        boolean isLastSelected = Boolean.parseBoolean(
+                c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED)));
+        c.close();
+
+        // delete old converter
+        delete(oldName);
+
+        // insert edited converter as new
+        ContentValues values = new ContentValues();
+        values.put(ConverterEntry.COLUMN_NAME_NAME, converter.getName());
+        values.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, orderPosition);
+        values.put(ConverterEntry.COLUMN_NAME_IS_ENABLED, isEnabled);
+        values.put(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED, isLastSelected);
+        values.put(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT, converter.getLastQuantity());
+        values.put(ConverterEntry.COLUMN_NAME_ERRORS, converter.getErrors());
+        try {
+            long converterId = db.insert(ConverterEntry.TABLE_NAME, null, values);
+            if (converterId == -1) return false;
+            values.clear();
+
+            int unitOrderPos = 1;
+            for (Converter.Unit unit : converter.getUnits()) {
+                values.put(UnitEntry.COLUMN_NAME_NAME, unit.name);
+                values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
+                values.put(UnitEntry.COLUMN_NAME_IS_ENABLED, String.valueOf(unit.isEnabled));
+                values.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, unitOrderPos++);
+                values.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
+                // check that insertion is successful
+                if (db.insert(UnitEntry.TABLE_NAME, null, values) == -1) return false;
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
         return true;
     }
@@ -386,7 +470,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         int valueColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_VALUE);
         int isEnabledColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_IS_ENABLED);
         List<Converter.Unit> units = new ArrayList<>();
-        while(c.moveToNext()) {
+        while (c.moveToNext()) {
             units.add(new Converter.Unit(c.getString(nameColInd), c.getDouble(valueColInd),
                     Boolean.parseBoolean(c.getString(isEnabledColInd))));
         }

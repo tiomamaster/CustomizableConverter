@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -17,7 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
-    private static ExecutorService sSingleExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService sSingleExecutor = Executors.newSingleThreadExecutor();
 
     private ConvertersDbHelper mDbHelper;
 
@@ -40,6 +41,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, List<Pair<String, Boolean>>>() {
             @Override
             protected List<Pair<String, Boolean>> doInBackground(Void... params) {
+                waitForEndOfWriting();
                 return mDbHelper.getAllConverters();
             }
 
@@ -58,6 +60,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, Converter>() {
             @Override
             protected Converter doInBackground(Void... params) {
+                waitForEndOfWriting();
                 return mDbHelper.createConverter(name);
             }
 
@@ -75,7 +78,9 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, Converter>() {
             @Override
             protected Converter doInBackground(Void... params) {
+                waitForEndOfWriting();
                 Converter converter = mDbHelper.createLastConverter();
+                // TODO: make listener static
                 Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
                         converter.getOnSettingsChangeListener());
                 return converter;
@@ -146,13 +151,27 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void writeConvertersOrder(@NonNull List<Pair<String, Boolean>> converters) {
+    public void writeConvertersOrder(@NonNull final List<Pair<String, Boolean>> converters) {
         checkNotNull(converters);
+
+        sSingleExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDbHelper.saveOrder(converters);
+            }
+        });
     }
 
     @Override
-    public void writeConverterState(@NonNull String name, boolean state) {
+    public void writeConverterState(@NonNull final String name, final boolean state) {
         checkNotNull(name);
+
+        sSingleExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDbHelper.saveState(name, state);
+            }
+        });
     }
 
     @Override
@@ -165,5 +184,15 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                 mDbHelper.delete(name);
             }
         });
+    }
+
+    private void waitForEndOfWriting() {
+        while(!sSingleExecutor.isTerminated()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

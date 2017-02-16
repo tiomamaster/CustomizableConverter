@@ -2,6 +2,7 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
@@ -11,6 +12,7 @@ import android.text.TextUtils;
 import com.tiomamaster.customizableconverter.R;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -18,14 +20,17 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Created by Artyom on 27.08.2016.
@@ -34,7 +39,9 @@ import static junit.framework.Assert.assertTrue;
 @LargeTest
 public class ConvertersServiceApiImplTest {
 
-    private static final int timeout = 3;
+    // adb shell pm clear  com.tiomamaster.customizableconverter.demo
+
+    private static final int timeout = 5;
 
     private Context mContext;
 
@@ -154,17 +161,16 @@ public class ConvertersServiceApiImplTest {
 //        TimeUnit.SECONDS.sleep(timeout);
 //    }
 
-
     @Test
-    public void saveNewConverter() throws Exception {
-        String name = "Test";
-        List<Converter.Unit> units = new ArrayList<>();
+    public void saveConverter() throws Exception {
+        final String newName = "Test";
+        final List<Converter.Unit> units = new ArrayList<>();
         units.add(new Converter.Unit("One", 1d, true));
         units.add(new Converter.Unit("Two", 2d, true));
         units.add(new Converter.Unit("Three", 3d, true));
+        Converter converter = new Converter(newName, units);
 
-        Converter converter = new Converter(name, units);
-
+        // save new converter
         mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
             @Override
             public void onSaved(boolean saved) {
@@ -172,6 +178,112 @@ public class ConvertersServiceApiImplTest {
             }
         }, converter, "");
 
+        // check that return converter is the same
+        mApi.getConverter(newName, new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertEquals(newName, converter.getName());
+                List<Converter.Unit> actualUnits = converter.getUnits();
+                assertEquals(units.size(), actualUnits.size());
+                for (int i = 0; i < actualUnits.size(); i++) {
+                    Converter.Unit expectedUnit = units.get(i);
+                    Converter.Unit actualUnit = actualUnits.get(i);
+                    assertEquals(expectedUnit, actualUnit);
+                    assertEquals(expectedUnit.value, actualUnit.value);
+                    assertEquals(expectedUnit.isEnabled, actualUnit.isEnabled);
+                }
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+
+        final String editedName = "Edited";
+        final List<Converter.Unit> editedUnits = new ArrayList<>();
+        editedUnits.add(new Converter.Unit("Four", 5d, true));
+        editedUnits.add(new Converter.Unit("Five", 6d, false));
+        editedUnits.add(new Converter.Unit("Three", 3d, true));
+        editedUnits.add(new Converter.Unit("Seven", 3.567d, false));
+        editedUnits.add(new Converter.Unit("Nine", 9999999.987546d, true));
+        converter = new Converter(editedName, editedUnits, "horrible errors", 1, "12345.12345");
+
+        // update converter
+        mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
+            @Override
+            public void onSaved(boolean saved) {
+                assertTrue(saved);
+            }
+        }, converter, newName);
+
+        // check that return updated converter
+        mApi.getConverter(editedName, new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertEquals(editedName, converter.getName());
+                assertEquals("horrible errors", converter.getErrors());
+                assertEquals(1, converter.getLastUnitPosition());
+                assertEquals("12345.12345", converter.getLastQuantity());
+                List<Converter.Unit> actualUnits = converter.getUnits();
+                assertEquals(editedUnits.size(), actualUnits.size());
+                for (int i = 0; i < actualUnits.size(); i++) {
+                    Converter.Unit expectedUnit = editedUnits.get(i);
+                    Converter.Unit actualUnit = actualUnits.get(i);
+                    assertEquals(expectedUnit, actualUnit);
+                    assertEquals(expectedUnit.value, actualUnit.value);
+                    assertEquals(expectedUnit.isEnabled, actualUnit.isEnabled);
+                }
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+    @Test
+    public void writeConvertersOrder() throws Exception {
+        String[] names = getConvertersNames(language);
+        final List<Pair<String, Boolean>> actualConverters = new ArrayList<>(names.length);
+        for (String name : names) {
+            actualConverters.add(new Pair<>(name, true));
+        }
+
+        // order of pairs in the db now is the same as in above list
+        // so swap all elements in the list and save new order in db
+        for (int i = 0; i < names.length/2; i++) {
+            Collections.swap(actualConverters, i, names.length - (i + 1));
+        }
+        mApi.writeConvertersOrder(actualConverters);
+
+        // check the order of pairs
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+            @Override
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                for (int i = 0; i < converters.size(); i++) {
+                    Pair<String, Boolean> expected = actualConverters.get(i);
+                    Pair<String, Boolean> actual = converters.get(i);
+                    assertEquals(expected, actual);
+                }
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+    @Test
+    public void writeConverterState() throws Exception {
+        String[] names = getConvertersNames(language);
+
+        // make all converters disabled
+        for (String name : names) {
+            mApi.writeConverterState(name, false);
+        }
+
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+            @Override
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                for (Pair<String, Boolean> converter : converters) {
+                    assertFalse(converter.second);
+                }
+            }
+        });
 
         TimeUnit.SECONDS.sleep(timeout);
     }
