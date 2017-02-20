@@ -82,7 +82,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                 Converter converter = mDbHelper.createLastConverter();
                 // TODO: make listener static
                 Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
-                        converter.getOnSettingsChangeListener());
+                        Converter.getOnSettingsChangeListener());
                 return converter;
             }
 

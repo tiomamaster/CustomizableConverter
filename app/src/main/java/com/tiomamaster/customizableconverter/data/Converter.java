@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by Artyom on 14.07.2016.
  */
-public class Converter implements SettingsRepository.OnSettingsChangeListener, Cloneable {
+public class Converter implements Cloneable {
 
     private static  DecimalFormat sDecimalFormat;
 
@@ -54,23 +54,27 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
         this(name, units, null);
     }
 
-    @Override
-    public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
-        // initialize at first call and further update DecimalFormat instance if app lang change
-        sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+    static SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
+        return new SettingsRepository.OnSettingsChangeListener() {
+            @Override
+            public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
+                // initialize at first call and further update DecimalFormat instance if app lang change
+                sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
 
-        if (stForm) {
-            sDecimalFormat.applyPattern("0.0E0");
-            DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
-            decimalFormatSymbols.setExponentSeparator("×10");
-            sDecimalFormat.setDecimalFormatSymbols(decimalFormatSymbols);
-        } else {
-            // apply default pattern
-            sDecimalFormat.applyPattern("#,##0.###");
-        }
-        sDecimalFormat.setGroupingSize(grSize);
-        sDecimalFormat.setMaximumFractionDigits(maxFrDigits);
-        isDefaultForm = defForm;
+                if (stForm) {
+                    sDecimalFormat.applyPattern("0.0E0");
+                    DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
+                    decimalFormatSymbols.setExponentSeparator("×10");
+                    sDecimalFormat.setDecimalFormatSymbols(decimalFormatSymbols);
+                } else {
+                    // apply default pattern
+                    sDecimalFormat.applyPattern("#,##0.###");
+                }
+                sDecimalFormat.setGroupingSize(grSize);
+                sDecimalFormat.setMaximumFractionDigits(maxFrDigits);
+                isDefaultForm = defForm;
+            }
+        };
     }
 
     @Override
@@ -149,10 +153,6 @@ public class Converter implements SettingsRepository.OnSettingsChangeListener, C
 
     public void setLastQuantity(String mLastQuantity) {
         this.mLastQuantity = mLastQuantity;
-    }
-
-    SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
-        return this;
     }
 
     private String convert(double quantity, double from, double to){
