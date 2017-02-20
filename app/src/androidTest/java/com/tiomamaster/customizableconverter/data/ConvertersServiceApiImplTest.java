@@ -121,6 +121,22 @@ public class ConvertersServiceApiImplTest {
     }
 
     @Test
+    public void getLastConverterAfterDeleteIt() throws Exception {
+        final String[] expected = getConvertersNames(language);
+
+        mApi.deleteConverter(expected[expected.length - 1]);
+
+        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertEquals(expected[0], converter.getName());
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+    @Test
     public void setLastUnit() throws Exception {
         String[] names = getConvertersNames(language);
 

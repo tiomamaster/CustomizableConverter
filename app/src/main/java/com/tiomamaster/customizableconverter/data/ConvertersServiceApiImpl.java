@@ -7,6 +7,8 @@ import android.support.v4.util.Pair;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -14,10 +16,13 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Created by Artyom on 16.07.2016.
+ * Concrete implementation of ConvertersServiceApi interface.
  */
 public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
+    /**
+     * All requests to the database should be piped through this executor.
+     */
     private static final ExecutorService sSingleExecutor = Executors.newSingleThreadExecutor();
 
     private ConvertersDbHelper mDbHelper;
@@ -30,7 +35,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         } else {
             mDbHelper = new ConvertersDbHelper(c, "en");
         }
-
         mContext = c;
     }
 
@@ -41,8 +45,18 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, List<Pair<String, Boolean>>>() {
             @Override
             protected List<Pair<String, Boolean>> doInBackground(Void... params) {
-                waitForEndOfWriting();
-                return mDbHelper.getAllConverters();
+                List<Pair<String, Boolean>> result = null;
+                try {
+                    result = sSingleExecutor.submit(new Callable<List<Pair<String, Boolean>>>() {
+                        @Override
+                        public List<Pair<String, Boolean>> call() throws Exception {
+                            return mDbHelper.getAllConverters();
+                        }
+                    }).get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return result;
             }
 
             @Override
@@ -60,8 +74,18 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, Converter>() {
             @Override
             protected Converter doInBackground(Void... params) {
-                waitForEndOfWriting();
-                return mDbHelper.createConverter(name);
+                Converter result = null;
+                try {
+                    result = sSingleExecutor.submit(new Callable<Converter>() {
+                        @Override
+                        public Converter call() throws Exception {
+                            return mDbHelper.createConverter(name);
+                        }
+                    }).get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return result;
             }
 
             @Override
@@ -78,12 +102,20 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, Converter>() {
             @Override
             protected Converter doInBackground(Void... params) {
-                waitForEndOfWriting();
-                Converter converter = mDbHelper.createLastConverter();
-                // TODO: make listener static
+                Converter result = null;
+                try {
+                    result = sSingleExecutor.submit(new Callable<Converter>() {
+                        @Override
+                        public Converter call() throws Exception {
+                            return mDbHelper.createLastConverter();
+                        }
+                    }).get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
                         Converter.getOnSettingsChangeListener());
-                return converter;
+                return result;
             }
 
             @Override
@@ -140,7 +172,18 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
-                return mDbHelper.save(converter, oldName);
+                boolean result = false;
+                try {
+                    result = sSingleExecutor.submit(new Callable<Boolean>() {
+                        @Override
+                        public Boolean call() throws Exception {
+                            return mDbHelper.save(converter, oldName);
+                        }
+                    }).get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return result;
             }
 
             @Override
@@ -184,15 +227,5 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                 mDbHelper.delete(name);
             }
         });
-    }
-
-    private void waitForEndOfWriting() {
-        while(!sSingleExecutor.isTerminated()) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

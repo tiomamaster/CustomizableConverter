@@ -83,9 +83,9 @@ class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
 
     @Override
     public void enableConverter(int orderPosition, boolean enable) {
-        mConvertersRepo.saveConverterState(orderPosition);
-
         mAllConverters.add(orderPosition,
                 new Pair<>(mAllConverters.remove(orderPosition).first, enable));
+
+        mConvertersRepo.saveConverterState(orderPosition);
     }
 }

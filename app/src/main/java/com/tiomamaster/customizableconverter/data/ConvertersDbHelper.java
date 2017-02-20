@@ -263,7 +263,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                             ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                             ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
                             ConverterEntry.COLUMN_NAME_ERRORS},
-                    ConverterEntry._ID + " = ?", new String[]{"1"}, null, null, null);
+                            null, null, null, null, ConverterEntry.COLUMN_NAME_ORDER_POSITION);
         }
         c.moveToFirst();
         int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
