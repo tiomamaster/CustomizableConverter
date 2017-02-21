@@ -157,7 +157,10 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getConverter("Test1", false, mGetConverterCallback);
 
         // set last converter if last converter name and new name are not equals
+        // and not need clone of converter, so in this case a user select the converter
         verify(mServiceApi).setLastConverter("Test1");
+
+        assertEquals("Test1", mRepository.mLastConverterName);
     }
 
     @Test

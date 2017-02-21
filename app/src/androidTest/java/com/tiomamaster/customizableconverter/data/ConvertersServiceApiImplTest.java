@@ -230,6 +230,13 @@ public class ConvertersServiceApiImplTest {
             }
         }, converter, newName);
 
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+            @Override
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                assertTrue(converters.contains(new Pair<>(editedName, true)));
+            }
+        });
+
         // check that return updated converter
         mApi.getConverter(editedName, new ConvertersServiceApi.LoadCallback<Converter>() {
             @Override

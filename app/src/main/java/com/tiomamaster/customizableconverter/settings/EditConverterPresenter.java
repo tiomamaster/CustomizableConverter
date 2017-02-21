@@ -100,6 +100,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             mView.showConverterExistError(false);
             mView.enableSaveConverter(false);
             mGoodConverterName = false;
+            checkCanSave();
             return;
         }
 

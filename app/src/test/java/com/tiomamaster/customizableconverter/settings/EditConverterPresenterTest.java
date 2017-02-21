@@ -98,6 +98,13 @@ public class EditConverterPresenterTest {
             mPresenter.handleHomePressed();
 
             verify(mView).showAskDialog();
+
+            // set empty name
+            mPresenter.setConverterName("");
+
+            mPresenter.handleHomePressed();
+
+            verify(mView, times(2)).showPreviousView();
         }
     }
 
@@ -118,7 +125,7 @@ public class EditConverterPresenterTest {
     public void setEmptyConverterName() {
         mPresenter.setConverterName("");
         verify(mView).showConverterExistError(false);
-        verify(mView).enableSaveConverter(false);
+        verify(mView, times(2)).enableSaveConverter(false);
     }
 
     @Test

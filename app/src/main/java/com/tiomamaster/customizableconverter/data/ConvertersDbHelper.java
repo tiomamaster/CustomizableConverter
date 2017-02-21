@@ -49,7 +49,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     ConverterEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
                     ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
                     ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
-                    ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 1, " +
+                    ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 0, " +
                     ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text default '1', " +                 // TODO: set default empty and handle this case in ConverterPresenter
                     ConverterEntry.COLUMN_NAME_ERRORS + " text default null)";
 
@@ -425,12 +425,13 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         // delete old converter
         delete(oldName);
 
+        // TODO: save last unit position
         // insert edited converter as new
         ContentValues values = new ContentValues();
         values.put(ConverterEntry.COLUMN_NAME_NAME, converter.getName());
         values.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, orderPosition);
-        values.put(ConverterEntry.COLUMN_NAME_IS_ENABLED, isEnabled);
-        values.put(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED, isLastSelected);
+        values.put(ConverterEntry.COLUMN_NAME_IS_ENABLED, String.valueOf(isEnabled));
+        values.put(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED, String.valueOf(isLastSelected));
         values.put(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT, converter.getLastQuantity());
         values.put(ConverterEntry.COLUMN_NAME_ERRORS, converter.getErrors());
         try {
