@@ -293,6 +293,11 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     public void showConversionResult(@NonNull List<Pair<String, String>> result) {
         checkNotNull(result);
 
+        if (result.isEmpty()) {
+            mConversionResult.setVisibility(View.VISIBLE);
+            return;
+        }
+
         mResultAdapter.setDataSet(result);
 
         mMsg.setVisibility(View.GONE);

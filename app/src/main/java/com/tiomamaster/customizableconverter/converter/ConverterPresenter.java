@@ -4,11 +4,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -75,7 +77,11 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
     @Override
     public void convert(@NonNull String from, @NonNull String quantity) {
-        if (TextUtils.isEmpty(quantity)) return;
+        if (quantity.isEmpty()) {
+            mConverterView.showConversionResult(new ArrayList<Pair<String, String>>());
+            return;
+        }
+
         mConverterView.showConversionResult(mCurConverter.convertAll(Double.valueOf(quantity), from));
     }
 

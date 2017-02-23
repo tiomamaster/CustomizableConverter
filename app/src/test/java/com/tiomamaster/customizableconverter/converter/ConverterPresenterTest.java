@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -26,9 +27,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Created by Artyom on 16.07.2016.
- */
 public class ConverterPresenterTest {
 
     private static final List<String> CONVERTERS_TYPES = Arrays.asList("Test0", "Test1");
@@ -52,7 +50,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void loadConvertersTypesShowItInView() {
+    public void loadConvertersTypes_ShowItInView() {
         mPresenter.loadConvertersTypes();
 
         verify(mView).setProgressIndicator(true);
@@ -66,7 +64,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void loadConvertersTypesShowNothing() {
+    public void loadConvertersTypes_ShowNothing() {
         mPresenter.loadConvertersTypes();
 
         verify(mView).setProgressIndicator(true);
@@ -78,7 +76,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void loadConverterShowItInView() {
+    public void loadConverter_ShowItInView() {
         String name = CONVERTERS_TYPES.get(0);
         mPresenter.loadConverter(name);
 
@@ -96,7 +94,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void callConvertShowResult() {
+    public void callConvert_ShowResult() {
         String from = "Test";
         double quantity = 100;
 
@@ -118,7 +116,16 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void saveLastUnitPosCallCurConverterAndRepo() {
+    public void callConvert_ShowEmptyResult() {
+        mPresenter.convert("Test", "");
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mView).showConversionResult(listCaptor.capture());
+        assertTrue(listCaptor.getValue().isEmpty());
+    }
+
+    @Test
+    public void saveLastUnitPos_CallCurConverterAndRepo() {
         loadConverter();
 
         mPresenter.saveLastUnitPos(1);
@@ -132,7 +139,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void saveLastQuantityCallCurConverterAndRepo() {
+    public void saveLastQuantity_CallCurConverterAndRepo() {
         loadConverter();
 
         String quantity = "100";
@@ -149,7 +156,7 @@ public class ConverterPresenterTest {
     }
 
     @Test
-    public void openSettingsShowSettingsView() {
+    public void openSettings_ShowSettingsView() {
         mPresenter.openSettings();
 
         verify(mView).showSettingsUi();

@@ -222,6 +222,8 @@ public class ConvertersServiceApiImplTest {
         editedUnits.add(new Converter.Unit("Nine", 9999999.987546d, true));
         converter = new Converter(editedName, editedUnits, "horrible errors", 1, "12345.12345");
 
+        mApi.setLastUnit(newName, 10);
+
         // update converter
         mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
             @Override
@@ -243,7 +245,7 @@ public class ConvertersServiceApiImplTest {
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(editedName, converter.getName());
                 assertEquals("horrible errors", converter.getErrors());
-                assertEquals(1, converter.getLastUnitPosition());
+                assertEquals(10, converter.getLastUnitPosition());
                 assertEquals("12345.12345", converter.getLastQuantity());
                 List<Converter.Unit> actualUnits = converter.getUnits();
                 assertEquals(editedUnits.size(), actualUnits.size());
