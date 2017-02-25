@@ -14,8 +14,10 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
@@ -65,6 +67,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     private View mRecyclerViewHeader;
 
     private TextView mMsg;
+
+    private MenuItem mBtnSettings;
 
     public ConverterFragment() {
     }
@@ -177,6 +181,20 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             }
         });
 
+        // create and set input filter for quantity
+        InputFilter quantityFilter = new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                if ((!source.toString().equals(".") && dest.toString().equals("0") && dstart == 1) ||
+                        dstart == 0 && !dest.toString().equals("") && source.toString().matches("0|[.]") ||
+                        dest.toString().matches("0.\\d+") && (dstart == 0 || dstart == 1) && source.toString().equals("0") ||
+                        dest.toString().matches("0.\\d+") && dstart == 1 && source.toString().matches("\\d"))
+                    return "";
+                return null;
+            }
+        };
+        mQuantity.setFilters(new InputFilter[]{quantityFilter});
+
         mResultText = (TextView) mRecyclerViewHeader.findViewById(R.id.resultText);
 
         setHasOptionsMenu(true);
@@ -215,6 +233,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);
+        mBtnSettings = menu.findItem(R.id.settings).setVisible(false).setEnabled(false);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -252,6 +271,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         // inflate spinner using converters types
         mParentActivity.initSpinner(converters, selection);
+
+        // show settings menu item
+        mBtnSettings.setVisible(true).setEnabled(true);
 
         // show last selected converter
         mActionsListener.loadConverter(mParentActivity.mSpinConverterTypes.getSelectedItem().toString());
