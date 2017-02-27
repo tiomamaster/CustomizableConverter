@@ -180,7 +180,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 return false;
             }
         });
-
         // create and set input filter for quantity
         InputFilter quantityFilter = new InputFilter() {
             @Override
@@ -225,16 +224,12 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mActionsListener.loadConvertersTypes();
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);
-        mBtnSettings = menu.findItem(R.id.settings).setVisible(false).setEnabled(false);
         super.onCreateOptionsMenu(menu, inflater);
+
+        mBtnSettings = menu.findItem(R.id.settings).setVisible(false).setEnabled(false);
+        mActionsListener.loadConvertersTypes();
     }
 
     @Override
@@ -272,9 +267,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         // inflate spinner using converters types
         mParentActivity.initSpinner(converters, selection);
 
-        // show settings menu item
-        mBtnSettings.setVisible(true).setEnabled(true);
-
         // show last selected converter
         mActionsListener.loadConverter(mParentActivity.mSpinConverterTypes.getSelectedItem().toString());
     }
@@ -309,6 +301,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         // show conversion result
         mActionsListener.convert(mSpinnerUnits.getSelectedItem().toString(), lastQuantity);
+
+        // show settings menu item
+        mBtnSettings.setVisible(true).setEnabled(true);
     }
 
     @Override

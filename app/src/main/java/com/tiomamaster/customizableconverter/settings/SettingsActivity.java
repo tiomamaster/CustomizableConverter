@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.tiomamaster.customizableconverter.R;
+import com.tiomamaster.customizableconverter.data.InMemorySettingsRepository;
 import com.tiomamaster.customizableconverter.data.Repositories;
 
 import static android.R.attr.value;
@@ -32,11 +33,15 @@ public class SettingsActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((InMemorySettingsRepository) Repositories.getInMemoryRepoInstance(getBaseContext())).updateLocale();
+
         setContentView(R.layout.activity_settings);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.title_fragment_settings));
 
         mFab = (FloatingActionButton) findViewById(R.id.fab_add);
 

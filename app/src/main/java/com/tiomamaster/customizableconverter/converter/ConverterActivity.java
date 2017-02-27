@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,6 +19,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.R;
+import com.tiomamaster.customizableconverter.data.InMemorySettingsRepository;
+import com.tiomamaster.customizableconverter.data.Repositories;
 
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class ConverterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((InMemorySettingsRepository) Repositories.getInMemoryRepoInstance(getBaseContext())).updateLocale();
+
         setContentView(R.layout.activity_converter);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

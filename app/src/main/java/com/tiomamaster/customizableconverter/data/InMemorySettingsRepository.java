@@ -2,15 +2,13 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.MainThread;
+import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
 
 import com.tiomamaster.customizableconverter.R;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -20,7 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by Artyom on 05.11.2016.
  */
 
-class InMemorySettingsRepository implements SettingsRepository, SharedPreferences.OnSharedPreferenceChangeListener {
+public class InMemorySettingsRepository implements SettingsRepository, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String PREF_LANGUAGE = "PREF_LANGUAGE";
     private static final String PREF_GROUPING_SIZE = "PREF_GROUPING_SIZE";
@@ -44,8 +42,10 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
         mContext = checkNotNull(c, "need Context");
         mPrefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        if (Locale.getDefault().equals(new Locale("ru"))) mLanguage = "ru";
-        else mLanguage = "en";
+        String startLang;
+        if (Locale.getDefault().equals(new Locale("ru"))) startLang = "ru";
+        else startLang = "en";
+        mLanguage = mPrefs.getString(PREF_LANGUAGE, startLang);
         mGrSize = Integer.parseInt(mPrefs.getString(PREF_GROUPING_SIZE, "3"));
         mPrecision = Integer.parseInt(mPrefs.getString(PREF_PRECISION, "5"));
         isStandardForm = mPrefs.getBoolean(PREF_STANDARD_FORM, false);
@@ -119,6 +119,14 @@ class InMemorySettingsRepository implements SettingsRepository, SharedPreference
 
         // to initialize settings properties in converters and summaries in fragment
         listener.onSettingsChange(mGrSize, mPrecision, isStandardForm, isDefaultForm);
+    }
+
+    public void updateLocale() {
+        Locale locale = new Locale(mLanguage);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        mContext.getResources().updateConfiguration(config, mContext.getResources().getDisplayMetrics());
     }
 
     private void notifyListeners() {

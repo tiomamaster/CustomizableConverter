@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Customizable Converter</string>
+    <string name="app_name" translatable="false">Customizable Converter</string>
     <string name="label_spin_convert_from">Convert from:</string>
     <string name="label_edit_text_quantity">In quantity:</string>
     <string name="label_rw_result">Result:</string>
@@ -43,6 +43,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
+    <string name="ok" translatable="false">OK</string>
     <string name="hint_number">Input number</string>
 </resources>

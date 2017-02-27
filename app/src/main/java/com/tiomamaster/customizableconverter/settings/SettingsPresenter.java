@@ -61,10 +61,6 @@ class SettingsPresenter implements SettingsContract.SettingsUal, SettingsReposit
 
     @Override
     public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
-        showSummaries();
-    }
-
-    private void showSummaries() {
         mSettingsView.showSummaries(mSettingsRepo.getSummaries());
     }
 }
