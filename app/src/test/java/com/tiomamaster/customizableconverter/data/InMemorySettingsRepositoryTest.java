@@ -42,6 +42,6 @@ public class InMemorySettingsRepositoryTest {
     public void setOnSettingsChangeListenerShouldCallAll() {
         // check that all listener was called
         verify(mSettingsChangeListener, times(2))
-                .onSettingsChange(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+                .onSettingsChange(anyInt(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 }

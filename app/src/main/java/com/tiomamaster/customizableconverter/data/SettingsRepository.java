@@ -8,7 +8,8 @@ public interface SettingsRepository {
 
     interface OnSettingsChangeListener{
 
-        void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm);
+        void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm,
+                              boolean langChanged);
     }
 
     String[] getSummaries();

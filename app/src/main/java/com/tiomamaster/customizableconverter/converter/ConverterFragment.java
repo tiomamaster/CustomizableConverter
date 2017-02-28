@@ -1,6 +1,9 @@
 package com.tiomamaster.customizableconverter.converter;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -42,10 +45,9 @@ import com.tiomamaster.customizableconverter.settings.SettingsActivity;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.tiomamaster.customizableconverter.converter.ConverterActivity.REQUEST_CODE_SETTINGS_ACTIVITY;
+import static com.tiomamaster.customizableconverter.converter.ConverterActivity.RESULT_CODE_RESTART_APP;
 
-/**
- * Created by Artyom on 14.07.2016.
- */
 public class ConverterFragment extends Fragment implements ConverterContract.View {
 
     @VisibleForTesting ConverterContract.UserActionListener mActionsListener;
@@ -121,6 +123,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                 ContextCompat.getColor(getActivity(), R.color.colorPrimary),
                 ContextCompat.getColor(getActivity(), R.color.accent),
                 ContextCompat.getColor(getActivity(), R.color.primary_dark));
+        swipeRefreshLayout.setEnabled(false);
 
         mRecyclerViewHeader = inflater.inflate(R.layout.rw_converter_header, container, false);
 
@@ -224,12 +227,19 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        mActionsListener.loadConvertersTypes();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);
         super.onCreateOptionsMenu(menu, inflater);
 
-        mBtnSettings = menu.findItem(R.id.settings).setVisible(false).setEnabled(false);
-        mActionsListener.loadConvertersTypes();
+        if (mBtnSettings == null) {
+            mBtnSettings = menu.findItem(R.id.settings).setVisible(false).setEnabled(false);
+        }
     }
 
     @Override
@@ -243,6 +253,21 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_SETTINGS_ACTIVITY && resultCode == RESULT_CODE_RESTART_APP) {
+            Intent startIntent = new Intent(mParentActivity, ConverterActivity.class);
+            int pendingIntentId = 123456;
+            PendingIntent mPendingIntent = PendingIntent.getActivity(mParentActivity, pendingIntentId,
+                    startIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            AlarmManager mgr = (AlarmManager) mParentActivity.getSystemService(Context.ALARM_SERVICE);
+            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+            System.exit(0);
+        }
+    }
+
+    @Override
     public void setProgressIndicator(final boolean active) {
 
         if (getView() == null) {
@@ -250,6 +275,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
         final SwipeRefreshLayout srl =
                 (SwipeRefreshLayout) getView().findViewById(R.id.refresh_layout);
+
+        if (!active) mBtnSettings.setVisible(true).setEnabled(true);
 
         // make sure setRefreshing() is called after the layout is done with everything else.
         srl.post(new Runnable() {
@@ -301,9 +328,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         // show conversion result
         mActionsListener.convert(mSpinnerUnits.getSelectedItem().toString(), lastQuantity);
-
-        // show settings menu item
-        mBtnSettings.setVisible(true).setEnabled(true);
     }
 
     @Override
@@ -324,7 +348,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void showSettingsUi() {
-        startActivity(new Intent(getContext(), SettingsActivity.class));
+        startActivityForResult(new Intent(getContext(), SettingsActivity.class),
+                REQUEST_CODE_SETTINGS_ACTIVITY);
     }
 
     @Override

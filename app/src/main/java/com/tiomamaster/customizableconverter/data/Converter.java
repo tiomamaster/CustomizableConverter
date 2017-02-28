@@ -57,7 +57,8 @@ public class Converter implements Cloneable {
     static SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
         return new SettingsRepository.OnSettingsChangeListener() {
             @Override
-            public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
+            public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm,
+                                         boolean langChanged) {
                 // initialize at first call and further update DecimalFormat instance if app lang change
                 sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
 

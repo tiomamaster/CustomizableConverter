@@ -35,9 +35,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Created by Artyom on 20.10.2016.
- */
 public class ConvertersEditFragment extends Fragment implements SettingsContract.ConvertersEditView {
 
     private SettingsContract.ConvertersEditUal mActionListener;

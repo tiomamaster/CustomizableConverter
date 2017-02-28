@@ -9,12 +9,10 @@ import android.view.MenuItem;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
+import com.tiomamaster.customizableconverter.converter.ConverterActivity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Created by Artyom on 11.10.2016.
- */
 public class SettingsFragment extends PreferenceFragmentCompat implements SettingsContract.SettingsView {
 
     private SettingsContract.SettingsUal mActionListener;
@@ -123,5 +121,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
     @Override
     public void showPreviousView() {
         getActivity().finish();
+    }
+
+    @Override
+    public void restartApp() {
+        mParentActivity.setResult(ConverterActivity.RESULT_CODE_RESTART_APP);
+        mParentActivity.finish();
     }
 }

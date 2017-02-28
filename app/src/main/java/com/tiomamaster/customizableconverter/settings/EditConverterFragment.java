@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,9 +44,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.R.id.root;
 
-/**
- * Created by Artyom on 07.12.2016.
- */
 public class EditConverterFragment extends Fragment implements SettingsContract.EditConverterView {
 
     private SettingsContract.EditConverterUal mActionListener;

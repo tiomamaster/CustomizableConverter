@@ -20,12 +20,6 @@ import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.R;
 
-import static android.R.attr.value;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * Created by Artyom on 05.01.2017.
- */
 public class EditUnitDialogFragment extends DialogFragment {
 
     static final String EDIT_UNIT_DIALOG_TAG = "EDIT_UNIT_DIALOG_TAG";

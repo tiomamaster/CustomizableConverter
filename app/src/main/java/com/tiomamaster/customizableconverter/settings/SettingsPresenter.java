@@ -1,20 +1,10 @@
 package com.tiomamaster.customizableconverter.settings;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 
-import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 import com.tiomamaster.customizableconverter.data.SettingsRepository;
 
-import java.util.List;
-
-import static android.R.attr.icon;
-import static android.R.attr.id;
 import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * Created by Artyom on 27.10.2016.
- */
 
 class SettingsPresenter implements SettingsContract.SettingsUal, SettingsRepository.OnSettingsChangeListener {
 
@@ -60,7 +50,9 @@ class SettingsPresenter implements SettingsContract.SettingsUal, SettingsReposit
     }
 
     @Override
-    public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm) {
+    public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm,
+                                 boolean langChanged) {
+        if (langChanged) mSettingsView.restartApp();
         mSettingsView.showSummaries(mSettingsRepo.getSummaries());
     }
 }

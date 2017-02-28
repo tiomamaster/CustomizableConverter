@@ -10,11 +10,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.support.v7.widget.Toolbar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -24,14 +24,12 @@ import com.tiomamaster.customizableconverter.data.Repositories;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * Created by Artyom on 14.07.2016.
- */
 public class ConverterActivity extends AppCompatActivity {
 
     public static final String CONVERTER_FRAGMENT_TAG = "ConverterFragment";
+
+    public final static int REQUEST_CODE_SETTINGS_ACTIVITY = 101;
+    public final static int RESULT_CODE_RESTART_APP = 102;
 
     @VisibleForTesting Spinner mSpinConverterTypes;
     private ArrayAdapter<String> mConvertersAdapter;
@@ -109,14 +107,6 @@ public class ConverterActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-    private void initFragment(Fragment fragment) {
-        // Add the ConverterFragment to the layout
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.contentFrame, fragment, CONVERTER_FRAGMENT_TAG);
-        transaction.commit();
-    }
-
     public void initSpinner(@NonNull List<String> convertersTypes, int selection) {
         showSpinner(true);
 
@@ -139,5 +129,13 @@ public class ConverterActivity extends AppCompatActivity {
 
             mSpinConverterTypes.setVisibility(View.GONE);
         }
+    }
+
+    private void initFragment(Fragment fragment) {
+        // Add the ConverterFragment to the layout
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.contentFrame, fragment, CONVERTER_FRAGMENT_TAG);
+        transaction.commit();
     }
 }

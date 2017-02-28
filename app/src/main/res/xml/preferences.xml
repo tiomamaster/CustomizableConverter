@@ -13,7 +13,6 @@
         android:key="PREF_LANGUAGE"
         android:entries="@array/pref_lang_entries"
         android:entryValues="@array/pref_lang_entryValues"
-        android:defaultValue="en"
         android:persistent="true"
         android:layout="@layout/preference_list_item"/>
 
