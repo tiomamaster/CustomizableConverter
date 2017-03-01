@@ -22,6 +22,8 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.method.ArrowKeyMovementMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
 import android.view.LayoutInflater;
@@ -69,8 +71,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     private View mRecyclerViewHeader;
 
     private TextView mMsg;
-
-    private MenuItem mBtnSettings;
 
     public ConverterFragment() {
     }
@@ -236,10 +236,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);
         super.onCreateOptionsMenu(menu, inflater);
-
-        if (mBtnSettings == null) {
-            mBtnSettings = menu.findItem(R.id.settings).setVisible(false).setEnabled(false);
-        }
     }
 
     @Override
@@ -259,10 +255,11 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         if (requestCode == REQUEST_CODE_SETTINGS_ACTIVITY && resultCode == RESULT_CODE_RESTART_APP) {
             Intent startIntent = new Intent(mParentActivity, ConverterActivity.class);
             int pendingIntentId = 123456;
-            PendingIntent mPendingIntent = PendingIntent.getActivity(mParentActivity, pendingIntentId,
+            PendingIntent pendingIntent = PendingIntent.getActivity(mParentActivity, pendingIntentId,
                     startIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             AlarmManager mgr = (AlarmManager) mParentActivity.getSystemService(Context.ALARM_SERVICE);
-            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
+            mParentActivity.finish();
             System.exit(0);
         }
     }
@@ -275,8 +272,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
         final SwipeRefreshLayout srl =
                 (SwipeRefreshLayout) getView().findViewById(R.id.refresh_layout);
-
-        if (!active) mBtnSettings.setVisible(true).setEnabled(true);
 
         // make sure setRefreshing() is called after the layout is done with everything else.
         srl.post(new Runnable() {
@@ -406,6 +401,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof VHItem) {
                 if (mDataSet != null) {
+                    // enable horizontal scrolling
+                    ((VHItem) holder).mResult.setSelected(true);
+
                     ((VHItem) holder).mUnitName.setText(mDataSet.get(position - 1).first);
 
                     String result = mDataSet.get(position - 1).second;

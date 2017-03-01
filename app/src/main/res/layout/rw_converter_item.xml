@@ -23,6 +23,7 @@
         android:layout_height="5dp"/>
 
     <TextView
+        style="@style/ScrolledTextView"
         android:id="@+id/text_unit_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

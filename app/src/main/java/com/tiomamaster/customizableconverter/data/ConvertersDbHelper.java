@@ -18,22 +18,12 @@ import com.tiomamaster.customizableconverter.data.ConvertersDbContract.UnitEntry
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static android.R.attr.name;
-import static android.R.attr.value;
-import static android.R.attr.y;
-import static com.tiomamaster.customizableconverter.R.id.quantity;
-import static com.tiomamaster.customizableconverter.R.id.transition_current_scene;
-
-/**
- * Created by Artyom on 26.08.2016.
- */
 final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
@@ -184,13 +174,6 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                         new String[]{String.valueOf(i)});
             }
         }
-
-        // TODO: delete this after adding and testing asynchronous call
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -219,12 +202,6 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         c.close();
         db.close();
 
-        // TODO: delete this after adding and testing asynchronous call
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return result;
     }
 
@@ -479,13 +456,6 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
         c.close();
         db.close();
-
-        // TODO: delete this after adding and testing asynchronous call
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         return units;
     }
