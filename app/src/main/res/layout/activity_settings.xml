@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:src="@drawable/ic_add"
-            app:fabSize="normal"
+            app:fabSize="mini"
             app:layout_anchor="@id/contentFrame"
             app:layout_anchorGravity="bottom|right|end"/>
 

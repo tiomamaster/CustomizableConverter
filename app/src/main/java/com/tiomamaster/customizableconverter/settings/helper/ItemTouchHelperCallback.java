@@ -3,12 +3,6 @@ package com.tiomamaster.customizableconverter.settings.helper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-import static android.support.v7.widget.helper.ItemTouchHelper.Callback.makeMovementFlags;
-
-/**
- * Created by Artyom on 14.11.2016.
- */
-
 public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     private final ItemTouchHelperAdapter mAdapter;
@@ -29,6 +23,7 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        if (!(viewHolder instanceof ItemTouchHelperViewHolder)) return 0;
         final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
         final int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
         return makeMovementFlags(dragFlags, swipeFlags);
@@ -50,8 +45,6 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
             ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
             itemViewHolder.onItemSelected();
         }
-
-        super.onSelectedChanged(viewHolder, actionState);
     }
 
     @Override
