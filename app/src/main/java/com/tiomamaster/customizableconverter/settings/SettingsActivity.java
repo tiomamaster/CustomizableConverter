@@ -14,13 +14,6 @@ import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.InMemorySettingsRepository;
 import com.tiomamaster.customizableconverter.data.Repositories;
 
-import static android.R.attr.value;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * Created by Artyom on 11.10.2016.
- */
-
 public class SettingsActivity extends AppCompatActivity
         implements EditUnitDialogFragment.EditUnitDialogListener {
 
@@ -95,8 +88,6 @@ public class SettingsActivity extends AppCompatActivity
 
     @Override
     public void onDialogPositiveClick() {
-        checkNotNull(value);
-
         ((SettingsContract.EditConverterUal) mActionListener).saveUnit();
     }
 
@@ -125,19 +116,16 @@ public class SettingsActivity extends AppCompatActivity
         // set appropriate toolbar title
         if (fragment instanceof SettingsFragment) {
             getSupportActionBar().setTitle(getString(R.string.title_fragment_settings));
+            mFab.hide();
         }
         else {
             getSupportActionBar().setTitle(getString(R.string.title_fragment_edit));
+            mFab.show();
         }
     }
 
     void setActionListener(SettingsContract.UserActionListener mActionListener) {
         this.mActionListener = mActionListener;
-    }
-
-    void setFabVisibility(boolean visible) {
-        if (visible) mFab.setVisibility(View.VISIBLE);
-        else mFab.setVisibility(View.GONE);
     }
 
     private void initFragment(Fragment fragment) {

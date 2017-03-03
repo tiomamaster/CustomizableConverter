@@ -39,7 +39,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
                         Injection.provideConvertersRepository(getContext()), view);
                 mParentActivity.showFragment(view);
                 mParentActivity.setActionListener(presenter);
-                mParentActivity.setFabVisibility(true);
                 return true;
             }
         });

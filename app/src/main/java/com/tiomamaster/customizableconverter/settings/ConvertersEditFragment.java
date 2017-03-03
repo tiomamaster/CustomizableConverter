@@ -93,7 +93,8 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
             case android.R.id.home:
                 mActionListener.handleHomePressed();
                 return true;
-            default: return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -109,7 +110,6 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                 Repositories.getInMemoryRepoInstance(getContext()), view);
         mParentActivity.showFragment(view);
         mParentActivity.setActionListener(presenter);
-        mParentActivity.setFabVisibility(false);
     }
 
     @Override
@@ -217,7 +217,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                 mName.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                    showEditConverter(mName.getText().toString());
+                        showEditConverter(mName.getText().toString());
                     }
                 });
 

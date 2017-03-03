@@ -35,9 +35,10 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:src="@drawable/ic_add"
-            app:fabSize="mini"
+            app:fabSize="normal"
             app:layout_anchor="@id/contentFrame"
-            app:layout_anchorGravity="bottom|right|end"/>
+            app:layout_anchorGravity="bottom|right|end"
+            app:layout_behavior = "com.tiomamaster.customizableconverter.settings.FabBehavior"/>
 
     </android.support.design.widget.CoordinatorLayout>
 
