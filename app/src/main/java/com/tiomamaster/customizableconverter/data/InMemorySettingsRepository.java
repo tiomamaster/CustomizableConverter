@@ -122,6 +122,7 @@ public class InMemorySettingsRepository implements SettingsRepository, SharedPre
         Configuration config = new Configuration();
         if (Build.VERSION.SDK_INT >= 17) config.setLocale(locale);
         else config.locale = locale;
+        // FIXME
         mContext.getResources().updateConfiguration(config, mContext.getResources().getDisplayMetrics());
     }
 

@@ -22,8 +22,7 @@ public class Divider extends RecyclerView.ItemDecoration {
 
     private Drawable mDivider;
 
-    @NonNull
-    private Context mContext;
+    @NonNull private Context mContext;
 
     private int mStartPos;
 

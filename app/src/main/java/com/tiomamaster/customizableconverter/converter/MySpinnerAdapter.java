@@ -12,9 +12,6 @@ import android.widget.Spinner;
 
 import com.tiomamaster.customizableconverter.R;
 
-/**
- * Created by Artyom on 29.07.2016.
- */
 class MySpinnerAdapter extends ArrayAdapter<String> {
 
     private LayoutInflater mInflater;

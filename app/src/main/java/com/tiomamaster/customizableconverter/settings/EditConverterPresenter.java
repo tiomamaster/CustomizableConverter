@@ -239,7 +239,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
             return;
         } else mView.showUnitExistError(false);
 
-        if (!mCurUnitValue.isEmpty() && !mCurUnitName.isEmpty()) mView.enableSaveUnit(true);
+        if (checkValue() && !mCurUnitName.isEmpty()) mView.enableSaveUnit(true);
         else mView.enableSaveUnit(false);
     }
 
@@ -249,8 +249,9 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
         mCurUnitValue = newValue;
 
-        if (!mCurUnitValue.isEmpty() && !mUnitNames.contains(mCurUnitName.toLowerCase()) ||
-                mInitialUnitName.toLowerCase().equals(mCurUnitName.toLowerCase()))
+        if (checkValue() && !mCurUnitName.isEmpty() &&
+                (!mUnitNames.contains(mCurUnitName.toLowerCase()) ||
+                        mInitialUnitName.toLowerCase().equals(mCurUnitName.toLowerCase())))
             mView.enableSaveUnit(true);
         else mView.enableSaveUnit(false);
     }
@@ -346,5 +347,15 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         mView.showConverterExistError(true);
         mView.enableSaveConverter(false);
         mGoodConverterName = false;
+    }
+
+    private boolean checkValue() {
+        if (mCurUnitValue.endsWith("E")) {
+            mCurUnitValue = mCurUnitValue.substring(0, mCurUnitValue.length() - 1);
+        } else if (mCurUnitValue.endsWith("-")) {
+            mCurUnitValue = mCurUnitValue.substring(0, mCurUnitValue.length() - 2);
+        }
+        return !mCurUnitValue.isEmpty() && !mCurUnitValue.equals(".") &&
+                Double.parseDouble(mCurUnitValue) != 0;
     }
 }

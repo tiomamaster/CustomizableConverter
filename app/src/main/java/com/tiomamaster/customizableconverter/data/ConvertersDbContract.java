@@ -2,9 +2,6 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.provider.BaseColumns;
 
-/**
- * Created by Artyom on 08.02.2017.
- */
 final class ConvertersDbContract {
 
     private ConvertersDbContract() {}

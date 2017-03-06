@@ -11,9 +11,6 @@ import java.util.List;
 import static android.R.attr.name;
 import static com.tiomamaster.customizableconverter.R.id.quantity;
 
-/**
- * Created by Artyom on 14.07.2016.
- */
 interface ConverterContract {
 
     interface View {

@@ -73,6 +73,9 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
         if (quantity.isEmpty()) {
             mConverterView.showConversionResult(new ArrayList<Pair<String, String>>());
             return;
+        } else if (quantity.equals(".")) {
+            // convert using zero quantity if user starts input with dot
+            quantity = "0";
         }
 
         mConverterView.showConversionResult(mCurConverter.convertAll(Double.valueOf(quantity), from));

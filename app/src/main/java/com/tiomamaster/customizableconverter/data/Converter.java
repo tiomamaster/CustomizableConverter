@@ -5,21 +5,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Created by Artyom on 14.07.2016.
- */
 public class Converter implements Cloneable {
 
     private static  DecimalFormat sDecimalFormat;

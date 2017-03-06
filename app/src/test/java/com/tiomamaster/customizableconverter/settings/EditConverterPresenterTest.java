@@ -226,11 +226,17 @@ public class EditConverterPresenterTest {
             mPresenter.setUnitName("Unit");
 
             verify(mView).showUnitExistError(false);
-            verify(mView).enableSaveUnit(false);
 
             mPresenter.setUnitValue("1");
 
             verify(mView).enableSaveUnit(true);
+
+            mPresenter.setUnitValue(".");
+
+            mPresenter.setUnitValue("0");
+            mPresenter.setUnitName("Unit");
+
+            verify(mView, times(4)).enableSaveUnit(false);
         } else {
             String name = "Unit0";
             // edit existing unit

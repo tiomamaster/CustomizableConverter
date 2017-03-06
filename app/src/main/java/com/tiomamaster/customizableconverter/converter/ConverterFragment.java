@@ -22,8 +22,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.method.ArrowKeyMovementMethod;
-import android.text.method.ScrollingMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
 import android.view.LayoutInflater;
@@ -187,8 +185,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         InputFilter quantityFilter = new InputFilter() {
             @Override
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                if ((!source.toString().equals(".") && dest.toString().equals("0") && dstart == 1) ||
-                        dstart == 0 && !dest.toString().equals("") && source.toString().matches("0|[.]") ||
+                if (dest.toString().equals("0") && dstart == 1 && !source.toString().equals(".") ||
+                        !dest.toString().equals("") && dstart == 0 && source.toString().matches("0|[.]") ||
                         dest.toString().matches("0.\\d+") && (dstart == 0 || dstart == 1) && source.toString().equals("0") ||
                         dest.toString().matches("0.\\d+") && dstart == 1 && source.toString().matches("\\d"))
                     return "";

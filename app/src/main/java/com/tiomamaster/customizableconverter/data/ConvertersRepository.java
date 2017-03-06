@@ -3,12 +3,8 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Artyom on 14.07.2016.
- */
 public interface ConvertersRepository {
 
     interface LoadEnabledConvertersTypesCallback {

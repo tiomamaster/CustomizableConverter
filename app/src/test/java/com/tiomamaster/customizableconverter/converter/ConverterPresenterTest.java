@@ -113,6 +113,9 @@ public class ConverterPresenterTest {
         assertEquals(quantity, doubleCaptor.getValue());
 
         verify(mView).showConversionResult(anyList());
+
+        mPresenter.convert(from, ".");
+        verify(mCurConverter).convertAll(0, from);
     }
 
     @Test
