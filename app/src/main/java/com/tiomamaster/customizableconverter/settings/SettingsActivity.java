@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.settings;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -26,9 +27,6 @@ public class SettingsActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ((InMemorySettingsRepository) Repositories.getInMemoryRepoInstance(getBaseContext())).updateLocale();
-
         setContentView(R.layout.activity_settings);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -79,6 +77,12 @@ public class SettingsActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         getSupportActionBar().setTitle(savedInstanceState.getString(TITLE_KEY));
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(((InMemorySettingsRepository)
+                Repositories.getInMemoryRepoInstance(newBase)).updateLocale());
     }
 
     @Override

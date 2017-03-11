@@ -116,14 +116,18 @@ public class InMemorySettingsRepository implements SettingsRepository, SharedPre
         listener.onSettingsChange(mGrSize, mPrecision, isStandardForm, isDefaultForm, false);
     }
 
-    public void updateLocale() {
+    public Context updateLocale() {
         Locale locale = new Locale(mLanguage);
         Locale.setDefault(locale);
         Configuration config = new Configuration();
-        if (Build.VERSION.SDK_INT >= 17) config.setLocale(locale);
-        else config.locale = locale;
-        // FIXME
-        mContext.getResources().updateConfiguration(config, mContext.getResources().getDisplayMetrics());
+        if (Build.VERSION.SDK_INT >= 17) {
+            config.setLocale(locale);
+            mContext = mContext.createConfigurationContext(config);
+        } else {
+            config.locale = locale;
+            mContext.getResources().updateConfiguration(config, mContext.getResources().getDisplayMetrics());
+        }
+        return mContext;
     }
 
     private void notifyListeners() {

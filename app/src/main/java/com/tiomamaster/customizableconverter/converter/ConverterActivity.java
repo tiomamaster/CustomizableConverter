@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.converter;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -41,9 +42,6 @@ public class ConverterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ((InMemorySettingsRepository) Repositories.getInMemoryRepoInstance(getBaseContext())).updateLocale();
-
         setContentView(R.layout.activity_converter);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -105,6 +103,12 @@ public class ConverterActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(mSpinSelKey, mSpinConverterTypes.getSelectedItemPosition());
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(((InMemorySettingsRepository)
+                Repositories.getInMemoryRepoInstance(newBase)).updateLocale());
     }
 
     public void initSpinner(@NonNull List<String> convertersTypes, int selection) {
