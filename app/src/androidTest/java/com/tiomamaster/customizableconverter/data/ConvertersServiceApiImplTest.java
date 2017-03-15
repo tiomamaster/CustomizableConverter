@@ -161,15 +161,6 @@ public class ConvertersServiceApiImplTest {
         TimeUnit.SECONDS.sleep(timeout);
     }
 
-//    @Test
-//    public void deleteConverter() throws Exception {
-//        final String[] names = getConvertersNames(language);
-//
-//        mApi.deleteConverter(names[0]);
-//
-//        TimeUnit.SECONDS.sleep(timeout);
-//    }
-
     @Test
     public void saveConverter() throws Exception {
         final String newName = "Test";

@@ -180,7 +180,7 @@ public class EditUnitDialogFragment extends DialogFragment {
     }
 
 
-    public interface EditUnitDialogListener {
+    interface EditUnitDialogListener {
         void onDialogPositiveClick();
         void onDialogNegativeClick();
         void onUnitNameChanged(String newName);

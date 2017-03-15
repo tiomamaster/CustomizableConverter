@@ -44,4 +44,5 @@
     <string name="title_fragment_settings">Настройки</string>
     <string name="title_saving_dialog">Сохранение…</string>
     <string name="yes">Да</string>
+    <string name="app_name">Конвертер</string>
 </resources>

@@ -1,8 +1,6 @@
 package com.tiomamaster.customizableconverter.data;
 
-/**
- * Created by Artyom on 05.11.2016.
- */
+import android.support.annotation.NonNull;
 
 public interface SettingsRepository {
 
@@ -18,5 +16,5 @@ public interface SettingsRepository {
 
     boolean getDefaultForm();
 
-    void setOnSettingsChangeListener(OnSettingsChangeListener listener);
+    void setOnSettingsChangeListener(@NonNull OnSettingsChangeListener listener);
 }

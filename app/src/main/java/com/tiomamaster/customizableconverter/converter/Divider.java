@@ -13,12 +13,10 @@ import com.tiomamaster.customizableconverter.R;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Divider for drawing between the recycler view items
+ * Divider for drawing between the recycler view items.
  */
 
 public class Divider extends RecyclerView.ItemDecoration {
-
-    private final int[] ATTRS = new int[]{android.R.attr.listDivider};
 
     private Drawable mDivider;
 
@@ -30,7 +28,8 @@ public class Divider extends RecyclerView.ItemDecoration {
         mContext = checkNotNull(context, "context cannot be null");
         mStartPos = startPos;
 
-        TypedArray styledAttributes = context.obtainStyledAttributes(ATTRS);
+        int[] attrs = new int[]{android.R.attr.listDivider};
+        TypedArray styledAttributes = context.obtainStyledAttributes(attrs);
         mDivider = styledAttributes.getDrawable(0);
         styledAttributes.recycle();
     }

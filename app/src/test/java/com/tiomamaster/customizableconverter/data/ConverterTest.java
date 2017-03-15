@@ -4,35 +4,16 @@ import android.support.v4.util.Pair;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runners.JUnit4;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.asm.tree.InsnList.check;
 
-/**
- * Created by Artyom on 26.07.2016.
- */
 public class ConverterTest {
-
-    private static double sDelta = 0.000001;
 
     private static String[] sUnitsName = {"Meter", "Centimeter", "Fathom", "League", "Mile"};
 
@@ -40,13 +21,11 @@ public class ConverterTest {
 
     private static boolean[] sIsEnabled = {true, true, true, false, true};
 
-    private static List<Converter.Unit> sUnits;
-
     private static Converter sConverter;
 
     @BeforeClass
     public static void setUp() {
-        sUnits = new ArrayList<>();
+        List<Converter.Unit> sUnits = new ArrayList<>();
         for (int i = 0; i < sUnitsName.length; i++) {
             sUnits.add(new Converter.Unit(sUnitsName[i], sUnitsValue[i], sIsEnabled[i]));
         }
@@ -54,7 +33,7 @@ public class ConverterTest {
     }
 
     @Test
-    public void convertAllCheckResult() {
+    public void convertAll_CheckResult() {
         // set default form to unsure correct testing
         Converter.getOnSettingsChangeListener().onSettingsChange(0, 0 ,false ,true, false);
 
@@ -74,7 +53,7 @@ public class ConverterTest {
     }
 
     @Test
-    public void changeSettingsCheckConversionResult() {
+    public void changeSettings_CheckConversionResult() {
         // try to get standard form
         Converter.getOnSettingsChangeListener().onSettingsChange(3, 5, true, false, false);
         List<Pair<String, String>> actual = sConverter.convertAll(5, sUnitsName[0]);
@@ -95,7 +74,7 @@ public class ConverterTest {
     }
 
     @Test
-    public void getEnabledUnitsCheckResult() {
+    public void getEnabledUnits_CheckResult() {
         assertFalse(sConverter.getEnabledUnitsName().contains(sUnitsName[3]));
         assertEquals(4, sConverter.getEnabledUnitsName().size());
     }

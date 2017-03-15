@@ -1,15 +1,9 @@
 package com.tiomamaster.customizableconverter.converter;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
-import com.tiomamaster.customizableconverter.data.Converter;
-
 import java.util.List;
-
-import static android.R.attr.name;
-import static com.tiomamaster.customizableconverter.R.id.quantity;
 
 interface ConverterContract {
 

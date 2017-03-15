@@ -8,11 +8,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 class SettingsPresenter implements SettingsContract.SettingsUal, SettingsRepository.OnSettingsChangeListener {
 
-    @NonNull
-    private SettingsRepository mSettingsRepo;
+    @NonNull private SettingsRepository mSettingsRepo;
 
-    @NonNull
-    private SettingsContract.SettingsView mSettingsView;
+    @NonNull private SettingsContract.SettingsView mSettingsView;
 
     SettingsPresenter(@NonNull SettingsRepository settingsRepository,
                       @NonNull SettingsContract.SettingsView settingsView) {

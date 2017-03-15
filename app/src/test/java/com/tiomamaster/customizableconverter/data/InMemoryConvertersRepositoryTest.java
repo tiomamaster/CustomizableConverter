@@ -17,18 +17,11 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
-/**
- * Created by Artyom on 16.07.2016.
- */
 public class InMemoryConvertersRepositoryTest {
 
     private InMemoryConvertersRepository mRepository;
@@ -52,7 +45,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getEnabledConvertersTypesRepositoryCachesAfterFirstApiCall() {
+    public void getEnabledConvertersTypes_RepositoryCachesAfterFirstApiCall() {
         // first call to the repository
         mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
 
@@ -68,7 +61,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getAllConverterTypesRepositoryCachesAfterFirstApiCall() {
+    public void getAllConverterTypes_RepositoryCachesAfterFirstApiCall() {
         // first call to the repository
         mRepository.getAllConverterTypes(mLoadAllCallback);
 
@@ -84,7 +77,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getConverterRepositoryCachesAfterFirstApiCall() {
+    public void getConverter_RepositoryCachesAfterFirstApiCall() {
         String name = "Test";
 
         //first call to the repository
@@ -103,7 +96,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getLastConverterAlwaysCallOnce() {
+    public void getLastConverter_AlwaysCallOnce() {
         String name = "Test";
 
         //first call to the repository
@@ -122,7 +115,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getConverterNameChanging() {
+    public void getConverter_NameChanging() {
         String[] names = {"Test0", "Test1"};
 
         // retrieve first converter
@@ -151,7 +144,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getConverterCallSetLastConverter() {
+    public void getConverter_CallSetLastConverter() {
         mRepository.mLastConverterName = "Test";
 
         mRepository.getConverter("Test1", false, mGetConverterCallback);
@@ -164,7 +157,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getEnabledConvertersTypesReturnOnlyEnabled() {
+    public void getEnabledConvertersTypes_ReturnOnlyEnabled() {
         // simulate last converter name
         mRepository.mLastConverterName = "Third";
 
@@ -273,7 +266,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void saveConvertersOrderCallServiceApi() {
+    public void saveConvertersOrder_CallServiceApi() {
         List<Pair<String, Boolean>> types = cacheTypes();
 
         mRepository.saveConvertersOrder();
@@ -282,7 +275,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void saveConverterStateCallServiceApi() {
+    public void saveConverterState_CallServiceApi() {
         List<Pair<String, Boolean>> types = cacheTypes();
 
         int index = 1;
@@ -293,7 +286,7 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void saveConverterDeletionCallServiceApi() {
+    public void saveConverterDeletion_CallServiceApi() {
         List<Pair<String, Boolean>> types = cacheTypes();
 
         int index = 0;

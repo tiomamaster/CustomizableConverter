@@ -26,9 +26,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Created by Artyom on 23.01.2017.
- */
 @RunWith(Parameterized.class)
 public class EditConverterPresenterTest {
 

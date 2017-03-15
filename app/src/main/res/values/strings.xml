@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Customizable Converter</string>
+    <string name="app_name">Converter</string>
     <string name="label_spin_convert_from">Convert from:</string>
     <string name="label_edit_text_quantity">In quantity:</string>
     <string name="label_rw_result">Result:</string>

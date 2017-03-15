@@ -15,16 +15,11 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Created by Artyom on 07.12.2016.
- */
 class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
-    @NonNull
-    private ConvertersRepository mConvertersRepo;
+    @NonNull private ConvertersRepository mConvertersRepo;
 
-    @NonNull
-    private SettingsContract.EditConverterView mView;
+    @NonNull private SettingsContract.EditConverterView mView;
 
     private String mInitialConverterName;
 

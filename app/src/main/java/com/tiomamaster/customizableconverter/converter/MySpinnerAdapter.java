@@ -2,7 +2,6 @@ package com.tiomamaster.customizableconverter.converter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.AppCompatCheckedTextView;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;

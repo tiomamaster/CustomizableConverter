@@ -1,6 +1,5 @@
 package com.tiomamaster.customizableconverter.settings;
 
-
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -156,7 +155,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         @Override
         public ConvertersAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new ConvertersAdapter.ViewHolder(LayoutInflater.from(parent.getContext()).
-                    inflate(R.layout.item_converters_edit, parent, false));
+                    inflate(R.layout.rw_converters_edit_item, parent, false));
         }
 
         @Override

@@ -9,9 +9,6 @@ import com.tiomamaster.customizableconverter.data.Converter;
 
 import java.util.List;
 
-/**
- * Created by Artyom on 27.10.2016.
- */
 interface SettingsContract {
 
     interface View {

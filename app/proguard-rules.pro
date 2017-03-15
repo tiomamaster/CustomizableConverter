@@ -15,3 +15,23 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}
+
+-keep class javax.annotation.** { *; }
+-dontwarn javax.annotation.**
+-keep class sun.misc.Unsafe { *; }
+-dontwarn sun.misc.Unsafe
+-keep class com.google.j2objc.annotations.** { *; }
+-dontwarn   com.google.j2objc.annotations.**
+-keep class java.lang.ClassValue { *; }
+-dontwarn   java.lang.ClassValue
+-keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
+-dontwarn   org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement

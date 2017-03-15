@@ -6,7 +6,6 @@ import android.support.v7.app.AlertDialog;
 
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,21 +14,16 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.core.AllOf.allOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.matches;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Created by Artyom on 18.01.2017.
- */
 public class ConvertersEditPresenterTest {
 
     @Mock private SettingsContract.ConvertersEditView mView;
@@ -53,21 +47,21 @@ public class ConvertersEditPresenterTest {
     }
 
     @Test
-    public void pressHomeBtnShowSettings() {
+    public void pressHomeBtn_ShowSettings() {
         mPresenter.handleHomePressed();
 
         verify(mView).showPreviousView();
     }
 
     @Test
-    public void handleFabShowEditConverter() {
+    public void handleFab_ShowEditConverter() {
         mPresenter.handleFabPressed();
 
         verify(mView).showEditConverter("");
     }
 
     @Test
-    public void loadConvertersReturnAll() {
+    public void loadConverters_ReturnAll() {
         List<Pair<String, Boolean>> actual = mPresenter.loadConverters();
 
         verify(mRepository, times(2)).getCachedConvertersTypes();
@@ -144,5 +138,4 @@ public class ConvertersEditPresenterTest {
 
         verify(mRepository, times(2)).saveConverterState(2);
     }
-
 }

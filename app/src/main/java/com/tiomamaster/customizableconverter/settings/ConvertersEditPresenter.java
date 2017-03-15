@@ -12,9 +12,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Created by Artyom on 06.12.2016.
- */
 class ConvertersEditPresenter implements SettingsContract.ConvertersEditUal {
 
     @NonNull private ConvertersRepository mConvertersRepo;

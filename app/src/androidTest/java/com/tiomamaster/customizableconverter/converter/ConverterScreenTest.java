@@ -1,6 +1,5 @@
 package com.tiomamaster.customizableconverter.converter;
 
-
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
 import android.support.test.espresso.ViewInteraction;
@@ -26,16 +25,12 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
-import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.clearText;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
-import static android.support.test.espresso.matcher.ViewMatchers.hasImeAction;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
@@ -43,20 +38,16 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withSpinnerText;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by Artyom on 19.07.2016.
- */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ConverterScreenTest {
@@ -76,7 +67,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void rotateCheckSpinnerConvertersState() {
+    public void rotate_CheckSpinnerConvertersState() {
         // spinner converter types prepare for rotate
         Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
         String selectionText = adapter.getItem(
@@ -92,7 +83,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void rotateCheckRecyclerViewState() {
+    public void rotate_CheckRecyclerViewState() {
         // spinner units prepare for rotate
         Adapter adapter = mFragment.mSpinnerUnits.getAdapter();
         String selectionText = adapter.getItem(
@@ -121,7 +112,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void chooseConverterShowIt() {
+    public void chooseConverter_ShowIt() {
         // select all converters in spinner
         Adapter adapter = mActivity.mSpinConverterTypes.getAdapter();
         for (int j = 0; j < adapter.getCount(); j++) {
@@ -143,7 +134,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void convertCheckResult() {
+    public void convert_CheckResult() {
         double quantity = 998.2217;
         String from = mFragment.mSpinnerUnits.getSelectedItem().toString();
 
@@ -169,7 +160,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void scrollCloseSoftKeyboard() {
+    public void scroll_CloseSoftKeyboard() {
         // input text to show keyboard
         onView(withId(R.id.quantity)).perform(typeText("900"));
 
@@ -184,7 +175,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void changeConverterSaveConverterState() {
+    public void changeConverter_SaveConverterState() {
         int converterPos = 2;
         int anotherConverterPos = 3;
         int unitPosition = 3;
@@ -225,7 +216,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void changeConverterHideSoftInput() {
+    public void changeConverter_HideSoftInput() {
         // select converter
         ViewInteraction spinnerConverterTypes = onView(withId(R.id.spinner_converter_types));
         spinnerConverterTypes.perform(click());
@@ -246,7 +237,7 @@ public class ConverterScreenTest {
     }
 
     @Test
-    public void clickSettingsMenuItemOpenSettingsUi() {
+    public void clickSettingsMenuItem_OpenSettingsUi() {
 
         // Click on settings option
         onView(withId(R.id.settings)).perform(click());
@@ -285,11 +276,8 @@ public class ConverterScreenTest {
             @Override
             protected boolean matchesSafely(final RecyclerView view) {
                 RecyclerView.ViewHolder viewHolder = view.findViewHolderForAdapterPosition(position);
-                if (viewHolder == null) {
-                    // has no item on such position
-                    return false;
-                }
-                return itemMatcher.matches(viewHolder.itemView);
+                // has no item on such position
+                return viewHolder != null && itemMatcher.matches(viewHolder.itemView);
             }
         };
     }

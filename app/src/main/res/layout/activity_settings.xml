@@ -41,5 +41,4 @@
             app:layout_behavior = "com.tiomamaster.customizableconverter.settings.FabBehavior"/>
 
     </android.support.design.widget.CoordinatorLayout>
-
 </LinearLayout>

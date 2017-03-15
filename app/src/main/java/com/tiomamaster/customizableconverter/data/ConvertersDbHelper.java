@@ -136,20 +136,17 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                             } else {
                                 Log.e(TAG, "onCreate: unit name is empty in line "
                                         + lineNum + " in file " + s);
-                                errors.append("Unit name is empty in line "
-                                        + lineNum + "\n");
+                                errors.append("Unit name is empty in line ").append(lineNum).append("\n");
                             }
                         } else {
                             Log.e(TAG, "onCreate: unit value is 0 in line "
                                     + lineNum + " in file " + s);
-                            errors.append("Unit value is 0 in line "
-                                    + lineNum + "\n");
+                            errors.append("Unit value is 0 in line ").append(lineNum).append("\n");
                         }
                     } else {
                         Log.e(TAG, "onCreate: unit value is empty in line "
                                 + lineNum + " in file " + s);
-                        errors.append("Unit value is empty in line "
-                                + lineNum + "\n");
+                        errors.append("Unit value is empty in line ").append(lineNum).append("\n");
                     }
                     lineNum++;
                 }

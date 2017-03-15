@@ -25,9 +25,6 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
 
-/**
- * Created by Artyom on 31.10.2016.
- */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SettingsScreenTest {

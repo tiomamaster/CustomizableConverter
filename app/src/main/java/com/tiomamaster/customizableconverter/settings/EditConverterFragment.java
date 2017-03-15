@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -93,7 +92,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
     }
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -152,8 +150,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 return false;
             }
         });
-
-
 
         mTextError = (TextView) mRecyclerViewHeader.findViewById(R.id.text_msg_error);
 
