@@ -3,6 +3,7 @@ package com.tiomamaster.customizableconverter.converter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatCheckedTextView;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,12 +44,12 @@ class MySpinnerAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.item_spin_converter_types, null);
-            ((AppCompatCheckedTextView)convertView).setTextColor(mColorPrimary);
-            ((AppCompatCheckedTextView)convertView).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            ((AppCompatTextView)convertView).setTextColor(mColorPrimary);
+            ((AppCompatTextView)convertView).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             if (mBackground != -1) {
                 convertView.setBackgroundColor(mBackground);
             }
-            ((AppCompatCheckedTextView)convertView).setHeight(mHeight);
+            ((AppCompatTextView)convertView).setHeight(mHeight);
         }
         return super.getView(position, convertView, parent);
     }
@@ -57,8 +58,8 @@ class MySpinnerAdapter extends ArrayAdapter<String> {
     public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.item_spin_converter_types, null);
-            ((AppCompatCheckedTextView)convertView).setHeight(mHeight);
-            ((AppCompatCheckedTextView)convertView).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            ((AppCompatTextView)convertView).setHeight(mHeight);
+            ((AppCompatTextView)convertView).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             int paddingLeftRight = mContext.getResources().
                     getDimensionPixelSize(R.dimen.spinner_item_left_right_padding);
             convertView.setPadding(paddingLeftRight, 0, paddingLeftRight, 0);
@@ -67,9 +68,9 @@ class MySpinnerAdapter extends ArrayAdapter<String> {
             }
         }
         if (mSpinner.getSelectedItemPosition() == position)
-            ((AppCompatCheckedTextView) convertView).setTextColor(mColorAccent);
+            ((AppCompatTextView) convertView).setTextColor(mColorAccent);
         else
-            ((AppCompatCheckedTextView) convertView).setTextColor(mColorPrimary);
+            ((AppCompatTextView) convertView).setTextColor(mColorPrimary);
         return super.getDropDownView(position, convertView, parent);
     }
 }

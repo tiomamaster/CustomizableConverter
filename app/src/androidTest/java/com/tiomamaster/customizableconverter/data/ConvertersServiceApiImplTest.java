@@ -1,8 +1,6 @@
 package com.tiomamaster.customizableconverter.data;
 
-import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
@@ -12,7 +10,6 @@ import android.text.TextUtils;
 import com.tiomamaster.customizableconverter.R;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,18 +27,14 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
 
-/**
- * Created by Artyom on 27.08.2016.
- */
 @RunWith(Parameterized.class)
 @LargeTest
 public class ConvertersServiceApiImplTest {
 
     // adb shell pm clear  com.tiomamaster.customizableconverter.demo
 
-    private static final int timeout = 5;
+    private static final int timeout = 1;
 
     private Context mContext;
 
