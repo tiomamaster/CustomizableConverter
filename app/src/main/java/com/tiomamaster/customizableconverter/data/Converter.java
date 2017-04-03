@@ -15,13 +15,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Converter implements Cloneable {
 
-    private static  DecimalFormat sDecimalFormat;
+    private static  DecimalFormat sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
 
     private static boolean isDefaultForm;
 
     @NonNull private String mName;
 
-    @NonNull private List<Unit> mUnits;
+    @NonNull protected List<Unit> mUnits;
 
     @Nullable private final String mErrors;
 
@@ -53,7 +53,7 @@ public class Converter implements Cloneable {
             public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm,
                                          boolean langChanged) {
                 // initialize at first call and further update DecimalFormat instance if app lang change
-                sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+//                sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
 
                 if (stForm) {
                     sDecimalFormat.applyPattern("0.0E0");
@@ -149,7 +149,7 @@ public class Converter implements Cloneable {
         this.mLastQuantity = mLastQuantity;
     }
 
-    private String convert(double quantity, double from, double to){
+    protected String convert(double quantity, double from, double to) {
         if (isDefaultForm) return String.valueOf(quantity * from / to);
         return sDecimalFormat.format(quantity * from / to);
     }
