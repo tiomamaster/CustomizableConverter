@@ -2,7 +2,6 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class TemperatureConverter extends Converter {
                 return 5/9d * (value - 32);
 
             case RANKINE_ID:
-                return (273.15 - value) / 1.8;
+                return value/1.8 - 273.15;
 
             case DELISLE_ID:
                 return 100 - value * 2/3d;
@@ -53,7 +52,7 @@ public class TemperatureConverter extends Converter {
                 return 100/33d * value;
 
             case RÉAUMUR_ID:
-                return 0.8 * value;
+                return value * 1.25;
 
             case RØMER_ID:
                 return 40/21d * (value - 7.5);
@@ -71,7 +70,7 @@ public class TemperatureConverter extends Converter {
                 return 9/5d * value + 32;
 
             case RANKINE_ID:
-                return 273.15 + value * 1.8;
+                return (273.15 + value) * 1.8;
 
             case DELISLE_ID:
                 return (100 - value) * 3/2d;
@@ -80,16 +79,12 @@ public class TemperatureConverter extends Converter {
                 return 33/100d * value;
 
             case RÉAUMUR_ID:
-                return 1.25 * value;
+                return 0.8 * value;
 
             case RØMER_ID:
                 return 21/40d * value + 7.5;
         }
 
         throw new RuntimeException("Unknown temperature unit name.");
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new TemperatureConverter("T", new ArrayList()).convert(10,));
     }
 }
