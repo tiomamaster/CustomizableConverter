@@ -22,8 +22,9 @@ public class TemperatureConverterTest {
                                               new Converter.Unit("Rankine",    3, true),
                                               new Converter.Unit("Delisle",    4, true),
                                               new Converter.Unit("Newton",     5, true),
-                                              new Converter.Unit("Réaumur",    6, true),
-                                              new Converter.Unit("Rømer",      7, true)};
+                                              new Converter.Unit("Réaumur(modern scale)",   6, true),
+                                              new Converter.Unit("Réaumur(original scale)", 7, true),
+                                              new Converter.Unit("Rømer",                   8, true)};
 
     private static Converter sTempConverter = new TemperatureConverter("T", Arrays.asList(sUnits));
 
@@ -31,8 +32,11 @@ public class TemperatureConverterTest {
 
     @Parameterized.Parameters
     public static Object[] data() {
-        return new Object[] {Arrays.asList(283.15, 50.0, 509.67, 135.0, 3.3, 8.0, 12.75),
-                             Arrays.asList(-263.15, -441.67, 18.00, 544.73, -86.84, -210.52, -130.65)};
+        return new Object[] {
+                // results for convert from Celsius
+                Arrays.asList(283.15, 50.0, 509.67, 135.0, 3.3, 8.0, 10.81, 12.75),
+                // results for convert from Kelvin
+                Arrays.asList(-263.15, -441.67, 18.00, 544.73, -86.84, -210.52, -284.486, -130.65)};
     }
 
     public TemperatureConverterTest(List<Double> expected) {

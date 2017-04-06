@@ -3,7 +3,6 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TemperatureConverter extends Converter {
@@ -14,8 +13,9 @@ public class TemperatureConverter extends Converter {
     private static final byte RANKINE_ID   = 3;
     private static final byte DELISLE_ID   = 4;
     private static final byte NEWTON_ID    = 5;
-    private static final byte RÉAUMUR_ID   = 6;
-    private static final byte RØMER_ID     = 7;
+    private static final byte RÉAUMUR_MODERN_ID = 6;
+    private static final byte RÉAUMUR_ORIGINAL_ID = 7;
+    private static final byte RØMER_ID     = 8;
 
     public TemperatureConverter(@NonNull String name, @NonNull List<Unit> units,
                                 @Nullable String errors, int lastUnit,
@@ -51,8 +51,11 @@ public class TemperatureConverter extends Converter {
             case NEWTON_ID:
                 return 100/33d * value;
 
-            case RÉAUMUR_ID:
-                return value * 1.25;
+            case RÉAUMUR_MODERN_ID:
+                return 1.25 * value;
+
+            case RÉAUMUR_ORIGINAL_ID:
+                return 0.925 * value;
 
             case RØMER_ID:
                 return 40/21d * (value - 7.5);
@@ -78,8 +81,11 @@ public class TemperatureConverter extends Converter {
             case NEWTON_ID:
                 return 33/100d * value;
 
-            case RÉAUMUR_ID:
+            case RÉAUMUR_MODERN_ID:
                 return 0.8 * value;
+
+            case RÉAUMUR_ORIGINAL_ID:
+                return value / 0.925;
 
             case RØMER_ID:
                 return 21/40d * value + 7.5;
