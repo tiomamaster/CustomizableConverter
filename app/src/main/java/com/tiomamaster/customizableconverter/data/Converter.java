@@ -52,8 +52,7 @@ public class Converter implements Cloneable {
             @Override
             public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm,
                                          boolean langChanged) {
-                // initialize at first call and further update DecimalFormat instance if app lang change
-//                sDecimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+                // update DecimalFormat instance if app lang change
 
                 if (stForm) {
                     sDecimalFormat.applyPattern("0.0E0");

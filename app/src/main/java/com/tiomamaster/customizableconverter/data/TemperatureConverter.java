@@ -3,7 +3,10 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.math.MathContext;
 import java.util.List;
+
+import static android.os.Build.VERSION_CODES.M;
 
 public class TemperatureConverter extends Converter {
 
@@ -13,9 +16,13 @@ public class TemperatureConverter extends Converter {
     private static final byte RANKINE_ID   = 3;
     private static final byte DELISLE_ID   = 4;
     private static final byte NEWTON_ID    = 5;
-    private static final byte RÉAUMUR_MODERN_ID = 6;
+    private static final byte RÉAUMUR_MODERN_ID   = 6;
     private static final byte RÉAUMUR_ORIGINAL_ID = 7;
-    private static final byte RØMER_ID     = 8;
+    private static final byte RØMER_ID            = 8;
+    private static final byte LEIDEN_SCALE_ID     = 9;
+    private static final byte PLANCK_TEMPERATURE_ID = 10;
+    private static final byte HOOKE_ID              = 11;
+    private static final byte DALTON_ID             = 12;
 
     public TemperatureConverter(@NonNull String name, @NonNull List<Unit> units,
                                 @Nullable String errors, int lastUnit,
@@ -59,6 +66,18 @@ public class TemperatureConverter extends Converter {
 
             case RØMER_ID:
                 return 40/21d * (value - 7.5);
+
+            case LEIDEN_SCALE_ID:
+                return value - 253;
+
+            case PLANCK_TEMPERATURE_ID:
+                return 1.416808 * Math.pow(10, 32) * value - 273.15;
+
+            case HOOKE_ID:
+                return 12/5 * value;
+
+            case DALTON_ID:
+                return 273.15 * (Math.pow(373.15/273.15, value/100) - 1);
         }
 
         throw new RuntimeException("Unknown temperature unit name.");
@@ -89,6 +108,18 @@ public class TemperatureConverter extends Converter {
 
             case RØMER_ID:
                 return 21/40d * value + 7.5;
+
+            case LEIDEN_SCALE_ID:
+                return value + 253;
+
+            case PLANCK_TEMPERATURE_ID:
+                return value/(1.416808 * Math.pow(10, 32)) + 273.15;
+
+            case HOOKE_ID:
+                return 5/12 * value;
+
+            case DALTON_ID:
+                return Math.log(Math.pow(value/273.15 + 1, 100))/Math.log(373.15/273.15);
         }
 
         throw new RuntimeException("Unknown temperature unit name.");
