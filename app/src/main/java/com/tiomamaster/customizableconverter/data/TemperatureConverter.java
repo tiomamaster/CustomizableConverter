@@ -74,10 +74,10 @@ public class TemperatureConverter extends Converter {
                 return 1.416808 * Math.pow(10, 32) * value - 273.15;
 
             case HOOKE_ID:
-                return 12/5 * value;
+                return 12/5d * value;
 
             case DALTON_ID:
-                return 273.15 * (Math.pow(373.15/273.15, value/100) - 1);
+                return 273.15 * (Math.pow(373.15 / 273.15, value / 100) - 1);
         }
 
         throw new RuntimeException("Unknown temperature unit name.");
@@ -113,10 +113,10 @@ public class TemperatureConverter extends Converter {
                 return value + 253;
 
             case PLANCK_TEMPERATURE_ID:
-                return value/(1.416808 * Math.pow(10, 32)) + 273.15;
+                return (value + 273.15) / (1.416808 * Math.pow(10, 32));
 
             case HOOKE_ID:
-                return 5/12 * value;
+                return 5/12d * value;
 
             case DALTON_ID:
                 return Math.log(Math.pow(value/273.15 + 1, 100))/Math.log(373.15/273.15);
