@@ -39,12 +39,8 @@ public class Converter implements Cloneable {
         mLastQuantity = lastQuantity;
     }
 
-    public Converter(@NonNull String name, @NonNull List<Unit> units, String errors) {
-        this(name, units, errors, 0, "1");
-    }
-
     public Converter(@NonNull String name, @NonNull List<Unit> units) {
-        this(name, units, null);
+        this(name, units, null, 0, "1");
     }
 
     static SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {
@@ -92,7 +88,10 @@ public class Converter implements Cloneable {
 
         for (Unit to : mUnits) {
             if (to.isEnabled && !to.name.equals(from.name)) {
-                result.add(new Pair<>(to.name, convert(quantity, from.value, to.value)));
+                String resultValue;
+                if (isDefaultForm) resultValue = String.valueOf(convert(quantity, from.value, to.value));
+                else resultValue = sDecimalFormat.format(convert(quantity, from.value, to.value));
+                result.add(new Pair<>(to.name, resultValue));
             }
         }
 
@@ -148,9 +147,8 @@ public class Converter implements Cloneable {
         this.mLastQuantity = mLastQuantity;
     }
 
-    protected String convert(double quantity, double from, double to) {
-        if (isDefaultForm) return String.valueOf(quantity * from / to);
-        return sDecimalFormat.format(quantity * from / to);
+    protected double convert(double quantity, double from, double to) {
+        return quantity * from / to;
     }
 
     public static class Unit implements Cloneable {

@@ -215,6 +215,10 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         c.close();
+        if (name.equals("Temperature") || name.equals("Температура")) {
+            return new TemperatureConverter(name, getUnits(db, converterId),
+                    errors, lastSelUnitPos, lastQuantity);
+        }
         return new Converter(name, getUnits(db, converterId), errors, lastSelUnitPos, lastQuantity);
     }
 
@@ -245,6 +249,10 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         c.close();
+        if (name.equals("Temperature") || name.equals("Температура")) {
+            return new TemperatureConverter(name, getUnits(db, converterId),
+                    errors, lastSelUnitPos, lastQuantity);
+        }
         return new Converter(name, getUnits(db, converterId), errors, lastSelUnitPos, lastQuantity);
     }
 

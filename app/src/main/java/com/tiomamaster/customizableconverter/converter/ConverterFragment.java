@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -187,8 +188,12 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 if (dest.toString().equals("0") && dstart == 1 && !source.toString().equals(".") ||
                         !dest.toString().equals("") && dstart == 0 && source.toString().matches("0|[.]") ||
-                        dest.toString().matches("0.\\d+") && (dstart == 0 || dstart == 1) && source.toString().equals("0") ||
-                        dest.toString().matches("0.\\d+") && dstart == 1 && source.toString().matches("\\d"))
+                        dest.toString().matches("0.\\d*?") && (dstart == 0 || dstart == 1) && source.toString().equals("0") ||
+                        dest.toString().matches("0.\\d*?") && dstart == 1 && source.toString().matches("\\d") ||
+                        dest.toString().equals("-") && source.toString().equals(".") ||
+                        dest.toString().matches("-0.?\\d*?") && (dstart == 1 || dstart == 2) && source.toString().equals("0") ||
+                        dest.toString().matches("-0.?\\d*?") && dstart == 2 && source.toString().matches("\\d") ||
+                        dest.toString().matches("-\\d+.?\\d*?") && dstart == 1 && source.toString().equals("0"))
                     return "";
                 return null;
             }
@@ -292,9 +297,17 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     @Override
-    public void showConverter(@NonNull List<String> units, int lastUnitPos, @NonNull String lastQuantity) {
+    public void showConverter(@NonNull List<String> units, int lastUnitPos,
+                              @NonNull String lastQuantity, boolean signedQuantity) {
         checkNotNull(units);
         checkNotNull(lastQuantity);
+
+        // set signed edit text for quantity input
+        if (signedQuantity) {
+            mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL|
+                    EditorInfo.TYPE_NUMBER_FLAG_SIGNED);
+        }
+        else mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
 
         // clear spinner units and set new data
         mUnitsAdapter.clear();
@@ -327,16 +340,12 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     public void showConversionResult(@NonNull List<Pair<String, String>> result) {
         checkNotNull(result);
 
-        if (result.isEmpty()) {
-            mConversionResult.setVisibility(View.VISIBLE);
-            return;
-        }
-
         mResultAdapter.setDataSet(result);
 
         mMsg.setVisibility(View.GONE);
         mConversionResult.setVisibility(View.VISIBLE);
-        mResultText.setVisibility(View.VISIBLE);
+        if (result.isEmpty()) mResultText.setVisibility(View.GONE);
+        else mResultText.setVisibility(View.VISIBLE);
     }
 
     @Override

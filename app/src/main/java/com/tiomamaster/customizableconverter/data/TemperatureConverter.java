@@ -10,19 +10,19 @@ import static android.os.Build.VERSION_CODES.M;
 
 public class TemperatureConverter extends Converter {
 
-    private static final byte CELSIUS_ID   = 0;
-    private static final byte KELVIN_ID    = 1;
-    private static final byte FARENEIT_ID  = 2;
-    private static final byte RANKINE_ID   = 3;
-    private static final byte DELISLE_ID   = 4;
-    private static final byte NEWTON_ID    = 5;
-    private static final byte RÉAUMUR_MODERN_ID   = 6;
-    private static final byte RÉAUMUR_ORIGINAL_ID = 7;
-    private static final byte RØMER_ID            = 8;
-    private static final byte LEIDEN_SCALE_ID     = 9;
-    private static final byte PLANCK_TEMPERATURE_ID = 10;
-    private static final byte HOOKE_ID              = 11;
-    private static final byte DALTON_ID             = 12;
+    private static final byte CELSIUS_ID   = 1;
+    private static final byte KELVIN_ID    = 2;
+    private static final byte FARENEIT_ID  = 3;
+    private static final byte RANKINE_ID   = 4;
+    private static final byte DELISLE_ID   = 5;
+    private static final byte NEWTON_ID    = 6;
+    private static final byte RÉAUMUR_MODERN_ID   = 7;
+    private static final byte RÉAUMUR_ORIGINAL_ID = 8;
+    private static final byte RØMER_ID            = 9;
+    private static final byte LEIDEN_SCALE_ID     = 10;
+    private static final byte PLANCK_TEMPERATURE_ID = 11;
+    private static final byte HOOKE_ID              = 12;
+    private static final byte DALTON_ID             = 13;
 
     public TemperatureConverter(@NonNull String name, @NonNull List<Unit> units,
                                 @Nullable String errors, int lastUnit,
@@ -35,10 +35,10 @@ public class TemperatureConverter extends Converter {
     }
 
     @Override
-    protected String convert(double quantity, double from, double to) {
-        if (from == CELSIUS_ID) return String.valueOf(convertFromCelsius(quantity, (byte) to));
-        if (to == CELSIUS_ID) return String.valueOf(celsiusValueOf((byte) from, quantity));
-        return String.valueOf(convertFromCelsius(celsiusValueOf((byte) from, quantity), (byte) to));
+    protected double convert(double quantity, double from, double to) {
+        if (from == CELSIUS_ID) return convertFromCelsius(quantity, (byte) to);
+        if (to == CELSIUS_ID) return celsiusValueOf((byte) from, quantity);
+        return convertFromCelsius(celsiusValueOf((byte) from, quantity), (byte) to);
     }
 
     private double celsiusValueOf(byte nameId, double value) {

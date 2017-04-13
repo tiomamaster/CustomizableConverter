@@ -13,7 +13,8 @@ interface ConverterContract {
 
         void showConvertersTypes(@NonNull List<String> converters, int selection);
 
-        void showConverter(@NonNull List<String> units, int lastUnitPos, @NonNull String lastQuantity);
+        void showConverter(@NonNull List<String> units, int lastUnitPos,
+                           @NonNull String lastQuantity, boolean signedQuantity);
 
         void showConversionResult(@NonNull List<Pair<String, String>> result);
 

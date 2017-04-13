@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.tiomamaster.customizableconverter.R.id.quantity;
 
 class ConverterPresenter implements ConverterContract.UserActionListener {
 
@@ -47,7 +48,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
     }
 
     @Override
-    public void loadConverter(@NonNull String name) {
+    public void loadConverter(@NonNull final String name) {
         checkNotNull(name);
 
         mConverterView.setProgressIndicator(true);
@@ -61,16 +62,22 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
                 mCurConverter = converter;
 
-                mConverterView.showConverter(converter.getEnabledUnitsName(),
-                        converter.getLastUnitPosition(),
-                        converter.getLastQuantity());
+                if (name.equals("Temperature") || name.equals("Температура")) {
+                    mConverterView.showConverter(converter.getEnabledUnitsName(),
+                            converter.getLastUnitPosition(),
+                            converter.getLastQuantity(), true);
+                } else {
+                    mConverterView.showConverter(converter.getEnabledUnitsName(),
+                            converter.getLastUnitPosition(),
+                            converter.getLastQuantity(), false);
+                }
             }
         });
     }
 
     @Override
     public void convert(@NonNull String from, @NonNull String quantity) {
-        if (quantity.isEmpty()) {
+        if (quantity.isEmpty() || quantity.equals("-")) {
             mConverterView.showConversionResult(new ArrayList<Pair<String, String>>());
             return;
         } else if (quantity.equals(".")) {

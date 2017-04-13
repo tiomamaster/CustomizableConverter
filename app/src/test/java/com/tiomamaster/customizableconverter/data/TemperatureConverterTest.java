@@ -16,19 +16,19 @@ public class TemperatureConverterTest {
 
     private static int sIndex;
 
-    private static Converter.Unit[] sUnits = {new Converter.Unit("Celsius",    0, true),
-                                              new Converter.Unit("Kelvin",     1, true),
-                                              new Converter.Unit("Fahrenheit", 2, true),
-                                              new Converter.Unit("Rankine",    3, true),
-                                              new Converter.Unit("Delisle",    4, true),
-                                              new Converter.Unit("Newton",     5, true),
-                                              new Converter.Unit("Réaumur(modern scale)",   6, true),
-                                              new Converter.Unit("Réaumur(original scale)", 7, true),
-                                              new Converter.Unit("Rømer",                   8, true),
-                                              new Converter.Unit("Leiden scale",            9, true),
-                                              new Converter.Unit("Planck temperature",      10, true),
-                                              new Converter.Unit("Hooke",                   11, true),
-                                              new Converter.Unit("Dalton",                  12, true)};
+    private static Converter.Unit[] sUnits = {new Converter.Unit("Celsius",    1, true),
+                                              new Converter.Unit("Kelvin",     2, true),
+                                              new Converter.Unit("Fahrenheit", 3, true),
+                                              new Converter.Unit("Rankine",    4, true),
+                                              new Converter.Unit("Delisle",    5, true),
+                                              new Converter.Unit("Newton",     6, true),
+                                              new Converter.Unit("Réaumur(modern scale)",   7, true),
+                                              new Converter.Unit("Réaumur(original scale)", 8, true),
+                                              new Converter.Unit("Rømer",                   9, true),
+                                              new Converter.Unit("Leiden scale",            10, true),
+                                              new Converter.Unit("Planck temperature",      11, true),
+                                              new Converter.Unit("Hooke",                   12, true),
+                                              new Converter.Unit("Dalton",                  13, true)};
 
     private static Converter sTempConverter = new TemperatureConverter("T", Arrays.asList(sUnits));
 
@@ -53,6 +53,9 @@ public class TemperatureConverterTest {
 
     @Test
     public void convertAll() {
+        // set default form to unsure correct testing
+        Converter.getOnSettingsChangeListener().onSettingsChange(0, 0 ,false ,true, false);
+
         List<Pair<String, String>> result = sTempConverter.convertAll(10, sUnits[sIndex].name);
         for (int i = 0; i < result.size(); i++) {
             Pair<String, String> pair = result.get(i);

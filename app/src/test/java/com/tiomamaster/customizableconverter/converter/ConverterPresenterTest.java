@@ -5,6 +5,7 @@ import android.support.v4.util.Pair;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,13 +23,16 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ConverterPresenterTest {
 
-    private static final List<String> CONVERTERS_TYPES = Arrays.asList("Test0", "Test1");
+    private static final List<String> CONVERTERS_TYPES = Arrays.asList("Test0", "Test1",
+            "Temperature", "Температура");
 
     @Mock private ConverterContract.View mView;
 
@@ -86,10 +90,22 @@ public class ConverterPresenterTest {
         mGetConverterCaptor.getValue().onConverterLoaded(converter);
 
         verify(mView).setProgressIndicator(false);
-
-        verify(mView).showConverter(anyList(), anyInt(), anyString());
-
+        verify(mView).showConverter(anyList(), anyInt(), anyString(), eq(false));
         assertEquals(name, converter.getName());
+
+        // load temperature converter in en and ru locales
+        name = CONVERTERS_TYPES.get(2);
+        mPresenter.loadConverter(name);
+        verify(mRepository).getConverter(eq(name), anyBoolean(), mGetConverterCaptor.capture());
+        converter = new Converter(name, new ArrayList<Converter.Unit>());
+        mGetConverterCaptor.getValue().onConverterLoaded(converter);
+
+        name = CONVERTERS_TYPES.get(3);
+        mPresenter.loadConverter(name);
+        verify(mRepository).getConverter(eq(name), anyBoolean(), mGetConverterCaptor.capture());
+        converter = new Converter(name, new ArrayList<Converter.Unit>());
+        mGetConverterCaptor.getValue().onConverterLoaded(converter);
+        verify(mView, times(2)).showConverter(anyList(), anyInt(), anyString(), eq(true));
     }
 
     @Test

@@ -85,6 +85,9 @@ public class ConvertersServiceApiImplTest {
             mApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
                 @Override
                 public void onLoaded(@NonNull Converter converter) {
+                    if (name.equals("Temperature") || name.equals("Температура")) {
+                        assertTrue(converter instanceof TemperatureConverter);
+                    }
                     assertNotNull(converter);
                     assertEquals(name, converter.getName());
                     assertTrue(converter.getUnits().size() > 2);
@@ -102,14 +105,22 @@ public class ConvertersServiceApiImplTest {
         final String[] expected = getConvertersNames(language);
 
         mApi.setLastConverter(expected[expected.length - 1]);
-
         mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(expected[expected.length - 1], converter.getName());
             }
         });
+        TimeUnit.SECONDS.sleep(timeout);
 
+        // set Temperature as last and check it
+        mApi.setLastConverter(expected[6]);
+        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertTrue(converter instanceof TemperatureConverter);
+            }
+        });
         TimeUnit.SECONDS.sleep(timeout);
     }
 
