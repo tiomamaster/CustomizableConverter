@@ -24,6 +24,7 @@ import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -462,8 +463,32 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             VHItem(View itemView) {
                 super(itemView);
 
-                mUnitName = (TextView) itemView.findViewById(R.id.text_unit_name);
-                mResult = (TextView) itemView.findViewById(R.id.text_unit_value);
+                mUnitName = (TextView) itemView.findViewById(R.id.text_view_name);
+                mResult = (TextView) itemView.findViewById(R.id.text_view_value);
+
+                registerForContextMenu(mResult);
+                mResult.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                    @Override
+                    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                        menu.add(R.string.copy).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                                    android.text.ClipboardManager clipboard = (android.text.ClipboardManager)
+                                            mParentActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+                                    clipboard.setText(mResult.getText());
+                                } else {
+                                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
+                                            mParentActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+                                    android.content.ClipData clip = android.content.ClipData
+                                            .newPlainText("Copied Text", mResult.getText());
+                                    clipboard.setPrimaryClip(clip);
+                                }
+                                return true;
+                            }
+                        });
+                    }
+                });
             }
         }
 

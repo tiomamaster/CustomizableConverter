@@ -45,4 +45,5 @@
     <string name="title_saving_dialog">Сохранение…</string>
     <string name="yes">Да</string>
     <string name="app_name">Конвертер</string>
+    <string name="copy">КОПИРОВАТЬ</string>
 </resources>

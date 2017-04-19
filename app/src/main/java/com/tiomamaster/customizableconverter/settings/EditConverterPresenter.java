@@ -6,6 +6,7 @@ import android.support.v4.util.Pair;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.TemperatureConverter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -308,6 +309,11 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 mHaveUnsavedChanges = false;
             }
         }, mCurConverter, mInitialConverterName);
+    }
+
+    @Override
+    public boolean isUnitsEditable() {
+        return !(mCurConverter instanceof TemperatureConverter);
     }
 
     private Set<String> createLowerCaseUnitNames() {

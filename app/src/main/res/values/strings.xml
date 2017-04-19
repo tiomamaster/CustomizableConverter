@@ -45,4 +45,5 @@
     <string name="cancel">Cancel</string>
     <string name="ok" translatable="false">OK</string>
     <string name="hint_number">Input number</string>
+    <string name="copy">COPY</string>
 </resources>

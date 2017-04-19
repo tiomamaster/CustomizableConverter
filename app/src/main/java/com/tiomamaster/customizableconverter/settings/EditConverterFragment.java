@@ -350,6 +350,8 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         private final static int TYPE_ITEM = 0;
         private final static int TYPE_HEADER = 1;
 
+        private boolean editable;
+
         private List<Converter.Unit> mUnits;
 
         @Override
@@ -361,8 +363,13 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_ITEM) {
-                return new VHItem(LayoutInflater.from(parent.getContext()).
-                        inflate(R.layout.rw_edit_converter_item, parent, false));
+                if (editable) {
+                    return new VHItem(LayoutInflater.from(parent.getContext()).
+                            inflate(R.layout.rw_edit_converter_item, parent, false));
+                } else {
+                    return new VHItem(LayoutInflater.from(parent.getContext()).
+                            inflate(R.layout.rw_converters_edit_item, parent, false));
+                }
             } else if (viewType == TYPE_HEADER) {
                 return new VHHeader(mRecyclerViewHeader);
             }
@@ -376,9 +383,11 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 int pos = position - 1;
                 ((VHItem) holder).mUnitName.setText(mUnits.get(pos).name);
 
-                double value = mUnits.get(pos).value;
-                if (value != 0d) {
-                    ((VHItem) holder).mUnitValue.setText(String.valueOf(value));
+                if (editable) {
+                    double value = mUnits.get(pos).value;
+                    if (value != 0d) {
+                        ((VHItem) holder).mUnitValue.setText(String.valueOf(value));
+                    }
                 }
 
                 ((VHItem) holder).mCheck.setChecked(mUnits.get(pos).isEnabled);
@@ -434,6 +443,8 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 // because notifyItemChanged() cause bug inside recycler view
                 notifyDataSetChanged();
             }
+
+            editable = mActionListener.isUnitsEditable();
         }
 
         private class VHItem extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
@@ -449,17 +460,20 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             VHItem(View itemView) {
                 super(itemView);
 
-                itemView.findViewById(root).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                if (editable) {
+                    itemView.findViewById(root).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                        mActionListener.editUnit(mUnitName.getText().toString(),
-                                mUnitValue.getText().toString());
-                    }
-                });
+                            mActionListener.editUnit(mUnitName.getText().toString(),
+                                    mUnitValue.getText().toString());
+                        }
+                    });
 
-                mUnitName = (TextView) itemView.findViewById(R.id.text_unit_name);
-                mUnitValue = (TextView) itemView.findViewById(R.id.text_unit_value);
+                    mUnitValue = (TextView) itemView.findViewById(R.id.text_view_value);
+                }
+
+                mUnitName = (TextView) itemView.findViewById(R.id.text_view_name);
                 mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
                 mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
             }

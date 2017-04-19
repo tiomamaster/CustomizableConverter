@@ -128,5 +128,10 @@ interface SettingsContract {
         void saveUnit();
 
         void saveConverter(boolean closeEditor);
+
+        /**
+         * @return true if units value editable for current converter, false otherwise.
+         */
+        boolean isUnitsEditable();
     }
 }

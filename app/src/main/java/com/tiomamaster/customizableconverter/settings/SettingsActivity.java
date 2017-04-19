@@ -117,7 +117,7 @@ public class SettingsActivity extends AppCompatActivity
         transaction.replace(R.id.contentFrame, fragment);
         transaction.commit();
 
-        // set appropriate toolbar title
+        // set appropriate toolbar title and handle fab
         if (fragment instanceof SettingsFragment) {
             getSupportActionBar().setTitle(getString(R.string.title_fragment_settings));
             mFab.hide();
