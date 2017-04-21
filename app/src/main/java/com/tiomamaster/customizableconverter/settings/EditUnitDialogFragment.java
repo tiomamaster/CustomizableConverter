@@ -45,6 +45,14 @@ public class EditUnitDialogFragment extends DialogFragment {
         return f;
     }
 
+    public static EditUnitDialogFragment newInstance(String name) {
+        EditUnitDialogFragment f = new EditUnitDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(ARGUMENT_UNIT_NAME, name);
+        f.setArguments(args);
+        return f;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -90,37 +98,40 @@ public class EditUnitDialogFragment extends DialogFragment {
 
         final EditText value = (EditText) dialogView.findViewById(R.id.edit_text_value);
 
-        value.setText(getArguments().getString(ARGUMENT_UNIT_VALUE));
+        String valueText = getArguments().getString(ARGUMENT_UNIT_VALUE);
+        if (valueText != null) {
+            value.setText(valueText);
 
-        value.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            value.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
+                }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-            }
+                }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                mListener.onUnitValueChanged(s.toString());
-            }
-        });
+                @Override
+                public void afterTextChanged(Editable s) {
+                    mListener.onUnitValueChanged(s.toString());
+                }
+            });
 
-        InputFilter valueFilter = new InputFilter() {
-            @Override
-            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                if (dest.toString().equals("0") && dstart == 1 && !source.toString().equals(".") ||
-                        !dest.toString().equals("") && dstart == 0 && source.toString().matches("0|[.]") ||
-                        dest.toString().matches("0.\\d+") && (dstart == 0 || dstart == 1) && source.toString().equals("0") ||
-                        dest.toString().matches("0.\\d+") && dstart == 1 && source.toString().matches("\\d"))
-                    return "";
-                return null;
-            }
-        };
-        value.setFilters(new InputFilter[]{valueFilter});
+            InputFilter valueFilter = new InputFilter() {
+                @Override
+                public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                    if (dest.toString().equals("0") && dstart == 1 && !source.toString().equals(".") ||
+                            !dest.toString().equals("") && dstart == 0 && source.toString().matches("0|[.]") ||
+                            dest.toString().matches("0.\\d+") && (dstart == 0 || dstart == 1) && source.toString().equals("0") ||
+                            dest.toString().matches("0.\\d+") && dstart == 1 && source.toString().matches("\\d"))
+                        return "";
+                    return null;
+                }
+            };
+            value.setFilters(new InputFilter[]{valueFilter});
+        } else value.setVisibility(View.GONE);
 
         builder.setView(dialogView)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

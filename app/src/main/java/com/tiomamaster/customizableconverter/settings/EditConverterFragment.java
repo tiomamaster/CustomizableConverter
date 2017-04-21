@@ -41,7 +41,6 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.tiomamaster.customizableconverter.R.id.root;
 
 public class EditConverterFragment extends Fragment implements SettingsContract.EditConverterView {
 
@@ -254,7 +253,16 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     @Override
     public void showEditUnit(@Nullable String name, @Nullable String value) {
-        showEditUnitDialog(name, value);
+        DialogFragment editDialog = EditUnitDialogFragment.newInstance(name, value);
+        editDialog.show(mParentActivity.getSupportFragmentManager(),
+                EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG);
+    }
+
+    @Override
+    public void showEditUnit(@NonNull String name) {
+        DialogFragment editDialog = EditUnitDialogFragment.newInstance(name);
+        editDialog.show(mParentActivity.getSupportFragmentManager(),
+                EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG);
     }
 
     @Override
@@ -329,12 +337,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         hideSoftInput();
     }
 
-    private void showEditUnitDialog(String name, String value) {
-        DialogFragment editDialog = EditUnitDialogFragment.newInstance(name, value);
-        editDialog.show(mParentActivity.getSupportFragmentManager(),
-                EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG);
-    }
-
     private void hideSoftInput() {
         //Find the currently focused view, so we can grab the correct window token from it.
         View view = mParentActivity.getCurrentFocus();
@@ -345,7 +347,8 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    private class UnitsAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ItemTouchHelperAdapter {
+    private class UnitsAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+            implements ItemTouchHelperAdapter {
 
         private final static int TYPE_ITEM = 0;
         private final static int TYPE_HEADER = 1;
@@ -444,7 +447,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 notifyDataSetChanged();
             }
 
-            editable = mActionListener.isUnitsEditable();
+            editable = mActionListener.isUnitsValueEditable();
+            if (editable) mParentActivity.showFab(true);
+            else mParentActivity.showFab(false);
         }
 
         private class VHItem extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
@@ -460,8 +465,14 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             VHItem(View itemView) {
                 super(itemView);
 
+                mUnitName = (TextView) itemView.findViewById(R.id.text_view_name);
+                mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
+                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
+
                 if (editable) {
-                    itemView.findViewById(root).setOnClickListener(new View.OnClickListener() {
+                    mUnitValue = (TextView) itemView.findViewById(R.id.text_view_value);
+
+                    itemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
 
@@ -469,13 +480,14 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                                     mUnitValue.getText().toString());
                         }
                     });
-
-                    mUnitValue = (TextView) itemView.findViewById(R.id.text_view_value);
+                } else {
+                    itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mActionListener.editUnit(mUnitName.getText().toString(), null);
+                        }
+                    });
                 }
-
-                mUnitName = (TextView) itemView.findViewById(R.id.text_view_name);
-                mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
-                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
             }
 
             @Override

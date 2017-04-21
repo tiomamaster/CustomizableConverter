@@ -256,6 +256,10 @@ public class EditConverterPresenterTest {
             // so, edit existing unit
             verify(mView).showUnitExistError(false);
             verify(mView).enableSaveUnit(true);
+
+            // edit only unit name
+            mPresenter.editUnit(name, null);
+            verify(mView).showEditUnit(name);
         }
     }
 

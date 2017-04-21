@@ -19,8 +19,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
@@ -142,7 +144,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         mParentActivity.setActionListener(presenter);
     }
 
-    private class ConvertersAdapter extends RecyclerView.Adapter<ConvertersAdapter.ViewHolder>
+    private class ConvertersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             implements ItemTouchHelperAdapter {
 
         private List<Pair<String, Boolean>> mConverters;
@@ -153,16 +155,16 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
         }
 
         @Override
-        public ConvertersAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ConvertersAdapter.ViewHolder(LayoutInflater.from(parent.getContext()).
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new VH(LayoutInflater.from(parent.getContext()).
                     inflate(R.layout.rw_converters_edit_item, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(final ConvertersAdapter.ViewHolder holder, int position) {
-            holder.mName.setText(mConverters.get(position).first);
+        public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+            ((VH) holder).mName.setText(mConverters.get(position).first);
 
-            holder.mHandleReorder.setOnTouchListener(new View.OnTouchListener() {
+            ((VH) holder).mHandleReorder.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (MotionEventCompat.getActionMasked(event) ==
@@ -173,8 +175,8 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
                 }
             });
 
-            holder.mCheck.setChecked(mConverters.get(position).second);
-            holder.mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            ((VH) holder).mCheck.setChecked(mConverters.get(position).second);
+            ((VH) holder).mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     mActionListener.enableConverter(holder.getAdapterPosition(), isChecked);
@@ -201,27 +203,27 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
             mActionListener.deleteConverter(position);
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+        private class VH extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
-            private AppCompatTextView mName;
+            private TextView mName;
 
             private ImageView mHandleReorder;
 
-            private AppCompatCheckBox mCheck;
+            private CheckBox mCheck;
 
-            ViewHolder(View itemView) {
+            VH(View itemView) {
                 super(itemView);
 
-                mName = (AppCompatTextView) itemView.findViewById(R.id.text_view_name);
-                mName.setOnClickListener(new View.OnClickListener() {
+                mName = (TextView) itemView.findViewById(R.id.text_view_name);
+                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
+                mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
+
+                itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         showEditConverter(mName.getText().toString());
                     }
                 });
-
-                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
-                mCheck = (AppCompatCheckBox) itemView.findViewById(R.id.check_box_enable);
             }
 
             @Override

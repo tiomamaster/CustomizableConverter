@@ -210,17 +210,20 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     }
 
     @Override
-    public void editUnit(@NonNull String name, @NonNull String value) {
+    public void editUnit(@NonNull String name, @Nullable String value) {
         checkNotNull(name);
-        checkNotNull(value);
-
-        mView.showEditUnit(name, value);
 
         mInitialUnitName = mCurUnitName = name;
-
-        mCurUnitValue = value;
-
         isNewUnit = false;
+
+        if (value != null) {
+            mView.showEditUnit(name, value);
+            mCurUnitValue = value;
+        } else {
+            mView.showEditUnit(name);
+            mCurUnitValue = String.valueOf(
+                    mUnits.get(mUnits.indexOf(new Converter.Unit(name, 1, true))).value);
+        }
     }
 
     @Override
@@ -312,7 +315,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     }
 
     @Override
-    public boolean isUnitsEditable() {
+    public boolean isUnitsValueEditable() {
         return !(mCurConverter instanceof TemperatureConverter);
     }
 

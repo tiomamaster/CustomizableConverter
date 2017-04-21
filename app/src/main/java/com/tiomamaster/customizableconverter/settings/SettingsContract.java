@@ -85,6 +85,8 @@ interface SettingsContract {
 
         void showEditUnit(@Nullable String name, @Nullable String value);
 
+        void showEditUnit(@NonNull String name);
+
         /**
          * Show error massage.
          * @param visible True if show error, false otherwise.
@@ -119,7 +121,7 @@ interface SettingsContract {
 
         void enableUnit(int orderPosition , boolean enable);
 
-        void editUnit(@NonNull String name, @NonNull String value);
+        void editUnit(@NonNull String name, @Nullable String value);
 
         void setUnitName(@NonNull String newName);
 
@@ -132,6 +134,6 @@ interface SettingsContract {
         /**
          * @return true if units value editable for current converter, false otherwise.
          */
-        boolean isUnitsEditable();
+        boolean isUnitsValueEditable();
     }
 }

@@ -10,7 +10,7 @@
     android:layout_marginRight="16dp"
     android:minHeight="48dp">
 
-    <android.support.v7.widget.AppCompatTextView
+    <TextView
         android:id="@+id/text_view_name"
         android:textColor="@color/primary_text"
         android:layout_width="wrap_content"
@@ -33,7 +33,7 @@
         android:layout_toLeftOf="@+id/check_box_enable"
         android:layout_toStartOf="@+id/check_box_enable" />
 
-    <android.support.v7.widget.AppCompatCheckBox
+    <CheckBox
         android:id="@+id/check_box_enable"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

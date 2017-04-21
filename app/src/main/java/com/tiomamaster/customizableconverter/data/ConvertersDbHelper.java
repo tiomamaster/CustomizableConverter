@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.R.attr.data;
+
 final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
@@ -180,6 +182,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        //TODO: upgrade db with new data for temperature converter
+        //TODO: add new field in converter table witch describe the type of converter and use this field for converters creation
     }
 
     List<Pair<String, Boolean>> getAllConverters() {

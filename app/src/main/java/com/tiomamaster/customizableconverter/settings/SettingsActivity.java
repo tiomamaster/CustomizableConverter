@@ -121,15 +121,21 @@ public class SettingsActivity extends AppCompatActivity
         if (fragment instanceof SettingsFragment) {
             getSupportActionBar().setTitle(getString(R.string.title_fragment_settings));
             mFab.hide();
-        }
-        else {
+        } else {
             getSupportActionBar().setTitle(getString(R.string.title_fragment_edit));
-            mFab.show();
+            // do not show fab instantly for EditConverterFragment
+            if (fragment instanceof ConvertersEditFragment) mFab.show();
         }
     }
 
     void setActionListener(SettingsContract.UserActionListener mActionListener) {
         this.mActionListener = mActionListener;
+    }
+
+    void showFab(boolean visible) {
+        if (visible) mFab.show();
+        else if (mFab.isShown()) mFab.hide();
+        else mFab.setVisibility(View.GONE);
     }
 
     private void initFragment(Fragment fragment) {
