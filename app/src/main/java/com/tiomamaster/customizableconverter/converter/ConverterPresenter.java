@@ -6,12 +6,12 @@ import android.support.v4.util.Pair;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.TemperatureConverter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.tiomamaster.customizableconverter.R.id.quantity;
 
 class ConverterPresenter implements ConverterContract.UserActionListener {
 
@@ -62,7 +62,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
                 mCurConverter = converter;
 
-                if (name.equals("Temperature") || name.equals("Температура")) {
+                if (mCurConverter instanceof TemperatureConverter) {
                     mConverterView.showConverter(converter.getEnabledUnitsName(),
                             converter.getLastUnitPosition(),
                             converter.getLastQuantity(), true);

@@ -108,7 +108,7 @@ public class EditConverterPresenterTest {
     @Test
     public void handleFabPressed() {
         mPresenter.handleFabPressed();
-        verify(mView).showEditUnit(null, null);
+        verify(mView).showEditUnit(null, "");
     }
 
     @Test

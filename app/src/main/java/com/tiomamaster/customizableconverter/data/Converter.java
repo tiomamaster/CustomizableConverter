@@ -40,7 +40,7 @@ public class Converter implements Cloneable {
     }
 
     public Converter(@NonNull String name, @NonNull List<Unit> units) {
-        this(name, units, null, 0, "1");
+        this(name, units, null, 0, "");
     }
 
     static SettingsRepository.OnSettingsChangeListener getOnSettingsChangeListener() {

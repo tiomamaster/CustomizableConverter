@@ -75,7 +75,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void handleFabPressed() {
         // show dialog for creation new unit with empty field
-        mView.showEditUnit(null, null);
+        mView.showEditUnit(null, "");
 
         mInitialUnitName = mCurUnitName = mCurUnitValue = "";
 

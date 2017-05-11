@@ -258,6 +258,29 @@ public class ConvertersServiceApiImplTest {
     }
 
     @Test
+    public void updateTemperatureConverter() throws Exception {
+        final String[] expected = getConvertersNames(language);
+        final String newName = "Temp";
+        Converter edited = new TemperatureConverter(newName, Collections.<Converter.Unit>emptyList());
+        mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
+            @Override
+            public void onSaved(boolean saved) {
+                assertTrue(saved);
+            }
+        }, edited, expected[6]);
+
+        mApi.getConverter(newName, new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertTrue(converter instanceof TemperatureConverter);
+                assertEquals(newName, converter.getName());
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
+    @Test
     public void writeConvertersOrder() throws Exception {
         String[] names = getConvertersNames(language);
         final List<Pair<String, Boolean>> actualConverters = new ArrayList<>(names.length);

@@ -23,13 +23,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static android.R.attr.data;
-
 final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "Converters.db";
 
     private static final String CREATE_TABLE_CONVERTER =
@@ -42,7 +40,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
                     ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 0, " +
                     ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text, " +
-                    ConverterEntry.COLUMN_NAME_ERRORS + " text default null)";
+                    ConverterEntry.COLUMN_NAME_ERRORS + " text default null, " +
+                    ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0)";
 
     private static final String CREATE_TABLE_UNIT =
             "create table " + UnitEntry.TABLE_NAME +
@@ -71,6 +70,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
     private Context mContext;
 
     private String mDbLang;
+
+    private static final int TEMPERATURE_CONVERTER_TYPE = 1;
 
     ConvertersDbHelper(Context c, String dbLang) {
         super(c, dbLang + DATABASE_NAME, null, DATABASE_VERSION);
@@ -105,6 +106,10 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         for (String s : assets) {
             // insert into table converter
             ContentValues contentValues = new ContentValues();
+            // by default converter type is 0, but for temperature set type to 1
+            if (TextUtils.equals(s, "Temperature")) {
+                contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, TEMPERATURE_CONVERTER_TYPE);
+            }
             if (TextUtils.equals(mDbLang, "ru"))
                 contentValues.put(ConverterEntry.COLUMN_NAME_NAME, translate[i]);
             else
@@ -112,65 +117,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, ++i);
             db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
             contentValues.clear();
-
-            // read file line by line and insert into table unit
-            BufferedReader reader = null;
-            StringBuilder errors = new StringBuilder();
-            try {
-                reader = new BufferedReader(new InputStreamReader(am.open(mDbLang + "/" + s)));
-                String line;
-                Pattern pattern = Pattern.compile(" +\\d+([.]|[,])?\\d* *");
-                Matcher matcher = pattern.matcher("");
-                int lineNum = 1;
-                while ((line = reader.readLine()) != null) {
-                    matcher.reset(line);
-                    if (matcher.find()) {
-                        Double value = Double.valueOf(matcher.group().trim());
-                        if (value != 0) {
-                            String name = matcher.replaceAll("").trim();
-                            if (!TextUtils.isEmpty(name)) {
-                                contentValues.put(UnitEntry.COLUMN_NAME_NAME, name);
-                                contentValues.put(UnitEntry.COLUMN_NAME_VALUE, value);
-                                contentValues.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, i);
-                                contentValues.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, lineNum);
-                                db.insert(UnitEntry.TABLE_NAME, null, contentValues);
-                                contentValues.clear();
-                            } else {
-                                Log.e(TAG, "onCreate: unit name is empty in line "
-                                        + lineNum + " in file " + s);
-                                errors.append("Unit name is empty in line ").append(lineNum).append("\n");
-                            }
-                        } else {
-                            Log.e(TAG, "onCreate: unit value is 0 in line "
-                                    + lineNum + " in file " + s);
-                            errors.append("Unit value is 0 in line ").append(lineNum).append("\n");
-                        }
-                    } else {
-                        Log.e(TAG, "onCreate: unit value is empty in line "
-                                + lineNum + " in file " + s);
-                        errors.append("Unit value is empty in line ").append(lineNum).append("\n");
-                    }
-                    lineNum++;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            // update converter if any showConverterExistError occurs after reading asset file
-            if (errors.length() != 0) {
-                // delete last \n
-                errors.deleteCharAt(errors.length() - 1);
-                contentValues.put(ConverterEntry.COLUMN_NAME_ERRORS, errors.toString());
-                db.update(ConverterEntry.TABLE_NAME, contentValues, ConverterEntry._ID + " = ?",
-                        new String[]{String.valueOf(i)});
-            }
+            // insert into table unit
+            insertUnits(db, i, s, contentValues);
         }
     }
 
@@ -182,8 +130,31 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //TODO: upgrade db with new data for temperature converter
         //TODO: add new field in converter table witch describe the type of converter and use this field for converters creation
+        db.execSQL("alter table " + ConverterEntry.TABLE_NAME + " add column " +
+                ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0");
+
+        //TODO: upgrade db with new data for temperature converter
+        // insert into converter table
+        String converterName = "Temperature";
+        Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
+                null, null, null, null, null);
+        c.moveToFirst();
+        int converterOrderPos = c.getInt(0) + 1;
+        c.close();
+        ContentValues contentValues = new ContentValues();
+        if (TextUtils.equals(mDbLang, "ru")) {
+            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Температура");
+        } else {
+            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, converterName);
+        }
+        contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, converterOrderPos);
+        contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, TEMPERATURE_CONVERTER_TYPE);
+        long id = db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
+        contentValues.clear();
+        // insert into table unit
+        insertUnits(db, id, converterName, contentValues);
     }
 
     List<Pair<String, Boolean>> getAllConverters() {
@@ -211,15 +182,17 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                 new String[]{ConverterEntry._ID,
                         ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                         ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
-                        ConverterEntry.COLUMN_NAME_ERRORS},
+                        ConverterEntry.COLUMN_NAME_ERRORS,
+                        ConverterEntry.COLUMN_NAME_TYPE},
                 ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name}, null, null, null);
         c.moveToFirst();
         int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
         int lastSelUnitPos = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS));
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
+        int type = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_TYPE));
         c.close();
-        if (name.equals("Temperature") || name.equals("Температура")) {
+        if (type == TEMPERATURE_CONVERTER_TYPE) {
             return new TemperatureConverter(name, getUnits(db, converterId),
                     errors, lastSelUnitPos, lastQuantity);
         }
@@ -233,7 +206,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                         ConverterEntry.COLUMN_NAME_NAME,
                         ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                         ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
-                        ConverterEntry.COLUMN_NAME_ERRORS},
+                        ConverterEntry.COLUMN_NAME_ERRORS,
+                        ConverterEntry.COLUMN_NAME_TYPE},
                 ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = ?", new String[]{"true"},
                 null, null, null);
         if (!c.moveToFirst()) {
@@ -243,7 +217,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                             ConverterEntry.COLUMN_NAME_NAME,
                             ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                             ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
-                            ConverterEntry.COLUMN_NAME_ERRORS},
+                            ConverterEntry.COLUMN_NAME_ERRORS,
+                            ConverterEntry.COLUMN_NAME_TYPE},
                             null, null, null, null, ConverterEntry.COLUMN_NAME_ORDER_POSITION);
         }
         c.moveToFirst();
@@ -252,8 +227,9 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         int lastSelUnitPos = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS));
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
+        int type = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_TYPE));
         c.close();
-        if (name.equals("Temperature") || name.equals("Температура")) {
+        if (type == TEMPERATURE_CONVERTER_TYPE) {
             return new TemperatureConverter(name, getUnits(db, converterId),
                     errors, lastSelUnitPos, lastQuantity);
         }
@@ -421,6 +397,9 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         values.put(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS, lastSelUnitPos);
         values.put(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT, converter.getLastQuantity());
         values.put(ConverterEntry.COLUMN_NAME_ERRORS, converter.getErrors());
+        if (converter instanceof TemperatureConverter) {
+            values.put(ConverterEntry.COLUMN_NAME_TYPE, TEMPERATURE_CONVERTER_TYPE);
+        }
         try {
             long converterId = db.insert(ConverterEntry.TABLE_NAME, null, values);
             if (converterId == -1) return false;
@@ -471,6 +450,68 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
     private void enableFk(SQLiteDatabase db) {
         if (!db.isReadOnly()) {
             db.execSQL(ENABLE_FK);
+        }
+    }
+
+    private void insertUnits(SQLiteDatabase db, long converterId,
+                             String converterName, ContentValues contentValues) {
+        AssetManager am = mContext.getAssets();
+        BufferedReader reader = null;
+        StringBuilder errors = new StringBuilder();
+        try {
+            reader = new BufferedReader(new InputStreamReader(am.open(mDbLang + "/" + converterName)));
+            String line;
+            Pattern pattern = Pattern.compile(" +\\d+([.]|[,])?\\d* *");
+            Matcher matcher = pattern.matcher("");
+            int lineNum = 1;
+            while ((line = reader.readLine()) != null) {
+                matcher.reset(line);
+                if (matcher.find()) {
+                    Double value = Double.valueOf(matcher.group().trim());
+                    if (value != 0) {
+                        String name = matcher.replaceAll("").trim();
+                        if (!TextUtils.isEmpty(name)) {
+                            contentValues.put(UnitEntry.COLUMN_NAME_NAME, name);
+                            contentValues.put(UnitEntry.COLUMN_NAME_VALUE, value);
+                            contentValues.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
+                            contentValues.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, lineNum);
+                            db.insert(UnitEntry.TABLE_NAME, null, contentValues);
+                            contentValues.clear();
+                        } else {
+                            Log.e(TAG, "onCreate: unit name is empty in line "
+                                    + lineNum + " in file " + converterName);
+                            errors.append("Unit name is empty in line ").append(lineNum).append("\n");
+                        }
+                    } else {
+                        Log.e(TAG, "onCreate: unit value is 0 in line "
+                                + lineNum + " in file " + converterName);
+                        errors.append("Unit value is 0 in line ").append(lineNum).append("\n");
+                    }
+                } else {
+                    Log.e(TAG, "onCreate: unit value is empty in line "
+                            + lineNum + " in file " + converterName);
+                    errors.append("Unit value is empty in line ").append(lineNum).append("\n");
+                }
+                lineNum++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (errors.length() != 0) {
+            // delete last \n
+            errors.deleteCharAt(errors.length() - 1);
+            contentValues.put(ConverterEntry.COLUMN_NAME_ERRORS, errors.toString());
+            db.update(ConverterEntry.TABLE_NAME, contentValues, ConverterEntry._ID + " = ?",
+                    new String[]{String.valueOf(converterId)});
         }
     }
 }

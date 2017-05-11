@@ -83,6 +83,12 @@ interface SettingsContract {
          */
         void showWarning(int position);
 
+        /**
+         * Show dialog to edit existing or create new unit.
+         * @param name The name of the editing unit. Pass null if create new unit.
+         * @param value The value of the editing unit. Pass null if unit is uneditable,
+         *              or empty string if create new unit.
+         */
         void showEditUnit(@Nullable String name, @Nullable String value);
 
         void showEditUnit(@NonNull String name);
