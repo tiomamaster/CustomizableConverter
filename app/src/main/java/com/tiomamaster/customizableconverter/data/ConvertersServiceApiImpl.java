@@ -5,6 +5,9 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -27,11 +30,15 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     private Context mContext;
 
+    private CurrencyLoader mCurrencyLoader;
+
     public ConvertersServiceApiImpl(Context c) {
         if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
             mDbHelper = new ConvertersDbHelper(c, "ru");
+            mCurrencyLoader = new CurrencyLoader(c, "ru");
         } else {
             mDbHelper = new ConvertersDbHelper(c, "en");
+            mCurrencyLoader = new CurrencyLoader(c, "en");
         }
         mContext = c;
     }
@@ -87,8 +94,31 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             }
 
             @Override
-            protected void onPostExecute(Converter converter) {
-                callback.onLoaded(converter);
+            protected void onPostExecute(final Converter converter) {
+                if (!converter.getUnits().isEmpty()) callback.onLoaded(converter);
+
+                // this case is the first request of currency converter so try to download fresh courses from the internet
+                else mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
+                    @Override
+                    public void onResponse(List<CurrencyConverter.CurrencyUnit> response) {
+                        // data successfully loaded, so return it to the user
+                        converter.getUnits().addAll(response);
+                        callback.onLoaded(converter);
+
+                        // save data to the database
+                        sSingleExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDbHelper.save(converter, converter.getName());
+                            }
+                        });
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO: report the error
+                    }
+                });
             }
         }.execute();
     }

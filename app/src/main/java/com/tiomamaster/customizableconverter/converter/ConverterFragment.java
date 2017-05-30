@@ -373,7 +373,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     /**
-     * Handle selection of spinner converters types
+     * Handle selection of spinner converters types.
      */
     void spinnerSelected(String selection) {
         mConversionResult.setVisibility(View.GONE);

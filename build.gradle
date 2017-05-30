@@ -40,4 +40,5 @@ ext {
     runnerVersion = '0.5'
     rulesVersion = '0.5'
     espressoVersion = '2.2.2'
+    volleyVersion = '1.0.0'
 }

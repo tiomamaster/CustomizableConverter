@@ -21,7 +21,7 @@ public class Converter implements Cloneable {
 
     @NonNull private String mName;
 
-    @NonNull protected List<Unit> mUnits;
+    @NonNull private List<Unit> mUnits;
 
     @Nullable private final String mErrors;
 

@@ -27,7 +27,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
 
-    private static final int DATABASE_VERSION = 2;
+    private static final byte DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "Converters.db";
 
     private static final String CREATE_TABLE_CONVERTER =
@@ -71,7 +71,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private String mDbLang;
 
-    private static final int TEMPERATURE_CONVERTER_TYPE = 1;
+    private static final byte TEMPERATURE_CONVERTER_TYPE = 1;
 
     ConvertersDbHelper(Context c, String dbLang) {
         super(c, dbLang + DATABASE_NAME, null, DATABASE_VERSION);
@@ -130,11 +130,10 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //TODO: add new field in converter table witch describe the type of converter and use this field for converters creation
+        // add column type in to converter table
         db.execSQL("alter table " + ConverterEntry.TABLE_NAME + " add column " +
                 ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0");
 
-        //TODO: upgrade db with new data for temperature converter
         // insert into converter table
         String converterName = "Temperature";
         Cursor c = db.query(ConverterEntry.TABLE_NAME,
@@ -368,7 +367,6 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
     }
 
     private boolean updateConverter(Converter converter, String oldName, SQLiteDatabase db) {
-        // update existing one
         // get useful information about old edited converter before delete it
         Cursor c = db.query(ConverterEntry.TABLE_NAME, new String[]{
                         ConverterEntry.COLUMN_NAME_ORDER_POSITION,

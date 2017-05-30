@@ -3,16 +3,13 @@ package com.tiomamaster.customizableconverter.data;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.math.MathContext;
 import java.util.List;
-
-import static android.os.Build.VERSION_CODES.M;
 
 public class TemperatureConverter extends Converter {
 
     private static final byte CELSIUS_ID   = 1;
     private static final byte KELVIN_ID    = 2;
-    private static final byte FARENEIT_ID  = 3;
+    private static final byte FAHRENHEIT_ID = 3;
     private static final byte RANKINE_ID   = 4;
     private static final byte DELISLE_ID   = 5;
     private static final byte NEWTON_ID    = 6;
@@ -24,9 +21,9 @@ public class TemperatureConverter extends Converter {
     private static final byte HOOKE_ID              = 12;
     private static final byte DALTON_ID             = 13;
 
-    public TemperatureConverter(@NonNull String name, @NonNull List<Unit> units,
-                                @Nullable String errors, int lastUnit,
-                                @Nullable String lastQuantity) {
+    TemperatureConverter(@NonNull String name, @NonNull List<Unit> units,
+                         @Nullable String errors, int lastUnit,
+                         @Nullable String lastQuantity) {
         super(name, units, errors, lastUnit, lastQuantity);
     }
 
@@ -46,7 +43,7 @@ public class TemperatureConverter extends Converter {
             case KELVIN_ID:
                 return value - 273.15;
 
-            case FARENEIT_ID:
+            case FAHRENHEIT_ID:
                 return 5/9d * (value - 32);
 
             case RANKINE_ID:
@@ -88,7 +85,7 @@ public class TemperatureConverter extends Converter {
             case KELVIN_ID:
                 return value + 273.15;
 
-            case FARENEIT_ID:
+            case FAHRENHEIT_ID:
                 return 9/5d * value + 32;
 
             case RANKINE_ID:

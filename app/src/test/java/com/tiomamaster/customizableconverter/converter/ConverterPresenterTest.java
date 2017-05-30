@@ -4,6 +4,7 @@ import android.support.v4.util.Pair;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.TemperatureConverter;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -97,13 +98,13 @@ public class ConverterPresenterTest {
         name = CONVERTERS_TYPES.get(2);
         mPresenter.loadConverter(name);
         verify(mRepository).getConverter(eq(name), anyBoolean(), mGetConverterCaptor.capture());
-        converter = new Converter(name, new ArrayList<Converter.Unit>());
+        converter = new TemperatureConverter(name, new ArrayList<Converter.Unit>());
         mGetConverterCaptor.getValue().onConverterLoaded(converter);
 
         name = CONVERTERS_TYPES.get(3);
         mPresenter.loadConverter(name);
         verify(mRepository).getConverter(eq(name), anyBoolean(), mGetConverterCaptor.capture());
-        converter = new Converter(name, new ArrayList<Converter.Unit>());
+        converter = new TemperatureConverter(name, new ArrayList<Converter.Unit>());
         mGetConverterCaptor.getValue().onConverterLoaded(converter);
         verify(mView, times(2)).showConverter(anyList(), anyInt(), anyString(), eq(true));
     }
