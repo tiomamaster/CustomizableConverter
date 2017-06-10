@@ -12,16 +12,25 @@ public class CurrencyConverter extends Converter {
     /**
      * Representation of time when units was lastly updated.
      */
-    private long mLastUpdate;
+    private long mLastUpdateTime;
 
     public CurrencyConverter(@NonNull String name, @NonNull List<Unit> units,
                              @Nullable String errors, int lastUnit,
-                             @Nullable String lastQuantity) {
+                             @Nullable String lastQuantity, long lastUpdate) {
         super(name, units, errors, lastUnit, lastQuantity);
+        mLastUpdateTime = lastUpdate;
     }
 
     public CurrencyConverter(@NonNull String name, @NonNull List<Unit> units) {
         super(name, units);
+    }
+
+    public long getLastUpdateTime() {
+        return mLastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long t) {
+        this.mLastUpdateTime = t;
     }
 
     public static class CurrencyUnit extends Unit {

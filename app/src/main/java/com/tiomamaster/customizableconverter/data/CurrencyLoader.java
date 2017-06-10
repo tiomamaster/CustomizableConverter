@@ -23,7 +23,7 @@ import java.util.List;
  * Loading currency from the http://www.cbr.ru.
  */
 
-class CurrencyLoader {
+final class CurrencyLoader {
 
     private Context mContext;
 

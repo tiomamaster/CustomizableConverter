@@ -87,6 +87,8 @@ public class ConvertersServiceApiImplTest {
                 public void onLoaded(@NonNull Converter converter) {
                     if (name.equals("Temperature") || name.equals("Температура")) {
                         assertTrue(converter instanceof TemperatureConverter);
+                    } else if (name.equals("Currency") || name.equals("Ввалюта")) {
+                        assertTrue(converter instanceof CurrencyConverter);
                     }
                     assertNotNull(converter);
                     assertEquals(name, converter.getName());
@@ -104,11 +106,11 @@ public class ConvertersServiceApiImplTest {
     public void setGetLastConverter() throws Exception {
         final String[] expected = getConvertersNames(language);
 
-        mApi.setLastConverter(expected[expected.length - 1]);
+        mApi.setLastConverter(expected[2]);
         mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
-                assertEquals(expected[expected.length - 1], converter.getName());
+                assertEquals(expected[2], converter.getName());
             }
         });
         TimeUnit.SECONDS.sleep(timeout);
@@ -119,6 +121,17 @@ public class ConvertersServiceApiImplTest {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertTrue(converter instanceof TemperatureConverter);
+            }
+        });
+        TimeUnit.SECONDS.sleep(timeout);
+
+
+        // set Currency as last and check it
+        mApi.setLastConverter(expected[expected.length - 1]);
+        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertTrue(converter instanceof CurrencyConverter);
             }
         });
         TimeUnit.SECONDS.sleep(timeout);
@@ -333,8 +346,17 @@ public class ConvertersServiceApiImplTest {
 
     private String[] getConvertersNames(String language) throws IOException {
         if (TextUtils.equals(language, "ru")) {
-            return mContext.getResources().getStringArray(R.array.translation_for_files_ru);
+            String[] array = mContext.getResources().getStringArray(R.array.translation_for_files_ru);
+            String[] result = new String[array.length + 1];
+            System.arraycopy(array, 0, result, 0, array.length);
+            result[result.length - 1] = "Валюта";
+            return result;
+        } else {
+            String[] array = mContext.getAssets().list(language);
+            String[] result = new String[array.length + 1];
+            System.arraycopy(array, 0, result, 0, array.length);
+            result[result.length - 1] = "Currency";
+            return result;
         }
-        else return mContext.getAssets().list(language);
     }
 }

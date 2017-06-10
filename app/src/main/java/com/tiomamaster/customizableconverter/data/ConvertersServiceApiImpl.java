@@ -95,30 +95,9 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
             @Override
             protected void onPostExecute(final Converter converter) {
-                if (!converter.getUnits().isEmpty()) callback.onLoaded(converter);
-
-                // this case is the first request of currency converter so try to download fresh courses from the internet
-                else mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
-                    @Override
-                    public void onResponse(List<CurrencyConverter.CurrencyUnit> response) {
-                        // data successfully loaded, so return it to the user
-                        converter.getUnits().addAll(response);
-                        callback.onLoaded(converter);
-
-                        // save data to the database
-                        sSingleExecutor.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                mDbHelper.save(converter, converter.getName());
-                            }
-                        });
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO: report the error
-                    }
-                });
+                if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
+                    updateCourses(converter, callback);
+                } else callback.onLoaded(converter);
             }
         }.execute();
     }
@@ -147,8 +126,10 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             }
 
             @Override
-            protected void onPostExecute(Converter converter) {
-                callback.onLoaded(converter);
+            protected void onPostExecute(final Converter converter) {
+                if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
+                    updateCourses(converter, callback);
+                } else callback.onLoaded(converter);
             }
         }.execute();
     }
@@ -253,6 +234,38 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             @Override
             public void run() {
                 mDbHelper.delete(name);
+            }
+        });
+    }
+
+    /**
+     * Load actual currency courses from the internet, return they or report a error using the callback
+     * and update database. This method will be called only if courses was never updated, for example,
+     * when the user selects the currency converter for the first time.
+     * @param converter created currency converter with empty units list.
+     * @param callback callback for return a result.
+     */
+    private void updateCourses(final Converter converter, @NonNull final LoadCallback<Converter> callback) {
+        mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
+            @Override
+            public void onResponse(List<CurrencyConverter.CurrencyUnit> response) {
+                // data successfully loaded, so return it to the user
+                ((CurrencyConverter) converter).setLastUpdateTime(System.currentTimeMillis());
+                converter.getUnits().addAll(response);
+                callback.onLoaded(converter);
+
+                // save data to the database
+                sSingleExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDbHelper.save(converter, converter.getName());
+                    }
+                });
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // TODO: report the error
             }
         });
     }

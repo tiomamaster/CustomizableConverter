@@ -27,7 +27,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
 
-    private static final byte DATABASE_VERSION = 2;
+    private static final byte DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "Converters.db";
 
     private static final String CREATE_TABLE_CONVERTER =
@@ -41,7 +41,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 0, " +
                     ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text, " +
                     ConverterEntry.COLUMN_NAME_ERRORS + " text default null, " +
-                    ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0)";
+                    ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0, " +
+                    ConverterEntry.COLUMN_NAME_LAST_UPDATE + " integer default null)";
 
     private static final String CREATE_TABLE_UNIT =
             "create table " + UnitEntry.TABLE_NAME +
@@ -53,6 +54,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     UnitEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
                     UnitEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
                     UnitEntry.COLUMN_NAME_CONVERTER_ID + " integer not null, " +
+                    UnitEntry.COLUMN_NAME_CHAR_CODE + " text default null, " +
                     "foreign key(" + UnitEntry.COLUMN_NAME_CONVERTER_ID + ") " +
                     "references " + ConverterEntry.TABLE_NAME + "(" + ConverterEntry._ID + ") " +
                     "on delete cascade)";
@@ -72,6 +74,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
     private String mDbLang;
 
     private static final byte TEMPERATURE_CONVERTER_TYPE = 1;
+    private static final byte CURRENCY_CONVERTER_TYPE = 2;
 
     ConvertersDbHelper(Context c, String dbLang) {
         super(c, dbLang + DATABASE_NAME, null, DATABASE_VERSION);
@@ -103,23 +106,32 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             translate = mContext.getResources().getStringArray(R.array.translation_for_files_ru);
         }
         int i = 0;
+        ContentValues contentValues = new ContentValues();
         for (String s : assets) {
             // insert into table converter
-            ContentValues contentValues = new ContentValues();
             // by default converter type is 0, but for temperature set type to 1
             if (TextUtils.equals(s, "Temperature")) {
                 contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, TEMPERATURE_CONVERTER_TYPE);
             }
-            if (TextUtils.equals(mDbLang, "ru"))
+            if (TextUtils.equals(mDbLang, "ru")) {
                 contentValues.put(ConverterEntry.COLUMN_NAME_NAME, translate[i]);
-            else
+            } else {
                 contentValues.put(ConverterEntry.COLUMN_NAME_NAME, s);
+            }
             contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, ++i);
             db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
             contentValues.clear();
             // insert into table unit
-            insertUnits(db, i, s, contentValues);
+            insertUnitsFromAssets(db, i, s, contentValues);
         }
+
+        // insert currency converter
+        contentValues.clear();
+        if (TextUtils.equals(mDbLang, "ru")) contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Валюта");
+        else contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Currency");
+        contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, CURRENCY_CONVERTER_TYPE);
+        contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, ++i);
+        db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
     }
 
     @Override
@@ -130,30 +142,23 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // add column type in to converter table
-        db.execSQL("alter table " + ConverterEntry.TABLE_NAME + " add column " +
-                ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0");
+        if (oldVersion == 1) {
+            // add column type in to converter table
+            db.execSQL("alter table " + ConverterEntry.TABLE_NAME + " add column " +
+                    ConverterEntry.COLUMN_NAME_TYPE + " integer not null default 0");
 
-        // insert into converter table
-        String converterName = "Temperature";
-        Cursor c = db.query(ConverterEntry.TABLE_NAME,
-                new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
-                null, null, null, null, null);
-        c.moveToFirst();
-        int converterOrderPos = c.getInt(0) + 1;
-        c.close();
-        ContentValues contentValues = new ContentValues();
-        if (TextUtils.equals(mDbLang, "ru")) {
-            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Температура");
-        } else {
-            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, converterName);
+            // insert temperature converter
+            String converterName = "Temperature";
+            long id = insertNewConverter(db, converterName, "Температура", TEMPERATURE_CONVERTER_TYPE);
+            // insert temperature converter units
+            insertUnitsFromAssets(db, id, converterName, new ContentValues());
+
+            // add column last update in to converter table
+            updateDbFrom2to3(db);
+        } else if (oldVersion == 2) {
+            updateDbFrom2to3(db);
+
         }
-        contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, converterOrderPos);
-        contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, TEMPERATURE_CONVERTER_TYPE);
-        long id = db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
-        contentValues.clear();
-        // insert into table unit
-        insertUnits(db, id, converterName, contentValues);
     }
 
     List<Pair<String, Boolean>> getAllConverters() {
@@ -182,7 +187,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                         ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                         ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
                         ConverterEntry.COLUMN_NAME_ERRORS,
-                        ConverterEntry.COLUMN_NAME_TYPE},
+                        ConverterEntry.COLUMN_NAME_TYPE,
+                        ConverterEntry.COLUMN_NAME_LAST_UPDATE},
                 ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name}, null, null, null);
         c.moveToFirst();
         int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
@@ -190,12 +196,16 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         int type = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_TYPE));
+        long lastUpdate = c.getLong(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_UPDATE));
         c.close();
         if (type == TEMPERATURE_CONVERTER_TYPE) {
-            return new TemperatureConverter(name, getUnits(db, converterId),
+            return new TemperatureConverter(name, getUnits(db, converterId, false),
                     errors, lastSelUnitPos, lastQuantity);
+        } else if (type == CURRENCY_CONVERTER_TYPE) {
+            return new CurrencyConverter(name, getUnits(db, converterId, true),
+                    errors, lastSelUnitPos, lastQuantity, lastUpdate);
         }
-        return new Converter(name, getUnits(db, converterId), errors, lastSelUnitPos, lastQuantity);
+        return new Converter(name, getUnits(db, converterId, false), errors, lastSelUnitPos, lastQuantity);
     }
 
     Converter createLastConverter() {
@@ -206,7 +216,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                         ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                         ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
                         ConverterEntry.COLUMN_NAME_ERRORS,
-                        ConverterEntry.COLUMN_NAME_TYPE},
+                        ConverterEntry.COLUMN_NAME_TYPE,
+                        ConverterEntry.COLUMN_NAME_LAST_UPDATE},
                 ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = ?", new String[]{"true"},
                 null, null, null);
         if (!c.moveToFirst()) {
@@ -217,7 +228,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                             ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
                             ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
                             ConverterEntry.COLUMN_NAME_ERRORS,
-                            ConverterEntry.COLUMN_NAME_TYPE},
+                            ConverterEntry.COLUMN_NAME_TYPE,
+                            ConverterEntry.COLUMN_NAME_LAST_UPDATE},
                             null, null, null, null, ConverterEntry.COLUMN_NAME_ORDER_POSITION);
         }
         c.moveToFirst();
@@ -227,12 +239,16 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
         String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
         int type = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_TYPE));
+        long lastUpdate = c.getLong(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_UPDATE));
         c.close();
         if (type == TEMPERATURE_CONVERTER_TYPE) {
-            return new TemperatureConverter(name, getUnits(db, converterId),
+            return new TemperatureConverter(name, getUnits(db, converterId, false),
                     errors, lastSelUnitPos, lastQuantity);
+        } else if (type == CURRENCY_CONVERTER_TYPE) {
+            return new CurrencyConverter(name, getUnits(db, converterId, true),
+                    errors, lastSelUnitPos, lastQuantity, lastUpdate);
         }
-        return new Converter(name, getUnits(db, converterId), errors, lastSelUnitPos, lastQuantity);
+        return new Converter(name, getUnits(db, converterId, false), errors, lastSelUnitPos, lastQuantity);
     }
 
     void saveLastConverter(String name) {
@@ -395,14 +411,23 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         values.put(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS, lastSelUnitPos);
         values.put(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT, converter.getLastQuantity());
         values.put(ConverterEntry.COLUMN_NAME_ERRORS, converter.getErrors());
+
+        // handle special cases
+        boolean isCurrencyConverter = false;
         if (converter instanceof TemperatureConverter) {
             values.put(ConverterEntry.COLUMN_NAME_TYPE, TEMPERATURE_CONVERTER_TYPE);
+        } else if (converter instanceof CurrencyConverter) {
+            values.put(ConverterEntry.COLUMN_NAME_TYPE, CURRENCY_CONVERTER_TYPE);
+            values.put(ConverterEntry.COLUMN_NAME_LAST_UPDATE,
+                    ((CurrencyConverter) converter).getLastUpdateTime());
+            isCurrencyConverter = true;
         }
         try {
             long converterId = db.insert(ConverterEntry.TABLE_NAME, null, values);
             if (converterId == -1) return false;
             values.clear();
 
+            // insert units
             int unitOrderPos = 1;
             for (Converter.Unit unit : converter.getUnits()) {
                 values.put(UnitEntry.COLUMN_NAME_NAME, unit.name);
@@ -410,6 +435,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                 values.put(UnitEntry.COLUMN_NAME_IS_ENABLED, String.valueOf(unit.isEnabled));
                 values.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, unitOrderPos++);
                 values.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
+                if (isCurrencyConverter) values.put(UnitEntry.COLUMN_NAME_CHAR_CODE,
+                        ((CurrencyConverter.CurrencyUnit) unit).charCode);
                 // check that insertion is successful
                 if (db.insert(UnitEntry.TABLE_NAME, null, values) == -1) return false;
             }
@@ -422,11 +449,12 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
     }
 
     @NonNull
-    private List<Converter.Unit> getUnits(SQLiteDatabase db, int converterId) {
+    private List<Converter.Unit> getUnits(SQLiteDatabase db, int converterId, boolean currency) {
         Cursor c = db.query(UnitEntry.TABLE_NAME,
                 new String[]{UnitEntry.COLUMN_NAME_NAME,
                         UnitEntry.COLUMN_NAME_VALUE,
-                        UnitEntry.COLUMN_NAME_IS_ENABLED},
+                        UnitEntry.COLUMN_NAME_IS_ENABLED,
+                        UnitEntry.COLUMN_NAME_CHAR_CODE},
                 UnitEntry.COLUMN_NAME_CONVERTER_ID + " = ?",
                 new String[]{String.valueOf(converterId)}, null, null,
                 UnitEntry.COLUMN_NAME_ORDER_POSITION);
@@ -434,10 +462,16 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         int nameColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_NAME);
         int valueColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_VALUE);
         int isEnabledColInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_IS_ENABLED);
+        int charCodeInd = c.getColumnIndex(UnitEntry.COLUMN_NAME_CHAR_CODE);
         List<Converter.Unit> units = new ArrayList<>();
         while (c.moveToNext()) {
-            units.add(new Converter.Unit(c.getString(nameColInd), c.getDouble(valueColInd),
-                    Boolean.parseBoolean(c.getString(isEnabledColInd))));
+            if (currency) {
+                units.add(new CurrencyConverter.CurrencyUnit(c.getString(nameColInd), c.getDouble(valueColInd),
+                        Boolean.parseBoolean(c.getString(isEnabledColInd)), c.getString(charCodeInd)));
+            } else {
+                units.add(new Converter.Unit(c.getString(nameColInd), c.getDouble(valueColInd),
+                        Boolean.parseBoolean(c.getString(isEnabledColInd))));
+            }
         }
         c.close();
         db.close();
@@ -451,8 +485,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void insertUnits(SQLiteDatabase db, long converterId,
-                             String converterName, ContentValues contentValues) {
+    private void insertUnitsFromAssets(SQLiteDatabase db, long converterId,
+                                       String converterName, ContentValues contentValues) {
         AssetManager am = mContext.getAssets();
         BufferedReader reader = null;
         StringBuilder errors = new StringBuilder();
@@ -511,5 +545,36 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             db.update(ConverterEntry.TABLE_NAME, contentValues, ConverterEntry._ID + " = ?",
                     new String[]{String.valueOf(converterId)});
         }
+    }
+
+    private long insertNewConverter(SQLiteDatabase db, String enName, String ruName, byte type){
+        Cursor c = db.query(ConverterEntry.TABLE_NAME,
+                new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
+                null, null, null, null, null);
+        c.moveToFirst();
+        int converterOrderPos = c.getInt(0) + 1;
+        c.close();
+        ContentValues contentValues = new ContentValues();
+        if (TextUtils.equals(mDbLang, "ru")) {
+            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, ruName);
+        } else {
+            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, enName);
+        }
+        contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, converterOrderPos);
+        contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, type);
+        return db.insert(ConverterEntry.TABLE_NAME, null, contentValues);
+    }
+
+    private void updateDbFrom2to3(SQLiteDatabase db) {
+        // add column last update in to converter table
+        db.execSQL("alter table " + ConverterEntry.TABLE_NAME + " add column " +
+                ConverterEntry.COLUMN_NAME_LAST_UPDATE + " integer default null");
+
+        // add column char code in to unit table
+        db.execSQL("alter table " + UnitEntry.TABLE_NAME + " add column " +
+                UnitEntry.COLUMN_NAME_CHAR_CODE + " text default null");
+
+        // insert currency converter
+        insertNewConverter(db, "Currency", "Валюта", CURRENCY_CONVERTER_TYPE);
     }
 }

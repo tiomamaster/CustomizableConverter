@@ -16,6 +16,7 @@ final class ConvertersDbContract {
         static final String COLUMN_NAME_LAST_QUANTITY_TEXT = "LastQuantityText";
         static final String COLUMN_NAME_ERRORS = "Errors";
         static final String COLUMN_NAME_TYPE = "Type";
+        static final String COLUMN_NAME_LAST_UPDATE = "LastUpdate";
     }
 
     static abstract class UnitEntry implements BaseColumns {
@@ -24,6 +25,7 @@ final class ConvertersDbContract {
         static final String COLUMN_NAME_VALUE = "Value";
         static final String COLUMN_NAME_ORDER_POSITION = "OrderPosition";
         static final String COLUMN_NAME_IS_ENABLED = "IsEnabled";
-        static final String COLUMN_NAME_CONVERTER_ID= "ConverterId";
+        static final String COLUMN_NAME_CONVERTER_ID = "ConverterId";
+        static final String COLUMN_NAME_CHAR_CODE = "CharCode";
     }
 }
