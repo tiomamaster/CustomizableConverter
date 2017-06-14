@@ -72,6 +72,15 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
                             converter.getLastQuantity(), false);
                 }
             }
+
+            @Override
+            public void reportError(@NonNull String message) {
+                checkNotNull(message);
+
+                mConverterView.setProgressIndicator(false);
+
+                mConverterView.showError(message);
+            }
         });
     }
 

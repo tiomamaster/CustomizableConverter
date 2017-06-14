@@ -72,6 +72,11 @@ public class ConvertersServiceApiImplTest {
                     assertEquals(expected[i], converters.get(i).first);
                 }
             }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
         });
 
         TimeUnit.SECONDS.sleep(timeout);
@@ -96,6 +101,11 @@ public class ConvertersServiceApiImplTest {
                     assertTrue(converter.getEnabledUnitsName().size() > 2);
                     assertNull(converter.getErrors());
                 }
+
+                @Override
+                public void onError(@NonNull String message) {
+
+                }
             });
         }
 
@@ -112,6 +122,11 @@ public class ConvertersServiceApiImplTest {
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(expected[2], converter.getName());
             }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
         });
         TimeUnit.SECONDS.sleep(timeout);
 
@@ -121,6 +136,11 @@ public class ConvertersServiceApiImplTest {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertTrue(converter instanceof TemperatureConverter);
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
         TimeUnit.SECONDS.sleep(timeout);
@@ -132,6 +152,11 @@ public class ConvertersServiceApiImplTest {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertTrue(converter instanceof CurrencyConverter);
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
         TimeUnit.SECONDS.sleep(timeout);
@@ -147,6 +172,11 @@ public class ConvertersServiceApiImplTest {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(expected[0], converter.getName());
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
 
@@ -164,6 +194,11 @@ public class ConvertersServiceApiImplTest {
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(5, converter.getLastUnitPosition());
             }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
         });
 
         TimeUnit.SECONDS.sleep(timeout);
@@ -179,6 +214,11 @@ public class ConvertersServiceApiImplTest {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals("9999.99999", converter.getLastQuantity());
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
 
@@ -217,6 +257,11 @@ public class ConvertersServiceApiImplTest {
                     assertEquals(expectedUnit.isEnabled, actualUnit.isEnabled);
                 }
             }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
         });
 
         TimeUnit.SECONDS.sleep(timeout);
@@ -245,6 +290,11 @@ public class ConvertersServiceApiImplTest {
             public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
                 assertTrue(converters.contains(new Pair<>(editedName, true)));
             }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
         });
 
         // check that return updated converter
@@ -264,6 +314,11 @@ public class ConvertersServiceApiImplTest {
                     assertEquals(expectedUnit.value, actualUnit.value);
                     assertEquals(expectedUnit.isEnabled, actualUnit.isEnabled);
                 }
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
 
@@ -287,6 +342,11 @@ public class ConvertersServiceApiImplTest {
             public void onLoaded(@NonNull Converter converter) {
                 assertTrue(converter instanceof TemperatureConverter);
                 assertEquals(newName, converter.getName());
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
 
@@ -318,6 +378,11 @@ public class ConvertersServiceApiImplTest {
                     assertEquals(expected, actual);
                 }
             }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
         });
 
         TimeUnit.SECONDS.sleep(timeout);
@@ -338,6 +403,11 @@ public class ConvertersServiceApiImplTest {
                 for (Pair<String, Boolean> converter : converters) {
                     assertFalse(converter.second);
                 }
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
 

@@ -181,6 +181,18 @@ public class ConverterPresenterTest {
         verify(mView).showSettingsUi();
     }
 
+    @Test
+    public void loadConverter_ShowError() {
+        mPresenter.loadConverter(anyString());
+
+        verify(mView).setProgressIndicator(true);
+
+        verify(mRepository).getConverter(anyString(), anyBoolean(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().reportError("error message");
+
+        verify(mView).showError("error message");
+    }
+
     private void loadConverter() {
         mPresenter.loadConverter(anyString());
 

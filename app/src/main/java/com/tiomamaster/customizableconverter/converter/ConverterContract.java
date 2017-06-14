@@ -21,6 +21,8 @@ interface ConverterContract {
         void showSettingsUi();
 
         void showNoting();
+
+        void showError(@NonNull String message);
     }
 
     interface UserActionListener {

@@ -362,6 +362,11 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         mParentActivity.showSpinner(false);
     }
 
+    @Override
+    public void showError(@NonNull String message) {
+
+    }
+
     void hideSoftInput() {
         //Find the currently focused view, so we can grab the correct window token from it.
         View view = mParentActivity.getCurrentFocus();

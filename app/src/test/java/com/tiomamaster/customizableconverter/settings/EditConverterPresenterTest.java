@@ -330,6 +330,24 @@ public class EditConverterPresenterTest {
         }
     }
 
+    @Test
+    public void loadUnits_ShowUnitsLoadingError() {
+        mPresenter.loadUnits();
+
+        if (mInitialConverterName.equals(OLD_CONVERTER)) {
+            // 2 times because loadUnits() called in setUp()
+            verify(mView, times(2)).setUnitsLoadingIndicator(true);
+
+            ArgumentCaptor<ConvertersRepository.GetConverterCallback> captor =
+                    ArgumentCaptor.forClass(ConvertersRepository.GetConverterCallback.class);
+            verify(mRepository, times(2)).getConverter(anyString(), anyBoolean(), captor.capture());
+            captor.getValue().reportError("error message");
+
+            verify(mView, times(2)).setUnitsLoadingIndicator(false);
+            verify(mView).showUnitsLoadingError("error message");
+        }
+    }
+
     private void loadUnits() {
         mPresenter.loadUnits();
 

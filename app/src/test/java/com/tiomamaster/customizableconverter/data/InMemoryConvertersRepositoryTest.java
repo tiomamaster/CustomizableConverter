@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -293,6 +296,33 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.saveConverterDeletion(0);
 
         verify(mServiceApi).deleteConverter(types.get(index).first);
+    }
+
+    @Test
+    public void getEnabledConvertersTypesReceiveError_SaveConverterName() {
+        mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
+
+        verify(mServiceApi).getLastConverter(mCaptor.capture());
+        mCaptor.getValue().onError("error");
+
+        if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
+            assertEquals("Валюта", mRepository.mLastConverterName);
+        } else {
+            assertEquals("Currency", mRepository.mLastConverterName);
+        }
+    }
+
+    @Test
+    public void getConverterReceiveError_CallReportError() {
+        // should be initialized at this point
+        mRepository.mLastConverterName = "Test";
+
+        mRepository.getConverter("Test1", false, mGetConverterCallback);
+
+        verify(mServiceApi).getConverter(anyString(), mCaptor.capture());
+        mCaptor.getValue().onError("error message");
+
+        verify(mGetConverterCallback).reportError("error message");
     }
 
     private List<Pair<String, Boolean>> cacheTypes() {

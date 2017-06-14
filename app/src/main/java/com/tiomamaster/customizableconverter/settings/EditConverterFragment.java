@@ -331,6 +331,11 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
                 .setCancelable(false).show();
     }
 
+    @Override
+    public void showUnitsLoadingError(@NonNull String message) {
+
+    }
+
     void clearEditText() {
         mEditName.clearFocus();
         mEditName.setFocusableInTouchMode(false);

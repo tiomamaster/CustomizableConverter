@@ -110,6 +110,8 @@ interface SettingsContract {
         void setConverterSavingIndicator(boolean active);
 
         void showAskDialog();
+
+        void showUnitsLoadingError(@NonNull String message);
     }
 
     interface EditConverterUal extends UserActionListener {

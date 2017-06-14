@@ -16,7 +16,10 @@ public interface ConvertersRepository {
     }
 
     interface GetConverterCallback {
+
         void onConverterLoaded(@NonNull Converter converter);
+
+        void reportError(@NonNull String message);
     }
 
     interface SaveConverterCallback {

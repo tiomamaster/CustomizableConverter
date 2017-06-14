@@ -5,6 +5,8 @@ import android.support.v4.util.Pair;
 
 import java.util.List;
 
+import static android.R.id.message;
+
 /**
  * Defines an interface to the service API that is used by this application. All data request should
  * be piped through this interface.
@@ -12,7 +14,10 @@ import java.util.List;
 interface ConvertersServiceApi {
 
     interface LoadCallback<T> {
+
         void onLoaded(@NonNull T converters);
+
+        void onError(@NonNull String message);
     }
 
     interface SaveCallback {

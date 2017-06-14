@@ -163,6 +163,15 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 mView.showUnits(mUnits);
                 mView.setUnitsLoadingIndicator(false);
             }
+
+            @Override
+            public void reportError(@NonNull String message) {
+                checkNotNull(message);
+
+                mView.setUnitsLoadingIndicator(false);
+
+                mView.showUnitsLoadingError(message);
+            }
         });
     }
 

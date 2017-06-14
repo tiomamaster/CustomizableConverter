@@ -7,6 +7,7 @@ import android.support.v4.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -41,6 +42,16 @@ class InMemoryConvertersRepository implements ConvertersRepository {
                     mLastConverterName = converter.getName();
                     cacheConverter(converter);
                 }
+
+                @Override
+                public void onError(@NonNull String message) {
+                    // save last selected converter name
+                    if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
+                        mLastConverterName = "Валюта";
+                    } else {
+                        mLastConverterName = "Currency";
+                    }
+                }
             });
             mFirstCall = false;
         }
@@ -52,12 +63,17 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
         mServiceApi.getAllConvertersTypes(
                 new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
-            @Override
-            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
-                mCachedConvertersTypes = converters;
-                callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
-            }
-        });
+                    @Override
+                    public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                        mCachedConvertersTypes = converters;
+                        callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
+                    }
+
+                    @Override
+                    public void onError(@NonNull String message) {
+
+                    }
+                });
     }
 
 
@@ -71,21 +87,28 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             return;
         }
 
-        // or load they from the API, cache and return through using callback
+        // or load they from the API, cache and return using callback
         mServiceApi.getAllConvertersTypes(
                 new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
-            @Override
-            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
-                mCachedConvertersTypes = converters;
-                callback.onConvertersTypesLoaded(converters);
-            }
-        });
+                    @Override
+                    public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                        mCachedConvertersTypes = converters;
+                        callback.onConvertersTypesLoaded(converters);
+                    }
+
+                    @Override
+                    public void onError(@NonNull String message) {
+
+                    }
+                });
     }
 
     @Override
     public void getConverter(@NonNull final String name, final boolean clone,
                              @NonNull final GetConverterCallback callback) {
         checkNotNull(name);
+        checkNotNull(callback);
+
         // save last selected converter
         if (!mLastConverterName.equals(name) && !clone) {
             mServiceApi.setLastConverter(name);
@@ -98,7 +121,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             return;
         }
 
-        checkNotNull(callback);
         mServiceApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
@@ -106,6 +128,11 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
                 if (clone) callback.onConverterLoaded((Converter) converter.clone());
                 else callback.onConverterLoaded(converter);
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+                callback.reportError(message);
             }
         });
     }

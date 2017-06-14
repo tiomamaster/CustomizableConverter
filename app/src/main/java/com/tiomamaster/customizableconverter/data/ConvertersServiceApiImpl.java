@@ -265,7 +265,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                // TODO: report the error
+                callback.onError(error.getMessage());
             }
         });
     }
