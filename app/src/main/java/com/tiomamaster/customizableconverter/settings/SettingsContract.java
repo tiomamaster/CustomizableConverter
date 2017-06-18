@@ -89,9 +89,9 @@ interface SettingsContract {
          * @param value The value of the editing unit. Pass null if unit is uneditable,
          *              or empty string if create new unit.
          */
-        void showEditUnit(@Nullable String name, @Nullable String value);
+        void showUnitEditor(@Nullable String name, @Nullable String value);
 
-        void showEditUnit(@NonNull String name);
+        void showUnitEditor(@NonNull String name);
 
         /**
          * Show error massage.

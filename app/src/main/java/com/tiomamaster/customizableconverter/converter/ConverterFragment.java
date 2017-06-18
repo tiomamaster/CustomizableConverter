@@ -85,7 +85,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                              @Nullable Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_converter, container, false);
 
-        mMsg = (TextView) root.findViewById(R.id.text);
+        mMsg = (TextView) root.findViewById(R.id.text_msg);
         mMsg.setVisibility(View.GONE);
 
         mConversionResult = (RecyclerView) root.findViewById(R.id.conversion_result);
@@ -358,19 +358,22 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     @Override
     public void showNoting() {
         mMsg.setVisibility(View.VISIBLE);
+        mMsg.setText(R.string.msg_no_converters);
         mConversionResult.setVisibility(View.GONE);
         mParentActivity.showSpinner(false);
     }
 
     @Override
     public void showError(@NonNull String message) {
-
+        mMsg.setVisibility(View.VISIBLE);
+        mMsg.setText(message);
+        mConversionResult.setVisibility(View.GONE);
     }
 
     void hideSoftInput() {
-        //Find the currently focused view, so we can grab the correct window token from it.
+        // find the currently focused view, so we can grab the correct window token from it
         View view = mParentActivity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        // if no view currently has focus, create a new one, just so we can grab a window token from it
         if (view == null) {
             view = new View(mParentActivity);
         }

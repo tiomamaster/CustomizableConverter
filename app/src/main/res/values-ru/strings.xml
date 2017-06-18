@@ -21,7 +21,7 @@
     <string name="msg_delete_converter">Вы действительно хотите удалить этот конвертер:</string>
     <string name="msg_loading">Загрузка единиц измерения…</string>
     <string name="msg_save_changes">Сохранить изменения?</string>
-    <string name="msg_show_nothing">Нет включённых конвертеров.</string>
+    <string name="msg_no_converters">Нет включённых конвертеров.</string>
     <string name="msg_unit_exist">Единица измерения с таким же именем уже существует.</string>
     <string name="no">Нет</string>
     <string name="pref_dialog_message_grouping_size">Количество цифр в группе:</string>
@@ -46,4 +46,5 @@
     <string name="yes">Да</string>
     <string name="app_name">Конвертер</string>
     <string name="copy">КОПИРОВАТЬ</string>
+    <string name="title_btn_update">Обновить</string>
 </resources>

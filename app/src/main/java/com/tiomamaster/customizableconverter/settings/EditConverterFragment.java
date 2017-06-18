@@ -24,10 +24,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.tiomamaster.customizableconverter.Injection;
@@ -40,6 +42,7 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.List;
 
+import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class EditConverterFragment extends Fragment implements SettingsContract.EditConverterView {
@@ -62,6 +65,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     private TextView mTextHint;
 
+    private ProgressBar mProgress;
     private TextView mTextLoading;
 
     private MenuItem mBtnSave;
@@ -70,6 +74,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     private AlertDialog mSavingDialog;
 
     private boolean isConverterExist;
+
+    private Button mBtnUpdate;
+    private TextView mTextLoadingError;
 
     public static EditConverterFragment newInstance() {
         return new EditConverterFragment();
@@ -154,7 +161,11 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
         mTextHint = (TextView) mRecyclerViewHeader.findViewById(R.id.text_hint);
 
+        mProgress = (ProgressBar) mRecyclerViewHeader.findViewById(R.id.progress);
         mTextLoading = (TextView) mRecyclerViewHeader.findViewById(R.id.text_loading);
+
+        mBtnUpdate = (Button) mRecyclerViewHeader.findViewById(R.id.btn_update);
+        mTextLoadingError = (TextView) mRecyclerViewHeader.findViewById(R.id.text_msg_loading_error);
 
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -232,8 +243,14 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     @Override
     public void setUnitsLoadingIndicator(boolean active) {
-        if (active) mTextLoading.setVisibility(View.VISIBLE);
-        else mTextLoading.setVisibility(View.GONE);
+        if (active) {
+            mTextLoading.setVisibility(View.VISIBLE);
+            mProgress.setVisibility(View.VISIBLE);
+        }
+        else {
+            mTextLoading.setVisibility(View.GONE);
+            mProgress.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -252,14 +269,14 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     }
 
     @Override
-    public void showEditUnit(@Nullable String name, @Nullable String value) {
+    public void showUnitEditor(@Nullable String name, @Nullable String value) {
         DialogFragment editDialog = EditUnitDialogFragment.newInstance(name, value);
         editDialog.show(mParentActivity.getSupportFragmentManager(),
                 EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG);
     }
 
     @Override
-    public void showEditUnit(@NonNull String name) {
+    public void showUnitEditor(@NonNull String name) {
         DialogFragment editDialog = EditUnitDialogFragment.newInstance(name);
         editDialog.show(mParentActivity.getSupportFragmentManager(),
                 EditUnitDialogFragment.EDIT_UNIT_DIALOG_TAG);
@@ -333,7 +350,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     @Override
     public void showUnitsLoadingError(@NonNull String message) {
-
+        mBtnUpdate.setVisibility(View.VISIBLE);
+        mTextLoadingError.setText(message);
+        mTextLoadingError.setVisibility(View.VISIBLE);
     }
 
     void clearEditText() {

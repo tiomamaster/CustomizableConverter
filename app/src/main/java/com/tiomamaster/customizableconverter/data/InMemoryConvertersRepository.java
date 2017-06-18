@@ -110,7 +110,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         checkNotNull(callback);
 
         // save last selected converter
-        if (!mLastConverterName.equals(name) && !clone) {
+        if ((mLastConverterName != null) && !mLastConverterName.equals(name) && !clone) {
             mServiceApi.setLastConverter(name);
             mLastConverterName = name;
         }

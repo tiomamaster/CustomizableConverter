@@ -20,7 +20,7 @@
     <string name="pref_summary_grouping_size">digits</string>
     <string name="pref_summary_precision">decimal digits</string>
     <string name="app_language">English</string>
-    <string name="msg_show_nothing">There are no enabled converters.</string>
+    <string name="msg_no_converters">There are no enabled converters.</string>
     <string name="msg_delete_converter">Are you sure want to delete this converter:</string>
     <string name="label_converter_name">Converter name:</string>
     <string name="label_units">Units:</string>
@@ -46,4 +46,5 @@
     <string name="ok" translatable="false">OK</string>
     <string name="hint_number">Input number</string>
     <string name="copy">COPY</string>
+    <string name="title_btn_update">Update</string>
 </resources>

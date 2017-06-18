@@ -108,7 +108,7 @@ public class EditConverterPresenterTest {
     @Test
     public void handleFabPressed() {
         mPresenter.handleFabPressed();
-        verify(mView).showEditUnit(null, "");
+        verify(mView).showUnitEditor(null, "");
     }
 
     @Test
@@ -239,7 +239,7 @@ public class EditConverterPresenterTest {
             // edit existing unit
             mPresenter.editUnit(name, "1");
 
-            verify(mView).showEditUnit(name, "1");
+            verify(mView).showUnitEditor(name, "1");
 
             mPresenter.setUnitName("Unit1");
 
@@ -259,7 +259,7 @@ public class EditConverterPresenterTest {
 
             // edit only unit name
             mPresenter.editUnit(name, null);
-            verify(mView).showEditUnit(name);
+            verify(mView).showUnitEditor(name);
         }
     }
 

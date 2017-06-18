@@ -84,7 +84,12 @@ public class Converter implements Cloneable {
     @NonNull
     public List<Pair<String, String>> convertAll(double quantity, String fromUnit) {
         List<Pair<String, String>> result = new ArrayList<>(mUnits.size());
-        Unit from = mUnits.get(mUnits.indexOf(new Unit(fromUnit, 1, true)));
+        Unit from;
+        if (this instanceof CurrencyConverter) {
+            from = mUnits.get(mUnits.indexOf(new CurrencyConverter.CurrencyUnit(fromUnit, 1, true, "")));
+        } else {
+            from = mUnits.get(mUnits.indexOf(new Unit(fromUnit, 1, true)));
+        }
 
         for (Unit to : mUnits) {
             if (to.isEnabled && !to.name.equals(from.name)) {

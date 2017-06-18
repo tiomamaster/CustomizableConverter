@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Loading currency from the http://www.cbr.ru.
@@ -59,7 +60,11 @@ final class CurrencyLoader {
         protected Response<List<CurrencyConverter.CurrencyUnit>> parseNetworkResponse(NetworkResponse response) {
             XmlPullParser xpp = Xml.newPullParser();
             List<CurrencyConverter.CurrencyUnit> units = new ArrayList<>(35);
-            units.add(new CurrencyConverter.CurrencyUnit("Рубль", 1d, true, "RUB"));
+            if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
+                units.add(new CurrencyConverter.CurrencyUnit("Рубль", 1d, true, "RUB"));
+            } else {
+                units.add(new CurrencyConverter.CurrencyUnit("Ruble", 1d, true, "RUB"));
+            }
             try {
                 xpp.setInput(new ByteArrayInputStream(response.data), null);
 

@@ -3,9 +3,11 @@ package com.tiomamaster.customizableconverter.settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
+import android.widget.ProgressBar;
 
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.CurrencyConverter;
 import com.tiomamaster.customizableconverter.data.TemperatureConverter;
 
 import java.util.ArrayList;
@@ -75,7 +77,7 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     @Override
     public void handleFabPressed() {
         // show dialog for creation new unit with empty field
-        mView.showEditUnit(null, "");
+        mView.showUnitEditor(null, "");
 
         mInitialUnitName = mCurUnitName = mCurUnitValue = "";
 
@@ -226,12 +228,17 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         isNewUnit = false;
 
         if (value != null) {
-            mView.showEditUnit(name, value);
+            mView.showUnitEditor(name, value);
             mCurUnitValue = value;
         } else {
-            mView.showEditUnit(name);
-            mCurUnitValue = String.valueOf(
-                    mUnits.get(mUnits.indexOf(new Converter.Unit(name, 1, true))).value);
+            mView.showUnitEditor(name);
+            if (mCurConverter instanceof CurrencyConverter) {
+                mCurUnitValue = String.valueOf(
+                        mUnits.get(mUnits.indexOf(new CurrencyConverter.CurrencyUnit(name, 1, true, ""))).value);
+            } else {
+                mCurUnitValue = String.valueOf(
+                        mUnits.get(mUnits.indexOf(new Converter.Unit(name, 1, true))).value);
+            }
         }
     }
 
@@ -325,7 +332,8 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public boolean isUnitsValueEditable() {
-        return !(mCurConverter instanceof TemperatureConverter);
+        return !((mCurConverter instanceof TemperatureConverter)
+                || (mCurConverter instanceof  CurrencyConverter));
     }
 
     private Set<String> createLowerCaseUnitNames() {

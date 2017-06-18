@@ -78,7 +78,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
                 checkNotNull(message);
 
                 mConverterView.setProgressIndicator(false);
-
+                // TODO: process message text to make it understandable for user
                 mConverterView.showError(message);
             }
         });
