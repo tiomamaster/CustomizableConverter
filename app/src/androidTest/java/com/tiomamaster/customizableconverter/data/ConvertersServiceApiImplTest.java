@@ -414,6 +414,74 @@ public class ConvertersServiceApiImplTest {
         TimeUnit.SECONDS.sleep(timeout);
     }
 
+    @Test
+    public void updateCourses() throws Exception {
+        String[] names = getConvertersNames(language);
+
+        // get currency converter
+        final CurrencyConverter[] currencyConverter = new CurrencyConverter[1];
+        mApi.getConverter(names[names.length - 1], new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                        currencyConverter[0] = (CurrencyConverter) converter;
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout * 3);
+
+        // change it slightly and save to the db
+        currencyConverter[0].getUnits().get(0).isEnabled = false;
+        currencyConverter[0].getUnits().get(5).isEnabled = false;
+        currencyConverter[0].getUnits().get(10).name = "Name that was changed by a user";
+        mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
+            @Override
+            public void onSaved(boolean saved) {
+
+            }
+        }, currencyConverter[0], currencyConverter[0].getName());
+
+        TimeUnit.SECONDS.sleep(timeout);
+
+        // check that update of currency converter is not affected any fields,
+        // excepted unit value and last update time
+        mApi.updateCourses(new ConvertersServiceApi.LoadCallback<List<Converter.Unit>>() {
+            @Override
+            public void onLoaded(@NonNull List<Converter.Unit> units) {
+                assertTrue(units.get(0) instanceof CurrencyConverter.CurrencyUnit);
+                assertFalse(units.get(0).isEnabled);
+                assertFalse(units.get(5).isEnabled);
+                assertEquals("Name that was changed by a user", units.get(10).name);
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+
+        mApi.getConverter(names[names.length - 1], new ConvertersServiceApi.LoadCallback<Converter>() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                assertTrue(currencyConverter[0].getLastUpdateTime() !=
+                        ((CurrencyConverter)converter).getLastUpdateTime());
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
+            }
+        });
+
+        TimeUnit.SECONDS.sleep(timeout);
+    }
+
     private String[] getConvertersNames(String language) throws IOException {
         if (TextUtils.equals(language, "ru")) {
             String[] array = mContext.getResources().getStringArray(R.array.translation_for_files_ru);

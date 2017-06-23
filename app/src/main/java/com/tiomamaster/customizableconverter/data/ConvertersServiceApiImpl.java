@@ -2,6 +2,7 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
@@ -26,6 +27,8 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
      */
     private static final ExecutorService sSingleExecutor = Executors.newSingleThreadExecutor();
 
+    private final Handler mHandler;
+
     private ConvertersDbHelper mDbHelper;
 
     private Context mContext;
@@ -41,6 +44,8 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             mCurrencyLoader = new CurrencyLoader(c, "en");
         }
         mContext = c;
+
+        mHandler = new Handler(mContext.getApplicationContext().getMainLooper());
     }
 
     @Override
@@ -96,7 +101,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             @Override
             protected void onPostExecute(final Converter converter) {
                 if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
-                    updateCourses(converter, callback);
+                    loadCourses(converter, callback);
                 } else callback.onLoaded(converter);
             }
         }.execute();
@@ -128,7 +133,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             @Override
             protected void onPostExecute(final Converter converter) {
                 if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
-                    updateCourses(converter, callback);
+                    loadCourses(converter, callback);
                 } else callback.onLoaded(converter);
             }
         }.execute();
@@ -238,14 +243,42 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
         });
     }
 
+    @Override
+    public void updateCourses(@NonNull final LoadCallback<List<Converter.Unit>> callback) {
+        mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
+            @Override
+            public void onResponse(final List<CurrencyConverter.CurrencyUnit> response) {
+                // update currency units values and get they from the database
+                sSingleExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final List<Converter.Unit> result = mDbHelper.updateCourses(response);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onLoaded(result);
+                            }
+                        });
+                    }
+                });
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
     /**
      * Load actual currency courses from the internet, return they or report a error using the callback
      * and update database. This method will be called only if courses was never updated, for example,
      * when the user selects the currency converter for the first time.
+     *
      * @param converter created currency converter with empty units list.
-     * @param callback callback for return a result.
+     * @param callback  callback for return a result.
      */
-    private void updateCourses(final Converter converter, @NonNull final LoadCallback<Converter> callback) {
+    private void loadCourses(final Converter converter, @NonNull final LoadCallback<Converter> callback) {
         mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
             @Override
             public void onResponse(List<CurrencyConverter.CurrencyUnit> response) {

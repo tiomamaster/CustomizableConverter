@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.R.attr.name;
+
 final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
@@ -346,6 +348,39 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+    }
+
+    List<Converter.Unit> updateCourses(List<CurrencyConverter.CurrencyUnit> units) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // update last time when units was updated
+            ContentValues values = new ContentValues();
+            values.put(ConverterEntry.COLUMN_NAME_LAST_UPDATE, System.currentTimeMillis());
+            db.update(ConverterEntry.TABLE_NAME, values,
+                    ConverterEntry.COLUMN_NAME_TYPE + " = ?",
+                    new String[]{String.valueOf(CURRENCY_CONVERTER_TYPE)});
+            values.clear();
+
+            // update currency units values
+            for (CurrencyConverter.CurrencyUnit unit : units) {
+                values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
+                db.update(UnitEntry.TABLE_NAME, values,
+                        UnitEntry.COLUMN_NAME_CHAR_CODE + " = ?", new String[]{unit.charCode});
+                values.clear();
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+
+        Cursor c = db.query(ConverterEntry.TABLE_NAME, new String[]{ConverterEntry._ID},
+                ConverterEntry.COLUMN_NAME_TYPE + " = ?",
+                new String[]{String.valueOf(CURRENCY_CONVERTER_TYPE)}, null, null, null);
+        c.moveToFirst();
+        int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
+        c.close();
+        return getUnits(db, converterId, true);
     }
 
     private boolean saveNewConverter(Converter converter, SQLiteDatabase db) {
