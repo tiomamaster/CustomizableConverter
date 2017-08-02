@@ -23,26 +23,32 @@ import java.util.Locale;
 /**
  * Loading currency from the http://www.cbr.ru.
  */
-
 final class CurrencyLoader {
-
-    private Context mContext;
 
     private String mUrl;
 
+    private final RequestQueue mQueue;
+
+    private final static String CURRENCY_REQUEST_TAG = "CURRENCY_REQUEST";
+
     CurrencyLoader(Context context, String locale) {
-        this.mContext = context;
         String lang = "";
         if (locale.equals("en")) lang = "_eng";
         mUrl = "http://www.cbr.ru/scripts/XML_daily" + lang + ".asp";
+        mQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 
     void getFreshCourses(Response.Listener<List<CurrencyConverter.CurrencyUnit>> responseListener,
                          Response.ErrorListener errListener) {
 
-        RequestQueue queue = Volley.newRequestQueue(mContext.getApplicationContext());
         Request request = new CurrencyUnitsRequest(Request.Method.GET, mUrl, responseListener, errListener);
-        queue.add(request);
+        request.setTag(CURRENCY_REQUEST_TAG);
+        mQueue.add(request);
+    }
+
+    // TODO: use this when switch from currency converter to any another one
+    void cancelAllRequests() {
+        mQueue.cancelAll(CURRENCY_REQUEST_TAG);
     }
 
     private static class CurrencyUnitsRequest extends Request<List<CurrencyConverter.CurrencyUnit>> {

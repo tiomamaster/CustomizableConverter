@@ -111,7 +111,7 @@ interface SettingsContract {
 
         void showAskDialog();
 
-        void showUnitsLoadingError(@NonNull String message);
+        void showUnitsLoadingError(int messageResId);
     }
 
     interface EditConverterUal extends UserActionListener {
@@ -143,5 +143,7 @@ interface SettingsContract {
          * @return true if units value editable for current converter, false otherwise.
          */
         boolean isUnitsValueEditable();
+
+        void updateUnits();
     }
 }

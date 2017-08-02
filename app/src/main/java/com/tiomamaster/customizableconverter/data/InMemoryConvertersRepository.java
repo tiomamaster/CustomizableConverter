@@ -1,19 +1,19 @@
 package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Concrete implementation to load converters from the a data source.
+ * Concrete implementation to load converters from the data source.
  */
 class InMemoryConvertersRepository implements ConvertersRepository {
 
@@ -23,11 +23,9 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     @VisibleForTesting String mLastConverterName;
 
-    @VisibleForTesting List<Pair<String,Boolean>> mCachedConvertersTypes;
+    @VisibleForTesting List<Pair<String, Boolean>> mCachedConvertersTypes;
 
     @VisibleForTesting Map<String, Converter> mCachedConverters;
-
-    private boolean mFirstCall = true;
 
     InMemoryConvertersRepository(@NonNull ConvertersServiceApi serviceApi) {
         this.mServiceApi = checkNotNull(serviceApi);
@@ -35,26 +33,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     @Override
     public void getEnabledConvertersTypes(@NonNull final LoadEnabledConvertersTypesCallback callback) {
-        if (mFirstCall) {
-            mServiceApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
-                @Override
-                public void onLoaded(@NonNull Converter converter) {
-                    mLastConverterName = converter.getName();
-                    cacheConverter(converter);
-                }
-
-                @Override
-                public void onError(@NonNull String message) {
-                    // save last selected converter name
-                    if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
-                        mLastConverterName = "Валюта";
-                    } else {
-                        mLastConverterName = "Currency";
-                    }
-                }
-            });
-            mFirstCall = false;
-        }
+        checkNotNull(callback);
 
         if (mCachedConvertersTypes != null) {
             callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
@@ -62,16 +41,13 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         }
 
         mServiceApi.getAllConvertersTypes(
-                new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+                new ConvertersServiceApi.LoadConvertersCallback() {
                     @Override
-                    public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                    public void onLoaded(@NonNull List<Pair<String, Boolean>> converters,
+                                         @Nullable String lastSelConverter) {
+                        mLastConverterName = lastSelConverter;
                         mCachedConvertersTypes = converters;
                         callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
-                    }
-
-                    @Override
-                    public void onError(@NonNull String message) {
-
                     }
                 });
     }
@@ -89,16 +65,12 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
         // or load they from the API, cache and return using callback
         mServiceApi.getAllConvertersTypes(
-                new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+                new ConvertersServiceApi.LoadConvertersCallback() {
                     @Override
-                    public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+                    public void onLoaded(@NonNull List<Pair<String, Boolean>> converters,
+                                         @Nullable String lastSelConverter) {
                         mCachedConvertersTypes = converters;
                         callback.onConvertersTypesLoaded(converters);
-                    }
-
-                    @Override
-                    public void onError(@NonNull String message) {
-
                     }
                 });
     }
@@ -121,7 +93,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             return;
         }
 
-        mServiceApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
+        mServiceApi.getConverter(name, new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 cacheConverter(converter);
@@ -131,7 +103,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
                 callback.reportError(message);
             }
         });
@@ -161,7 +133,8 @@ class InMemoryConvertersRepository implements ConvertersRepository {
                     mCachedConverters.put(converter.getName(), converter);
 
                     int index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, true));
-                    if (index == -1) index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, false));
+                    if (index == -1)
+                        index = mCachedConvertersTypes.indexOf(new Pair<>(oldName, false));
                     mCachedConvertersTypes.add(index,
                             new Pair<>(converter.getName(), mCachedConvertersTypes.remove(index).second));
                 }
@@ -197,6 +170,30 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     @Override
     public void saveConverterDeletion(int position) {
         mServiceApi.deleteConverter(mCachedConvertersTypes.get(position).first);
+    }
+
+    @Override
+    public void updateCourses(@NonNull final GetConverterCallback callback) {
+        Converter currencyConverter = null;
+        if (mCachedConverters != null) {
+            Converter lastConverter = mCachedConverters.get(mLastConverterName);
+            if (lastConverter instanceof CurrencyConverter) currencyConverter = lastConverter;
+        }
+
+        mServiceApi.updateCourses(new ConvertersServiceApi.LoadConverterCallback() {
+            @Override
+            public void onLoaded(@NonNull Converter converter) {
+                if (mCachedConverters == null) mCachedConverters = new HashMap<>();
+                mCachedConverters.put(converter.getName(), converter);
+
+                callback.onConverterLoaded(converter);
+            }
+
+            @Override
+            public void onError(@Nullable String message) {
+                callback.reportError(message);
+            }
+        }, currencyConverter);
     }
 
     private void cacheConverter(@NonNull Converter converter) {

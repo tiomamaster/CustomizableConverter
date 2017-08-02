@@ -2,6 +2,7 @@ package com.tiomamaster.customizableconverter.data;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.v4.util.Pair;
@@ -40,7 +41,8 @@ public class ConvertersServiceApiImplTest {
 
     private ConvertersServiceApiImpl mApi;
 
-    @Parameterized.Parameter public String language;
+    @Parameterized.Parameter
+    public String language;
 
     @Parameterized.Parameters
     public static Iterable<? extends Object> data() {
@@ -64,18 +66,13 @@ public class ConvertersServiceApiImplTest {
     public void getAllConvertersTypes() throws Exception {
         final String[] expected = getConvertersNames(language);
 
-        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadConvertersCallback() {
             @Override
-            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters, @Nullable String lastSelConverter) {
                 assertEquals(expected.length, converters.size());
                 for (int i = 0; i < expected.length; i++) {
                     assertEquals(expected[i], converters.get(i).first);
                 }
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
-
             }
         });
 
@@ -87,7 +84,7 @@ public class ConvertersServiceApiImplTest {
         String[] expected = getConvertersNames(language);
 
         for (final String name : expected) {
-            mApi.getConverter(name, new ConvertersServiceApi.LoadCallback<Converter>() {
+            mApi.getConverter(name, new ConvertersServiceApi.LoadConverterCallback() {
                 @Override
                 public void onLoaded(@NonNull Converter converter) {
                     if (name.equals("Temperature") || name.equals("Температура")) {
@@ -103,7 +100,7 @@ public class ConvertersServiceApiImplTest {
                 }
 
                 @Override
-                public void onError(@NonNull String message) {
+                public void onError(@Nullable String message) {
 
                 }
             });
@@ -117,45 +114,10 @@ public class ConvertersServiceApiImplTest {
         final String[] expected = getConvertersNames(language);
 
         mApi.setLastConverter(expected[2]);
-        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadConvertersCallback() {
             @Override
-            public void onLoaded(@NonNull Converter converter) {
-                assertEquals(expected[2], converter.getName());
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
-
-            }
-        });
-        TimeUnit.SECONDS.sleep(timeout);
-
-        // set Temperature as last and check it
-        mApi.setLastConverter(expected[6]);
-        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
-            @Override
-            public void onLoaded(@NonNull Converter converter) {
-                assertTrue(converter instanceof TemperatureConverter);
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
-
-            }
-        });
-        TimeUnit.SECONDS.sleep(timeout);
-
-
-        // set Currency as last and check it
-        mApi.setLastConverter(expected[expected.length - 1]);
-        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
-            @Override
-            public void onLoaded(@NonNull Converter converter) {
-                assertTrue(converter instanceof CurrencyConverter);
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters, @Nullable String lastSelConverter) {
+                assertEquals(expected[2], lastSelConverter);
 
             }
         });
@@ -168,15 +130,17 @@ public class ConvertersServiceApiImplTest {
 
         mApi.deleteConverter(expected[expected.length - 1]);
 
-        mApi.getLastConverter(new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(expected[expected.length - 1], new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
-                assertEquals(expected[0], converter.getName());
+
             }
 
             @Override
-            public void onError(@NonNull String message) {
-
+            public void onError(@Nullable String message) {
+                assertEquals(
+                        "There are no converters with given name - " + expected[expected.length - 1],
+                        message);
             }
         });
 
@@ -189,14 +153,14 @@ public class ConvertersServiceApiImplTest {
 
         mApi.setLastUnit(names[5], 5);
 
-        mApi.getConverter(names[5], new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(names[5], new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(5, converter.getLastUnitPosition());
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });
@@ -210,14 +174,14 @@ public class ConvertersServiceApiImplTest {
 
         mApi.setLastQuantity(names[9], "9999.99999");
 
-        mApi.getConverter(names[9], new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(names[9], new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals("9999.99999", converter.getLastQuantity());
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });
@@ -243,7 +207,7 @@ public class ConvertersServiceApiImplTest {
         }, converter, "");
 
         // check that return converter is the same
-        mApi.getConverter(newName, new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(newName, new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(newName, converter.getName());
@@ -259,7 +223,7 @@ public class ConvertersServiceApiImplTest {
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });
@@ -285,20 +249,15 @@ public class ConvertersServiceApiImplTest {
             }
         }, converter, newName);
 
-        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadConvertersCallback() {
             @Override
-            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters, @Nullable String lastSelConverter) {
                 assertTrue(converters.contains(new Pair<>(editedName, true)));
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
-
             }
         });
 
         // check that return updated converter
-        mApi.getConverter(editedName, new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(editedName, new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertEquals(editedName, converter.getName());
@@ -317,7 +276,7 @@ public class ConvertersServiceApiImplTest {
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });
@@ -337,7 +296,7 @@ public class ConvertersServiceApiImplTest {
             }
         }, edited, expected[6]);
 
-        mApi.getConverter(newName, new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(newName, new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertTrue(converter instanceof TemperatureConverter);
@@ -345,7 +304,7 @@ public class ConvertersServiceApiImplTest {
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });
@@ -363,25 +322,20 @@ public class ConvertersServiceApiImplTest {
 
         // order of pairs in the db now is the same as in above list
         // so swap all elements in the list and save new order in db
-        for (int i = 0; i < names.length/2; i++) {
+        for (int i = 0; i < names.length / 2; i++) {
             Collections.swap(actualConverters, i, names.length - (i + 1));
         }
         mApi.writeConvertersOrder(actualConverters);
 
         // check the order of pairs
-        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadConvertersCallback() {
             @Override
-            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters, @Nullable String lastSelConverter) {
                 for (int i = 0; i < converters.size(); i++) {
                     Pair<String, Boolean> expected = actualConverters.get(i);
                     Pair<String, Boolean> actual = converters.get(i);
                     assertEquals(expected, actual);
                 }
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
-
             }
         });
 
@@ -397,17 +351,12 @@ public class ConvertersServiceApiImplTest {
             mApi.writeConverterState(name, false);
         }
 
-        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadCallback<List<Pair<String, Boolean>>>() {
+        mApi.getAllConvertersTypes(new ConvertersServiceApi.LoadConvertersCallback() {
             @Override
-            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters) {
+            public void onLoaded(@NonNull List<Pair<String, Boolean>> converters, @Nullable String lastSelConverter) {
                 for (Pair<String, Boolean> converter : converters) {
                     assertFalse(converter.second);
                 }
-            }
-
-            @Override
-            public void onError(@NonNull String message) {
-
             }
         });
 
@@ -420,24 +369,25 @@ public class ConvertersServiceApiImplTest {
 
         // get currency converter
         final CurrencyConverter[] currencyConverter = new CurrencyConverter[1];
-        mApi.getConverter(names[names.length - 1], new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(names[names.length - 1], new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
-                        currencyConverter[0] = (CurrencyConverter) converter;
+                currencyConverter[0] = (CurrencyConverter) converter;
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });
 
-        TimeUnit.SECONDS.sleep(timeout * 3);
+        TimeUnit.SECONDS.sleep(timeout);
 
         // change it slightly and save to the db
         currencyConverter[0].getUnits().get(0).isEnabled = false;
         currencyConverter[0].getUnits().get(5).isEnabled = false;
         currencyConverter[0].getUnits().get(10).name = "Name that was changed by a user";
+        currencyConverter[0].getUnits().get(0).value = 12345;
         mApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
             @Override
             public void onSaved(boolean saved) {
@@ -449,32 +399,33 @@ public class ConvertersServiceApiImplTest {
 
         // check that update of currency converter is not affected any fields,
         // excepted unit value and last update time
-        mApi.updateCourses(new ConvertersServiceApi.LoadCallback<List<Converter.Unit>>() {
+        mApi.updateCourses(new ConvertersServiceApi.LoadConverterCallback() {
             @Override
-            public void onLoaded(@NonNull List<Converter.Unit> units) {
-                assertTrue(units.get(0) instanceof CurrencyConverter.CurrencyUnit);
-                assertFalse(units.get(0).isEnabled);
-                assertFalse(units.get(5).isEnabled);
-                assertEquals("Name that was changed by a user", units.get(10).name);
+            public void onLoaded(@NonNull Converter converter) {
+                assertTrue(converter.getUnits().get(0) instanceof CurrencyConverter.CurrencyUnit);
+                assertFalse(converter.getUnits().get(0).isEnabled);
+                assertFalse(converter.getUnits().get(5).isEnabled);
+                assertEquals("Name that was changed by a user", converter.getUnits().get(10).name);
+                assertTrue(converter.getUnits().get(0).value != 12345);
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
-        });
+        }, null);
 
         TimeUnit.SECONDS.sleep(timeout);
 
-        mApi.getConverter(names[names.length - 1], new ConvertersServiceApi.LoadCallback<Converter>() {
+        mApi.getConverter(names[names.length - 1], new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
                 assertTrue(currencyConverter[0].getLastUpdateTime() !=
-                        ((CurrencyConverter)converter).getLastUpdateTime());
+                        ((CurrencyConverter) converter).getLastUpdateTime());
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(@Nullable String message) {
 
             }
         });

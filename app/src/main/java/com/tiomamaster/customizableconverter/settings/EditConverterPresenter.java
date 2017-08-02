@@ -3,8 +3,8 @@ package com.tiomamaster.customizableconverter.settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import android.widget.ProgressBar;
 
+import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
 import com.tiomamaster.customizableconverter.data.CurrencyConverter;
@@ -151,28 +151,12 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         mConvertersRepo.getConverter(mInitialConverterName, true, new ConvertersRepository.GetConverterCallback() {
             @Override
             public void onConverterLoaded(@NonNull Converter converter) {
-                checkNotNull(converter);
-
-                mCurConverter = converter;
-
-                mUnits = mCurConverter.getUnits();
-
-                // create unit lower case names set
-                mUnitNames = createLowerCaseUnitNames();
-
-                mEnabledUnits = mCurConverter.getEnabledUnitsName().size();
-
-                mView.showUnits(mUnits);
-                mView.setUnitsLoadingIndicator(false);
+                success(converter);
             }
 
             @Override
-            public void reportError(@NonNull String message) {
-                checkNotNull(message);
-
-                mView.setUnitsLoadingIndicator(false);
-
-                mView.showUnitsLoadingError(message);
+            public void reportError(@Nullable String message) {
+                error();
             }
         });
     }
@@ -289,7 +273,12 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         } else {
             if (!mInitialUnitName.equals(mCurUnitName)) {
                 // update existing unit with new name and value
-                int index = mUnits.indexOf(new Converter.Unit(mInitialUnitName, 0d, true));
+                int index;
+                if (mCurConverter instanceof CurrencyConverter) {
+                    index = mUnits.indexOf(new CurrencyConverter.CurrencyUnit(mInitialUnitName, 0d, true, ""));
+                } else {
+                    index = mUnits.indexOf(new Converter.Unit(mInitialUnitName, 0d, true));
+                }
                 mUnits.get(index).name = mCurUnitName;
                 mUnits.get(index).value = Double.valueOf(mCurUnitValue);
 
@@ -336,6 +325,24 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
                 || (mCurConverter instanceof  CurrencyConverter));
     }
 
+    @Override
+    public void updateUnits() {
+        mView.setUnitsLoadingIndicator(true);
+
+        mConvertersRepo.updateCourses(new ConvertersRepository.GetConverterCallback() {
+            @Override
+            public void onConverterLoaded(@NonNull Converter converter) {
+                success(converter);
+            }
+
+            @Override
+            public void reportError(@Nullable String message) {
+                error();
+            }
+        });
+
+    }
+
     private Set<String> createLowerCaseUnitNames() {
         Set<String> names = new HashSet<>();
         for (Converter.Unit mUnit : mUnits) {
@@ -378,5 +385,27 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
         }
         return !mCurUnitValue.isEmpty() && !mCurUnitValue.equals(".") &&
                 Double.parseDouble(mCurUnitValue) != 0;
+    }
+
+    private void error() {
+        mView.setUnitsLoadingIndicator(false);
+        mView.showUnitsLoadingError(R.string.msg_internet_error);
+    }
+
+    private void success(@NonNull Converter converter) {
+        checkNotNull(converter);
+
+        mCurConverter = converter;
+
+        mUnits = mCurConverter.getUnits();
+
+        // create unit lower case names set
+        mUnitNames = createLowerCaseUnitNames();
+
+        mEnabledUnits = mCurConverter.getEnabledUnitsName().size();
+
+        mView.setUnitsLoadingIndicator(false);
+
+        mView.showUnits(mUnits);
     }
 }

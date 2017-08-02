@@ -2,8 +2,10 @@ package com.tiomamaster.customizableconverter.settings;
 
 import android.support.v4.util.Pair;
 
+import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.CurrencyConverter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -29,9 +32,11 @@ import static org.mockito.Mockito.when;
 @RunWith(Parameterized.class)
 public class EditConverterPresenterTest {
 
-    @Mock private SettingsContract.EditConverterView mView;
+    @Mock
+    private SettingsContract.EditConverterView mView;
 
-    @Mock private ConvertersRepository mRepository;
+    @Mock
+    private ConvertersRepository mRepository;
 
     private EditConverterPresenter mPresenter;
 
@@ -40,13 +45,14 @@ public class EditConverterPresenterTest {
     private static final String NEW_CONVERTER = "";
     private static final String OLD_CONVERTER = "Test";
 
-    private List<Converter.Unit> mUnits = new ArrayList<>(
-            Arrays.asList(new Converter.Unit("Unit0", 1d, true),
-                    new Converter.Unit("Unit1", 2d, true),
-                    new Converter.Unit("Unit2", 3d, false),
-                    new Converter.Unit("Unit3", 4d, true)));
+    private List<Converter.Unit> mUnits = new ArrayList<>(Arrays.asList(new Converter.Unit("Unit0", 1d, true),
+            new Converter.Unit("Unit1", 2d, true),
+            new Converter.Unit("Unit2", 3d, false),
+            new Converter.Unit("Unit3", 4d, true)));
 
-    private Converter mCurConverter = new Converter(OLD_CONVERTER, mUnits);
+    private Converter mConverter = new Converter(OLD_CONVERTER, mUnits);
+    private Converter mCurConverter = new CurrencyConverter(OLD_CONVERTER, mUnits);
+
 
 
     @Parameterized.Parameters
@@ -135,7 +141,7 @@ public class EditConverterPresenterTest {
             verify(mView).enableSaveConverter(false);
         } else {
             verify(mView).showConverterExistError(false);
-            assertEquals(name, mCurConverter.getName());
+            assertEquals(name, mConverter.getName());
             verify(mView).enableSaveConverter(true);
         }
     }
@@ -172,7 +178,7 @@ public class EditConverterPresenterTest {
             verify(mView).enableSaveConverter(true);
 
             assertTrue(mUnits.size() == 3);
-            assertTrue(mCurConverter.getLastUnitPosition() == 0);
+            assertTrue(mConverter.getLastUnitPosition() == 0);
 
             mPresenter.deleteUnit(0);
 
@@ -303,6 +309,33 @@ public class EditConverterPresenterTest {
     }
 
     @Test
+    public void saveCurrencyUnit() {
+        List<Converter.Unit> units = new ArrayList<>();
+        units.addAll(Arrays.asList(new CurrencyConverter.CurrencyUnit("Unit0", 1d, true, ""),
+                new CurrencyConverter.CurrencyUnit("Unit1", 2d, true, ""),
+                new CurrencyConverter.CurrencyUnit("Unit2", 3d, false, ""),
+                new CurrencyConverter.CurrencyUnit("Unit3", 4d, true, "")));
+        CurrencyConverter converter = new CurrencyConverter("Test", units);
+        if (!mInitialConverterName.equals(NEW_CONVERTER)) {
+
+            ArgumentCaptor<ConvertersRepository.GetConverterCallback> captor =
+                    ArgumentCaptor.forClass(ConvertersRepository.GetConverterCallback.class);
+            verify(mRepository).getConverter(anyString(), anyBoolean(), captor.capture());
+            captor.getValue().onConverterLoaded(converter);
+
+            String[] names = {"Name0", "Name1"};
+
+            mPresenter.editUnit(units.get(0).name, String.valueOf(units.get(0).value));
+            mPresenter.setUnitName(names[0]);
+            mPresenter.saveUnit();
+
+            assertEquals(names[0], units.get(0).name);
+
+            verify(mView).onUnitEdited(0);
+        }
+    }
+
+    @Test
     public void saveConverter() {
         mPresenter.saveConverter(true);
 
@@ -331,7 +364,7 @@ public class EditConverterPresenterTest {
     }
 
     @Test
-    public void loadUnits_ShowUnitsLoadingError() {
+    public void loadUnitsFail_ShowUnitsLoadingError() {
         mPresenter.loadUnits();
 
         if (mInitialConverterName.equals(OLD_CONVERTER)) {
@@ -344,7 +377,42 @@ public class EditConverterPresenterTest {
             captor.getValue().reportError("error message");
 
             verify(mView, times(2)).setUnitsLoadingIndicator(false);
-            verify(mView).showUnitsLoadingError("error message");
+            verify(mView).showUnitsLoadingError(R.string.msg_internet_error);
+        }
+    }
+
+    @Test
+    public void updateUnitsSuccess_ShowItInView() {
+        mPresenter.updateUnits();
+
+        if (mInitialConverterName.equals(OLD_CONVERTER)) {
+            verify(mView, times(2)).setUnitsLoadingIndicator(true);
+
+            ArgumentCaptor<ConvertersRepository.GetConverterCallback> captor =
+                    ArgumentCaptor.forClass(ConvertersRepository.GetConverterCallback.class);
+            verify(mRepository).updateCourses(captor.capture());
+            captor.getValue().onConverterLoaded(mCurConverter);
+
+            verify(mView, times(2)).setUnitsLoadingIndicator(false);
+
+            verify(mView, times(2)).showUnits(mCurConverter.getUnits());
+        }
+    }
+
+    @Test
+    public void updateUnitsFail_ShowErrorMessage() {
+        mPresenter.updateUnits();
+
+        if (mInitialConverterName.equals(OLD_CONVERTER)) {
+            verify(mView, times(2)).setUnitsLoadingIndicator(true);
+
+            ArgumentCaptor<ConvertersRepository.GetConverterCallback> captor =
+                    ArgumentCaptor.forClass(ConvertersRepository.GetConverterCallback.class);
+            verify(mRepository).updateCourses(captor.capture());
+            captor.getValue().reportError("error message");
+
+            verify(mView, times(2)).setUnitsLoadingIndicator(false);
+            verify(mView).showUnitsLoadingError(R.string.msg_internet_error);
         }
     }
 
@@ -358,7 +426,7 @@ public class EditConverterPresenterTest {
             ArgumentCaptor<ConvertersRepository.GetConverterCallback> captor =
                     ArgumentCaptor.forClass(ConvertersRepository.GetConverterCallback.class);
             verify(mRepository).getConverter(anyString(), anyBoolean(), captor.capture());
-            captor.getValue().onConverterLoaded(mCurConverter);
+            captor.getValue().onConverterLoaded(mConverter);
         }
     }
 

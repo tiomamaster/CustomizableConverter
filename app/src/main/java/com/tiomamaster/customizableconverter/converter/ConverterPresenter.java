@@ -1,11 +1,14 @@
 package com.tiomamaster.customizableconverter.converter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pair;
 
+import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.CurrencyConverter;
 import com.tiomamaster.customizableconverter.data.TemperatureConverter;
 
 import java.util.ArrayList;
@@ -62,6 +65,9 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
                 mCurConverter = converter;
 
+                if (mCurConverter instanceof CurrencyConverter) mConverterView.enableSwipeToRefresh(true);
+                else mConverterView.enableSwipeToRefresh(false);
+
                 if (mCurConverter instanceof TemperatureConverter) {
                     mConverterView.showConverter(converter.getEnabledUnitsName(),
                             converter.getLastUnitPosition(),
@@ -74,12 +80,9 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
             }
 
             @Override
-            public void reportError(@NonNull String message) {
-                checkNotNull(message);
-
+            public void reportError(@Nullable String message) {
                 mConverterView.setProgressIndicator(false);
-                // TODO: process message text to make it understandable for user
-                mConverterView.showError(message);
+                mConverterView.showError(R.string.msg_internet_error);
             }
         });
     }
@@ -112,5 +115,37 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
     @Override
     public void openSettings() {
         mConverterView.showSettingsUi();
+    }
+
+    @Override
+    public void updateCourses() {
+        mConverterView.setProgressIndicator(true);
+
+        mConvertersRepository.updateCourses(new ConvertersRepository.GetConverterCallback() {
+            @Override
+            public void onConverterLoaded(@NonNull Converter converter) {
+                checkNotNull(converter);
+
+                mConverterView.setProgressIndicator(false);
+
+                mCurConverter = converter;
+
+                mConverterView.showConverter(converter.getEnabledUnitsName(),
+                        converter.getLastUnitPosition(),
+                        converter.getLastQuantity(), false);
+
+                mConverterView.enableSwipeToRefresh(true);
+            }
+
+            @Override
+            public void reportError(@Nullable String message) {
+                if (mCurConverter instanceof CurrencyConverter) {
+                    mConverterView.showSnackBar(R.string.msg_internet_error);
+                } else {
+                    mConverterView.showError(R.string.msg_internet_error);
+                }
+                mConverterView.setProgressIndicator(false);
+            }
+        });
     }
 }

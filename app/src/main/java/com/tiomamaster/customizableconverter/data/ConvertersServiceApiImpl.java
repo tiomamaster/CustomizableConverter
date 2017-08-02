@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import com.android.volley.Response;
@@ -31,8 +32,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     private ConvertersDbHelper mDbHelper;
 
-    private Context mContext;
-
     private CurrencyLoader mCurrencyLoader;
 
     public ConvertersServiceApiImpl(Context c) {
@@ -43,23 +42,22 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             mDbHelper = new ConvertersDbHelper(c, "en");
             mCurrencyLoader = new CurrencyLoader(c, "en");
         }
-        mContext = c;
 
-        mHandler = new Handler(mContext.getApplicationContext().getMainLooper());
+        mHandler = new Handler(c.getApplicationContext().getMainLooper());
     }
 
     @Override
-    public void getAllConvertersTypes(@NonNull final LoadCallback<List<Pair<String, Boolean>>> callback) {
+    public void getAllConvertersTypes(@NonNull final LoadConvertersCallback callback) {
         checkNotNull(callback);
 
-        new AsyncTask<Void, Void, List<Pair<String, Boolean>>>() {
+        new AsyncTask<Void, Void, Pair<String, List<Pair<String, Boolean>>>>() {
             @Override
-            protected List<Pair<String, Boolean>> doInBackground(Void... params) {
-                List<Pair<String, Boolean>> result = null;
+            protected Pair<String, List<Pair<String, Boolean>>> doInBackground(Void... params) {
+                Pair<String, List<Pair<String, Boolean>>> result = null;
                 try {
-                    result = sSingleExecutor.submit(new Callable<List<Pair<String, Boolean>>>() {
+                    result = sSingleExecutor.submit(new Callable<Pair<String, List<Pair<String, Boolean>>>>() {
                         @Override
-                        public List<Pair<String, Boolean>> call() throws Exception {
+                        public Pair<String, List<Pair<String, Boolean>>> call() throws Exception {
                             return mDbHelper.getAllConverters();
                         }
                     }).get();
@@ -70,14 +68,14 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             }
 
             @Override
-            protected void onPostExecute(List<Pair<String, Boolean>> converters) {
-                callback.onLoaded(converters);
+            protected void onPostExecute(Pair<String, List<Pair<String, Boolean>>> result) {
+                callback.onLoaded(result.second, result.first);
             }
         }.execute();
     }
 
     @Override
-    public void getConverter(@NonNull final String name, @NonNull final LoadCallback<Converter> callback) {
+    public void getConverter(@NonNull final String name, @NonNull final LoadConverterCallback callback) {
         checkNotNull(name);
         checkNotNull(callback);
 
@@ -89,7 +87,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                     result = sSingleExecutor.submit(new Callable<Converter>() {
                         @Override
                         public Converter call() throws Exception {
-                            return mDbHelper.createConverter(name);
+                            return mDbHelper.create(name);
                         }
                     }).get();
                 } catch (Exception e) {
@@ -100,40 +98,13 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
             @Override
             protected void onPostExecute(final Converter converter) {
-                if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
-                    loadCourses(converter, callback);
-                } else callback.onLoaded(converter);
-            }
-        }.execute();
-    }
-
-    @Override
-    public void getLastConverter(@NonNull final LoadCallback<Converter> callback) {
-        checkNotNull(callback);
-
-        new AsyncTask<Void, Void, Converter>() {
-            @Override
-            protected Converter doInBackground(Void... params) {
-                Converter result = null;
-                try {
-                    result = sSingleExecutor.submit(new Callable<Converter>() {
-                        @Override
-                        public Converter call() throws Exception {
-                            return mDbHelper.createLastConverter();
-                        }
-                    }).get();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (converter == null) {
+                    callback.onError("There are no converters with given name - " + name);
+                    return;
                 }
-                Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
-                        Converter.getOnSettingsChangeListener());
-                return result;
-            }
 
-            @Override
-            protected void onPostExecute(final Converter converter) {
                 if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
-                    loadCourses(converter, callback);
+                    updateCourses(callback, converter);
                 } else callback.onLoaded(converter);
             }
         }.execute();
@@ -244,54 +215,40 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     }
 
     @Override
-    public void updateCourses(@NonNull final LoadCallback<List<Converter.Unit>> callback) {
+    public void updateCourses(@NonNull final LoadConverterCallback callback,
+                              @Nullable final Converter converter) {
+        checkNotNull(callback);
+
         mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
             @Override
             public void onResponse(final List<CurrencyConverter.CurrencyUnit> response) {
-                // update currency units values and get they from the database
                 sSingleExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        final List<Converter.Unit> result = mDbHelper.updateCourses(response);
+
+                        // update or insert currency units values and get they from the database
+                        final List<Converter.Unit> result = mDbHelper.updateOrInsertCourses(response);
+
+                        final CurrencyConverter[] newConverter = new CurrencyConverter[1];
+
+                        if (converter != null) {
+                            ((CurrencyConverter) converter).setLastUpdateTime(System.currentTimeMillis());
+                            // update converter units
+                            converter.getUnits().clear();
+                            converter.getUnits().addAll(result);
+                        } else{
+                            newConverter[0] = mDbHelper.create();
+                            newConverter[0].setLastUpdateTime(System.currentTimeMillis());
+                        }
+
+                        // report result
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                callback.onLoaded(result);
+                                if (converter != null) callback.onLoaded(converter);
+                                else callback.onLoaded(newConverter[0]);
                             }
                         });
-                    }
-                });
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                callback.onError(error.getMessage());
-            }
-        });
-    }
-
-    /**
-     * Load actual currency courses from the internet, return they or report a error using the callback
-     * and update database. This method will be called only if courses was never updated, for example,
-     * when the user selects the currency converter for the first time.
-     *
-     * @param converter created currency converter with empty units list.
-     * @param callback  callback for return a result.
-     */
-    private void loadCourses(final Converter converter, @NonNull final LoadCallback<Converter> callback) {
-        mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
-            @Override
-            public void onResponse(List<CurrencyConverter.CurrencyUnit> response) {
-                // data successfully loaded, so return it to the user
-                ((CurrencyConverter) converter).setLastUpdateTime(System.currentTimeMillis());
-                converter.getUnits().addAll(response);
-                callback.onLoaded(converter);
-
-                // save data to the database
-                sSingleExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDbHelper.save(converter, converter.getName());
                     }
                 });
             }

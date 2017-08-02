@@ -22,7 +22,11 @@ interface ConverterContract {
 
         void showNoting();
 
-        void showError(@NonNull String message);
+        void showError(int messageResId);
+
+        void enableSwipeToRefresh(boolean isEnabled);
+
+        void showSnackBar(int messageResId);
     }
 
     interface UserActionListener {
@@ -38,5 +42,7 @@ interface ConverterContract {
         void saveLastQuantity(@NonNull String quantity);
 
         void openSettings();
+
+        void updateCourses();
     }
 }

@@ -1,6 +1,7 @@
 package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public interface ConvertersRepository {
 
         void onConverterLoaded(@NonNull Converter converter);
 
-        void reportError(@NonNull String message);
+        void reportError(@Nullable String message);
     }
 
     interface SaveConverterCallback {
@@ -57,4 +58,6 @@ public interface ConvertersRepository {
      * @param position The order position of converter.
      */
     void saveConverterDeletion(int position);
+
+    void updateCourses(@NonNull GetConverterCallback callback);
 }

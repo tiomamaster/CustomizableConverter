@@ -1,6 +1,7 @@
 package com.tiomamaster.customizableconverter.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import java.util.List;
@@ -11,22 +12,25 @@ import java.util.List;
  */
 interface ConvertersServiceApi {
 
-    interface LoadCallback<T> {
+    interface LoadConvertersCallback {
 
-        void onLoaded(@NonNull T converters);
+        void onLoaded(@NonNull List<Pair<String, Boolean>> converters, @Nullable String lastSelConverter);
+    }
 
-        void onError(@NonNull String message);
+    interface LoadConverterCallback {
+
+        void onLoaded(@NonNull Converter converter);
+
+        void onError(@Nullable String message);
     }
 
     interface SaveCallback {
         void onSaved(boolean saved);
     }
 
-    void getAllConvertersTypes(@NonNull LoadCallback<List<Pair<String, Boolean>>> callback);
+    void getAllConvertersTypes(@NonNull LoadConvertersCallback callback);
 
-    void getConverter(@NonNull String name, @NonNull LoadCallback<Converter> callback);
-
-    void getLastConverter(@NonNull LoadCallback<Converter> callback);
+    void getConverter(@NonNull String name, @NonNull LoadConverterCallback callback);
 
     void setLastConverter(@NonNull String name);
 
@@ -43,5 +47,5 @@ interface ConvertersServiceApi {
 
     void deleteConverter(@NonNull String name);
 
-    void updateCourses(@NonNull LoadCallback<List<Converter.Unit>> callback);
+    void updateCourses(@NonNull LoadConverterCallback callback, @Nullable Converter converter);
 }

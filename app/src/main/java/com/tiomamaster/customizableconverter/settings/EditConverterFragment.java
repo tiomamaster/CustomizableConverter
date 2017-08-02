@@ -42,7 +42,6 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.List;
 
-import static android.R.attr.name;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class EditConverterFragment extends Fragment implements SettingsContract.EditConverterView {
@@ -165,6 +164,12 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mTextLoading = (TextView) mRecyclerViewHeader.findViewById(R.id.text_loading);
 
         mBtnUpdate = (Button) mRecyclerViewHeader.findViewById(R.id.btn_update);
+        mBtnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mActionListener.updateUnits();
+            }
+        });
         mTextLoadingError = (TextView) mRecyclerViewHeader.findViewById(R.id.text_msg_loading_error);
 
         setRetainInstance(true);
@@ -225,6 +230,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     @Override
     public void showUnits(@NonNull List<Converter.Unit> units) {
         checkNotNull(units);
+        mBtnUpdate.setVisibility(View.GONE);
+        mTextLoadingError.setVisibility(View.GONE);
+
         mAdapter.setUnits(units);
     }
 
@@ -349,9 +357,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     }
 
     @Override
-    public void showUnitsLoadingError(@NonNull String message) {
+    public void showUnitsLoadingError(int messageResId) {
         mBtnUpdate.setVisibility(View.VISIBLE);
-        mTextLoadingError.setText(message);
+        mTextLoadingError.setText(messageResId);
         mTextLoadingError.setVisibility(View.VISIBLE);
     }
 

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
@@ -36,6 +37,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -50,6 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.converter.ConverterActivity.REQUEST_CODE_SETTINGS_ACTIVITY;
 import static com.tiomamaster.customizableconverter.converter.ConverterActivity.RESULT_CODE_RESTART_APP;
 
+// TODO: show last update time of currencies
 public class ConverterFragment extends Fragment implements ConverterContract.View {
 
     @VisibleForTesting ConverterContract.UserActionListener mActionsListener;
@@ -72,6 +75,10 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     private TextView mMsg;
 
+    private SwipeRefreshLayout mSrl;
+
+    private Button mBtnUpdate;
+
     public ConverterFragment() {
     }
 
@@ -86,7 +93,15 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         final View root = inflater.inflate(R.layout.fragment_converter, container, false);
 
         mMsg = (TextView) root.findViewById(R.id.text_msg);
-        mMsg.setVisibility(View.GONE);
+
+        mBtnUpdate = (Button) root.findViewById(R.id.btn_update);
+
+        mBtnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mActionsListener.updateCourses();
+            }
+        });
 
         mConversionResult = (RecyclerView) root.findViewById(R.id.conversion_result);
         mConversionResult.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -117,13 +132,18 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mConversionResult.setVisibility(View.GONE);
 
-        SwipeRefreshLayout swipeRefreshLayout =
-                (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
-        swipeRefreshLayout.setColorSchemeColors(
+        mSrl = (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
+        mSrl.setColorSchemeColors(
                 ContextCompat.getColor(getActivity(), R.color.colorPrimary),
                 ContextCompat.getColor(getActivity(), R.color.accent),
                 ContextCompat.getColor(getActivity(), R.color.primary_dark));
-        swipeRefreshLayout.setEnabled(false);
+        mSrl.setEnabled(false);
+        mSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mActionsListener.updateCourses();
+            }
+        });
 
         mRecyclerViewHeader = inflater.inflate(R.layout.rw_converter_header, container, false);
 
@@ -248,7 +268,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             case R.id.settings:
                 mActionsListener.openSettings();
                 return true;
-            default: return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -271,17 +292,13 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     @Override
     public void setProgressIndicator(final boolean active) {
 
-        if (getView() == null) {
-            return;
-        }
-        final SwipeRefreshLayout srl =
-                (SwipeRefreshLayout) getView().findViewById(R.id.refresh_layout);
+        if (getView() == null) return;
 
         // make sure setRefreshing() is called after the layout is done with everything else.
-        srl.post(new Runnable() {
+        mSrl.post(new Runnable() {
             @Override
             public void run() {
-                srl.setRefreshing(active);
+                mSrl.setRefreshing(active);
             }
         });
     }
@@ -305,10 +322,10 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         // set signed edit text for quantity input
         if (signedQuantity) {
-            mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL|
+            mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL |
                     EditorInfo.TYPE_NUMBER_FLAG_SIGNED);
-        }
-        else mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER|EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+        } else
+            mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
 
         // clear spinner units and set new data
         mUnitsAdapter.clear();
@@ -343,6 +360,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mResultAdapter.setDataSet(result);
 
+        mBtnUpdate.setVisibility(View.GONE);
         mMsg.setVisibility(View.GONE);
         mConversionResult.setVisibility(View.VISIBLE);
         if (result.isEmpty()) mResultText.setVisibility(View.GONE);
@@ -364,10 +382,34 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     }
 
     @Override
-    public void showError(@NonNull String message) {
+    public void showError(int messageResId) {
+        mBtnUpdate.setVisibility(View.VISIBLE);
         mMsg.setVisibility(View.VISIBLE);
-        mMsg.setText(message);
+        mMsg.setText(messageResId);
         mConversionResult.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void enableSwipeToRefresh(boolean isEnabled) {
+
+        if (getView() == null) return;
+
+        mSrl.setEnabled(isEnabled);
+    }
+
+    @Override
+    public void showSnackBar(int messageResId) {
+        if (getView() == null) return;
+
+        Snackbar
+                .make(getView(), messageResId, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.retry, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mActionsListener.updateCourses();
+                    }
+                })
+                .show();
     }
 
     void hideSoftInput() {
@@ -481,7 +523,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                         menu.add(R.string.copy).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
-                                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
                                     android.text.ClipboardManager clipboard = (android.text.ClipboardManager)
                                             mParentActivity.getSystemService(Context.CLIPBOARD_SERVICE);
                                     clipboard.setText(mResult.getText());

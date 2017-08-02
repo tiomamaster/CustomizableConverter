@@ -2,11 +2,12 @@ package com.tiomamaster.customizableconverter.converter;
 
 import android.support.v4.util.Pair;
 
+import com.tiomamaster.customizableconverter.R;
 import com.tiomamaster.customizableconverter.data.Converter;
 import com.tiomamaster.customizableconverter.data.ConvertersRepository;
+import com.tiomamaster.customizableconverter.data.CurrencyConverter;
 import com.tiomamaster.customizableconverter.data.TemperatureConverter;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,8 +25,8 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,7 +40,9 @@ public class ConverterPresenterTest {
 
     @Mock private ConvertersRepository mRepository;
 
-    @Mock private Converter mCurConverter;
+    @Mock private Converter mConverter;
+
+    @Mock private CurrencyConverter mCurConverter;
 
     private ConverterPresenter mPresenter;
 
@@ -93,6 +96,7 @@ public class ConverterPresenterTest {
         verify(mView).setProgressIndicator(false);
         verify(mView).showConverter(anyList(), anyInt(), anyString(), eq(false));
         assertEquals(name, converter.getName());
+        verify(mView, never()).enableSwipeToRefresh(true);
 
         // load temperature converter in en and ru locales
         name = CONVERTERS_TYPES.get(2);
@@ -110,20 +114,32 @@ public class ConverterPresenterTest {
     }
 
     @Test
+    public void loadConverter_DisableSwipeToRefresh() throws Exception {
+        String name = CONVERTERS_TYPES.get(0);
+        mPresenter.loadConverter(name);
+
+        verify(mRepository).getConverter(eq(name), anyBoolean(), mGetConverterCaptor.capture());
+        Converter converter = new Converter(name, new ArrayList<Converter.Unit>());
+        mGetConverterCaptor.getValue().onConverterLoaded(converter);
+
+        verify(mView).enableSwipeToRefresh(false);
+    }
+
+    @Test
     public void callConvert_ShowResult() {
         String from = "Test";
         double quantity = 100;
 
-        when(mCurConverter.convertAll(quantity, from)).thenReturn(new ArrayList<Pair<String, String>>());
+        when(mConverter.convertAll(quantity, from)).thenReturn(new ArrayList<Pair<String, String>>());
 
-        loadConverter();
+        loadConverter(mConverter);
 
         mPresenter.convert(from, String.valueOf(quantity));
 
         ArgumentCaptor<Double> doubleCaptor = ArgumentCaptor.forClass(Double.TYPE);
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(mCurConverter).convertAll(doubleCaptor.capture(), stringCaptor.capture());
+        verify(mConverter).convertAll(doubleCaptor.capture(), stringCaptor.capture());
 
         assertEquals(from, stringCaptor.getValue());
         assertEquals(quantity, doubleCaptor.getValue());
@@ -131,7 +147,7 @@ public class ConverterPresenterTest {
         verify(mView).showConversionResult(anyList());
 
         mPresenter.convert(from, ".");
-        verify(mCurConverter).convertAll(0, from);
+        verify(mConverter).convertAll(0, from);
     }
 
     @Test
@@ -145,13 +161,13 @@ public class ConverterPresenterTest {
 
     @Test
     public void saveLastUnitPos_CallCurConverterAndRepo() {
-        loadConverter();
+        loadConverter(mConverter);
 
         mPresenter.saveLastUnitPos(1);
 
         ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.TYPE);
 
-        verify(mCurConverter).setLastUnitPosition(captor.capture());
+        verify(mConverter).setLastUnitPosition(captor.capture());
         assertEquals(1, captor.getValue().intValue());
 
         verify(mRepository).saveLastUnit();
@@ -159,7 +175,7 @@ public class ConverterPresenterTest {
 
     @Test
     public void saveLastQuantity_CallCurConverterAndRepo() {
-        loadConverter();
+        loadConverter(mConverter);
 
         String quantity = "100";
 
@@ -167,7 +183,7 @@ public class ConverterPresenterTest {
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
-        verify(mCurConverter).setLastQuantity(captor.capture());
+        verify(mConverter).setLastQuantity(captor.capture());
 
         assertEquals(quantity, captor.getValue());
 
@@ -190,13 +206,55 @@ public class ConverterPresenterTest {
         verify(mRepository).getConverter(anyString(), anyBoolean(), mGetConverterCaptor.capture());
         mGetConverterCaptor.getValue().reportError("error message");
 
-        verify(mView).showError("error message");
+        verify(mView).showError(R.string.msg_internet_error);
     }
 
-    private void loadConverter() {
+    @Test
+    public void updateCoursesSuccess_ShowInView() {
+        mPresenter.updateCourses();
+
+        verify(mView).setProgressIndicator(true);
+
+        verify(mRepository).updateCourses(mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+
+        verify(mView).setProgressIndicator(false);
+
+        verify(mView).showConverter(anyList(), anyInt(), anyString(), eq(false));
+
+        verify(mView).enableSwipeToRefresh(true);
+    }
+
+    @Test
+    public void updateCoursesFail_ShowError() {
+        mPresenter.updateCourses();
+
+        verify(mRepository).updateCourses(mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().reportError("Error message");
+
+        verify(mView).showError(R.string.msg_internet_error);
+        verify(mView).setProgressIndicator(false);
+    }
+
+    @Test
+    public void updateCoursesFail_ShowSnack() {
+        // make current converter instance not null
+        loadConverter(mCurConverter);
+
+        mPresenter.updateCourses();
+
+        verify(mRepository).updateCourses(mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().reportError("Error message");
+
+        // show snack bar if current converter is not null
+        verify(mView).showSnackBar(R.string.msg_internet_error);
+        verify(mView, times(2)).setProgressIndicator(false);
+    }
+
+    private void loadConverter(Converter converter) {
         mPresenter.loadConverter(anyString());
 
         verify(mRepository).getConverter(anyString(), anyBoolean(), mGetConverterCaptor.capture());
-        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+        mGetConverterCaptor.getValue().onConverterLoaded(converter);
     }
 }

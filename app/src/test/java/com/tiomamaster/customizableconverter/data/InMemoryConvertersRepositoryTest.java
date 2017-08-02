@@ -14,12 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -33,13 +31,17 @@ public class InMemoryConvertersRepositoryTest {
 
     @Mock private Converter mConverter;
 
+    @Mock private CurrencyConverter mCurrencyCon;
+
     @Mock private ConvertersRepository.LoadEnabledConvertersTypesCallback mLoadEnabledCallback;
 
     @Mock private ConvertersRepository.LoadAllConvertersTypesCallback mLoadAllCallback;
 
     @Mock private ConvertersRepository.GetConverterCallback mGetConverterCallback;
 
-    @Captor private ArgumentCaptor<ConvertersServiceApi.LoadCallback> mCaptor;
+    @Captor private ArgumentCaptor<ConvertersServiceApi.LoadConvertersCallback> mGetConvertersCaptor;
+
+    @Captor private ArgumentCaptor<ConvertersServiceApi.LoadConverterCallback> mGetConverterCaptor;
 
     @Before
     public void setUp() {
@@ -53,14 +55,14 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
 
         // verify that service api was called enables repository caching
-        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
-        mCaptor.getValue().onLoaded(new ArrayList<Pair<String, Boolean>>());
+        verify(mServiceApi).getAllConvertersTypes(mGetConvertersCaptor.capture());
+        mGetConvertersCaptor.getValue().onLoaded(new ArrayList<Pair<String, Boolean>>(), "");
 
         // second call to repository
         mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
 
         // check Api was called once
-        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.LoadCallback.class));
+        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.LoadConvertersCallback.class));
     }
 
     @Test
@@ -69,14 +71,14 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getAllConverterTypes(mLoadAllCallback);
 
         // verify that service api was called enables repository caching
-        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
-        mCaptor.getValue().onLoaded(new ArrayList<Pair<String, Boolean>>());
+        verify(mServiceApi).getAllConvertersTypes(mGetConvertersCaptor.capture());
+        mGetConvertersCaptor.getValue().onLoaded(new ArrayList<Pair<String, Boolean>>(), "");
 
         // second call to repository
         mRepository.getAllConverterTypes(mLoadAllCallback);
 
         // check Api was called once
-        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.LoadCallback.class));
+        verify(mServiceApi).getAllConvertersTypes(any(ConvertersServiceApi.LoadConvertersCallback.class));
     }
 
     @Test
@@ -88,33 +90,14 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.getConverter(name, false, mGetConverterCallback);
 
         // verify that service api was called enables repository caching
-        verify(mServiceApi).getConverter(eq(name), mCaptor.capture());
-        mCaptor.getValue().onLoaded(new Converter(name, new ArrayList<Converter.Unit>()));
+        verify(mServiceApi).getConverter(eq(name), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onLoaded(new Converter(name, new ArrayList<Converter.Unit>()));
 
         // second call to repository
         mRepository.getConverter(name, false, mGetConverterCallback);
 
         // check Api was called once
-        verify(mServiceApi).getConverter(eq(name), any(ConvertersServiceApi.LoadCallback.class));
-    }
-
-    @Test
-    public void getLastConverter_AlwaysCallOnce() {
-        String name = "Test";
-
-        //first call to the repository
-        mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
-
-        // verify that service api was called enables repository caching
-        verify(mServiceApi).getLastConverter(mCaptor.capture());
-        mCaptor.getValue().onLoaded(new Converter(name, new ArrayList<Converter.Unit>()));
-
-        // several calls to the repository
-        mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
-        mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
-
-        // check Api was called once
-        verify(mServiceApi).getLastConverter(any(ConvertersServiceApi.LoadCallback.class));
+        verify(mServiceApi).getConverter(eq(name), any(ConvertersServiceApi.LoadConverterCallback.class));
     }
 
     @Test
@@ -124,15 +107,15 @@ public class InMemoryConvertersRepositoryTest {
         // retrieve first converter
         mRepository.mLastConverterName = names[0];
         mRepository.getConverter(names[0], false, mGetConverterCallback);
-        verify(mServiceApi).getConverter(eq(names[0]), mCaptor.capture());
-        mCaptor.getValue().onLoaded(new Converter(names[0], new ArrayList<Converter.Unit>()));
+        verify(mServiceApi).getConverter(eq(names[0]), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onLoaded(new Converter(names[0], new ArrayList<Converter.Unit>()));
 
         String startName = mRepository.mLastConverterName;
 
         // retrieve second converter
         mRepository.getConverter(names[1], false, mGetConverterCallback);
-        verify(mServiceApi).getConverter(eq(names[1]), mCaptor.capture());
-        mCaptor.getValue().onLoaded(new Converter(names[1], new ArrayList<Converter.Unit>()));
+        verify(mServiceApi).getConverter(eq(names[1]), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onLoaded(new Converter(names[1], new ArrayList<Converter.Unit>()));
 
         assertNotEquals(startName, mRepository.mLastConverterName);
 
@@ -161,9 +144,6 @@ public class InMemoryConvertersRepositoryTest {
 
     @Test
     public void getEnabledConvertersTypes_ReturnOnlyEnabled() {
-        // simulate last converter name
-        mRepository.mLastConverterName = "Third";
-
         // create list of all converters
         List<Pair<String, Boolean>> allConverters = new ArrayList<>(4);
         Pair<String, Boolean> first = new Pair<>("First", true);
@@ -180,8 +160,8 @@ public class InMemoryConvertersRepositoryTest {
 
         mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
 
-        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
-        mCaptor.getValue().onLoaded(allConverters);
+        verify(mServiceApi).getAllConvertersTypes(mGetConvertersCaptor.capture());
+        mGetConvertersCaptor.getValue().onLoaded(allConverters, "Third");
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
 
@@ -299,37 +279,68 @@ public class InMemoryConvertersRepositoryTest {
     }
 
     @Test
-    public void getEnabledConvertersTypesReceiveError_SaveConverterName() {
-        mRepository.getEnabledConvertersTypes(mLoadEnabledCallback);
-
-        verify(mServiceApi).getLastConverter(mCaptor.capture());
-        mCaptor.getValue().onError("error");
-
-        if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
-            assertEquals("Валюта", mRepository.mLastConverterName);
-        } else {
-            assertEquals("Currency", mRepository.mLastConverterName);
-        }
-    }
-
-    @Test
     public void getConverterReceiveError_CallReportError() {
         // should be initialized at this point
         mRepository.mLastConverterName = "Test";
 
         mRepository.getConverter("Test1", false, mGetConverterCallback);
 
-        verify(mServiceApi).getConverter(anyString(), mCaptor.capture());
-        mCaptor.getValue().onError("error message");
+        verify(mServiceApi).getConverter(anyString(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onError("error message");
 
         verify(mGetConverterCallback).reportError("error message");
+    }
+
+    @Test
+    public void updateCoursesSuccess_CallOnConverterLoaded() {
+        mRepository.mLastConverterName = "Test";
+        mRepository.mCachedConverters = new HashMap<>();
+        mRepository.mCachedConverters.put(mRepository.mLastConverterName, mCurrencyCon);
+
+        mRepository.updateCourses(mGetConverterCallback);
+
+        verify(mServiceApi).updateCourses(mGetConverterCaptor.capture(), any(CurrencyConverter.class));
+        mGetConverterCaptor.getValue().onLoaded(mCurrencyCon);
+
+        verify(mGetConverterCallback).onConverterLoaded(mCurrencyCon);
+    }
+
+    @Test
+    public void updateCoursesSuccess_CacheCurrencyConverter() {
+        // first call
+        mRepository.updateCourses(mGetConverterCallback);
+
+        CurrencyConverter nullCon = null;
+        verify(mServiceApi).updateCourses(mGetConverterCaptor.capture(), eq(nullCon));
+        // caching happens at this point
+        mGetConverterCaptor.getValue().onLoaded(mCurrencyCon);
+
+        // second call
+        mRepository.updateCourses(mGetConverterCallback);
+
+        // give already created currency converter to the service api for courses update
+        verify(mServiceApi).updateCourses(mGetConverterCaptor.capture(), eq(mCurrencyCon));
+        mGetConverterCaptor.getValue().onLoaded(mCurrencyCon);
+    }
+
+    @Test
+    public void updateCoursesError_CallReportError() {
+        mRepository.mLastConverterName = "Test";
+        mRepository.updateCourses(mGetConverterCallback);
+
+        // no currency converter in cache so simply pass null
+        CurrencyConverter nullCurCon = null;
+        verify(mServiceApi).updateCourses(mGetConverterCaptor.capture(), eq(nullCurCon));
+        mGetConverterCaptor.getValue().onError("Error message");
+
+        verify(mGetConverterCallback).reportError("Error message");
     }
 
     private List<Pair<String, Boolean>> cacheTypes() {
         mRepository.getAllConverterTypes(mLoadAllCallback);
         List<Pair<String, Boolean>> types = Arrays.asList(new Pair<>("One", true), new Pair<>("Two", false));
-        verify(mServiceApi).getAllConvertersTypes(mCaptor.capture());
-        mCaptor.getValue().onLoaded(types);
+        verify(mServiceApi).getAllConvertersTypes(mGetConvertersCaptor.capture());
+        mGetConvertersCaptor.getValue().onLoaded(types, "");
         return types;
     }
 }

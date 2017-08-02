@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.R.attr.name;
 
 final class ConvertersDbHelper extends SQLiteOpenHelper {
 
@@ -129,7 +128,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
         // insert currency converter
         contentValues.clear();
-        if (TextUtils.equals(mDbLang, "ru")) contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Валюта");
+        if (TextUtils.equals(mDbLang, "ru"))
+            contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Валюта");
         else contentValues.put(ConverterEntry.COLUMN_NAME_NAME, "Currency");
         contentValues.put(ConverterEntry.COLUMN_NAME_TYPE, CURRENCY_CONVERTER_TYPE);
         contentValues.put(ConverterEntry.COLUMN_NAME_ORDER_POSITION, ++i);
@@ -163,26 +163,36 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    List<Pair<String, Boolean>> getAllConverters() {
+    Pair<String, List<Pair<String, Boolean>>> getAllConverters() {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(ConverterEntry.TABLE_NAME,
                 new String[]{ConverterEntry.COLUMN_NAME_NAME,
-                        ConverterEntry.COLUMN_NAME_IS_ENABLED},
+                        ConverterEntry.COLUMN_NAME_IS_ENABLED,
+                        ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED},
                 null, null, null, null, ConverterEntry.COLUMN_NAME_ORDER_POSITION);
 
         int nameInd = c.getColumnIndex(ConverterEntry.COLUMN_NAME_NAME);
         int isEnabledInd = c.getColumnIndex(ConverterEntry.COLUMN_NAME_IS_ENABLED);
-        List<Pair<String, Boolean>> result = new ArrayList<>(c.getCount());
-        while (c.moveToNext()) {
-            result.add(new Pair<>(c.getString(nameInd), Boolean.parseBoolean(c.getString(isEnabledInd))));
+        int isLastSelectedInd = c.getColumnIndex(ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED);
+        List<Pair<String, Boolean>> converters = new ArrayList<>(c.getCount());
+        String lastSelConverterName = null;
+        if (c.moveToNext()) {
+            // set default value
+            lastSelConverterName = c.getString(nameInd);
+            do {
+                converters.add(new Pair<>(c.getString(nameInd), Boolean.parseBoolean(c.getString(isEnabledInd))));
+                if (Boolean.parseBoolean(c.getString(isLastSelectedInd)))
+                    lastSelConverterName = c.getString(nameInd);
+            } while (c.moveToNext());
         }
         c.close();
         db.close();
 
-        return result;
+        return new Pair<>(lastSelConverterName, converters);
     }
 
-    Converter createConverter(String name) {
+    @Nullable
+    Converter create(String name) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(ConverterEntry.TABLE_NAME,
                 new String[]{ConverterEntry._ID,
@@ -192,7 +202,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                         ConverterEntry.COLUMN_NAME_TYPE,
                         ConverterEntry.COLUMN_NAME_LAST_UPDATE},
                 ConverterEntry.COLUMN_NAME_NAME + " = ?", new String[]{name}, null, null, null);
-        c.moveToFirst();
+        if (!c.moveToFirst()) return null;
         int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
         int lastSelUnitPos = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS));
         String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
@@ -210,47 +220,15 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         return new Converter(name, getUnits(db, converterId, false), errors, lastSelUnitPos, lastQuantity);
     }
 
-    Converter createLastConverter() {
+    CurrencyConverter create() {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(ConverterEntry.TABLE_NAME,
-                new String[]{ConverterEntry._ID,
-                        ConverterEntry.COLUMN_NAME_NAME,
-                        ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
-                        ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
-                        ConverterEntry.COLUMN_NAME_ERRORS,
-                        ConverterEntry.COLUMN_NAME_TYPE,
-                        ConverterEntry.COLUMN_NAME_LAST_UPDATE},
-                ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " = ?", new String[]{"true"},
-                null, null, null);
-        if (!c.moveToFirst()) {
-            // this case is first run, so simply return first converter
-            c = db.query(ConverterEntry.TABLE_NAME,
-                    new String[]{ConverterEntry._ID,
-                            ConverterEntry.COLUMN_NAME_NAME,
-                            ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS,
-                            ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT,
-                            ConverterEntry.COLUMN_NAME_ERRORS,
-                            ConverterEntry.COLUMN_NAME_TYPE,
-                            ConverterEntry.COLUMN_NAME_LAST_UPDATE},
-                            null, null, null, null, ConverterEntry.COLUMN_NAME_ORDER_POSITION);
-        }
+        Cursor c = db.query(ConverterEntry.TABLE_NAME, new String[]{ConverterEntry.COLUMN_NAME_NAME},
+                ConverterEntry.COLUMN_NAME_TYPE + " = ?",
+                new String[]{String.valueOf(CURRENCY_CONVERTER_TYPE)}, null, null, null);
         c.moveToFirst();
-        int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
-        String name = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_NAME));
-        int lastSelUnitPos = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS));
-        String lastQuantity = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT));
-        String errors = c.getString(c.getColumnIndex(ConverterEntry.COLUMN_NAME_ERRORS));
-        int type = c.getInt(c.getColumnIndex(ConverterEntry.COLUMN_NAME_TYPE));
-        long lastUpdate = c.getLong(c.getColumnIndex(ConverterEntry.COLUMN_NAME_LAST_UPDATE));
+        String name = c.getString(0);
         c.close();
-        if (type == TEMPERATURE_CONVERTER_TYPE) {
-            return new TemperatureConverter(name, getUnits(db, converterId, false),
-                    errors, lastSelUnitPos, lastQuantity);
-        } else if (type == CURRENCY_CONVERTER_TYPE) {
-            return new CurrencyConverter(name, getUnits(db, converterId, true),
-                    errors, lastSelUnitPos, lastQuantity, lastUpdate);
-        }
-        return new Converter(name, getUnits(db, converterId, false), errors, lastSelUnitPos, lastQuantity);
+        return (CurrencyConverter) create(name);
     }
 
     void saveLastConverter(String name) {
@@ -350,8 +328,15 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    List<Converter.Unit> updateCourses(List<CurrencyConverter.CurrencyUnit> units) {
+    List<Converter.Unit> updateOrInsertCourses(List<CurrencyConverter.CurrencyUnit> units) {
         SQLiteDatabase db = getWritableDatabase();
+
+        Cursor c = db.query(ConverterEntry.TABLE_NAME, new String[]{ConverterEntry._ID},
+                ConverterEntry.COLUMN_NAME_TYPE + " = ?",
+                new String[]{String.valueOf(CURRENCY_CONVERTER_TYPE)}, null, null, null);
+        c.moveToFirst();
+        int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
+
         db.beginTransaction();
         try {
             // update last time when units was updated
@@ -362,24 +347,37 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     new String[]{String.valueOf(CURRENCY_CONVERTER_TYPE)});
             values.clear();
 
-            // update currency units values
-            for (CurrencyConverter.CurrencyUnit unit : units) {
-                values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
-                db.update(UnitEntry.TABLE_NAME, values,
-                        UnitEntry.COLUMN_NAME_CHAR_CODE + " = ?", new String[]{unit.charCode});
-                values.clear();
+            c = db.query(UnitEntry.TABLE_NAME, null, UnitEntry.COLUMN_NAME_CHAR_CODE + " not null",
+                    null, null, null, null);
+
+            if (c.getCount() == 0) {
+                // insert currency units
+                int unitOrderPos = 1;
+                for (CurrencyConverter.CurrencyUnit unit : units) {
+                    values.put(UnitEntry.COLUMN_NAME_NAME, unit.name);
+                    values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
+                    values.put(UnitEntry.COLUMN_NAME_ORDER_POSITION, unitOrderPos++);
+                    values.put(UnitEntry.COLUMN_NAME_CONVERTER_ID, converterId);
+                    values.put(UnitEntry.COLUMN_NAME_CHAR_CODE, unit.charCode);
+                    db.insert(UnitEntry.TABLE_NAME, null, values);
+                    values.clear();
+                }
+            } else {
+                // update currency units values
+                for (CurrencyConverter.CurrencyUnit unit : units) {
+                    values.put(UnitEntry.COLUMN_NAME_VALUE, unit.value);
+                    db.update(UnitEntry.TABLE_NAME, values,
+                            UnitEntry.COLUMN_NAME_CHAR_CODE + " = ?", new String[]{unit.charCode});
+                    values.clear();
+                }
             }
+
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
+            c.close();
         }
 
-        Cursor c = db.query(ConverterEntry.TABLE_NAME, new String[]{ConverterEntry._ID},
-                ConverterEntry.COLUMN_NAME_TYPE + " = ?",
-                new String[]{String.valueOf(CURRENCY_CONVERTER_TYPE)}, null, null, null);
-        c.moveToFirst();
-        int converterId = c.getInt(c.getColumnIndex(ConverterEntry._ID));
-        c.close();
         return getUnits(db, converterId, true);
     }
 
@@ -582,7 +580,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    private long insertNewConverter(SQLiteDatabase db, String enName, String ruName, byte type){
+    private long insertNewConverter(SQLiteDatabase db, String enName, String ruName, byte type) {
         Cursor c = db.query(ConverterEntry.TABLE_NAME,
                 new String[]{"max(" + ConverterEntry.COLUMN_NAME_ORDER_POSITION + ")"},
                 null, null, null, null, null);
