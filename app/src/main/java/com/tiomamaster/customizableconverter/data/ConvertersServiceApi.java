@@ -48,4 +48,6 @@ interface ConvertersServiceApi {
     void deleteConverter(@NonNull String name);
 
     void updateCourses(@NonNull LoadConverterCallback callback, @Nullable Converter converter);
+
+    void cancelUpdateRequest();
 }

@@ -89,6 +89,8 @@ public class InMemoryConvertersRepositoryTest {
         mRepository.mLastConverterName = name;
         mRepository.getConverter(name, false, mGetConverterCallback);
 
+        verify(mServiceApi).cancelUpdateRequest();
+
         // verify that service api was called enables repository caching
         verify(mServiceApi).getConverter(eq(name), mGetConverterCaptor.capture());
         mGetConverterCaptor.getValue().onLoaded(new Converter(name, new ArrayList<Converter.Unit>()));

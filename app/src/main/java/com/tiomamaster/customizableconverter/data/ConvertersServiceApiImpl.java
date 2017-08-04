@@ -259,4 +259,9 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             }
         });
     }
+
+    @Override
+    public void cancelUpdateRequest() {
+        mCurrencyLoader.cancelAllRequests();
+    }
 }

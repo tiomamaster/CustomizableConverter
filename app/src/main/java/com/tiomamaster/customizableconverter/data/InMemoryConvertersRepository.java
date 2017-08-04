@@ -81,6 +81,8 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         checkNotNull(name);
         checkNotNull(callback);
 
+        mServiceApi.cancelUpdateRequest();
+
         // save last selected converter
         if ((mLastConverterName != null) && !mLastConverterName.equals(name) && !clone) {
             mServiceApi.setLastConverter(name);
@@ -183,8 +185,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
         mServiceApi.updateCourses(new ConvertersServiceApi.LoadConverterCallback() {
             @Override
             public void onLoaded(@NonNull Converter converter) {
-                if (mCachedConverters == null) mCachedConverters = new HashMap<>();
-                mCachedConverters.put(converter.getName(), converter);
+                cacheConverter(converter);
 
                 callback.onConverterLoaded(converter);
             }
@@ -199,9 +200,7 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     private void cacheConverter(@NonNull Converter converter) {
         checkNotNull(converter);
 
-        if (mCachedConverters == null) {
-            mCachedConverters = new HashMap<>();
-        }
+        if (mCachedConverters == null) mCachedConverters = new HashMap<>();
 
         mCachedConverters.put(converter.getName(), converter);
     }
