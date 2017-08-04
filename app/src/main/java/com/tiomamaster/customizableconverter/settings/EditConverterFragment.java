@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +13,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -56,7 +59,9 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     private View mRecyclerViewHeader;
 
-    private EditText mEditName;
+    private AppCompatEditText mEditName;
+    private TextWatcher mEditNameTextWatcher;
+    private Drawable mEditNameBackground;
 
     private TextView mTextError;
 
@@ -128,30 +133,32 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
         mRecyclerViewHeader = inflater.inflate(R.layout.rw_edit_converter_header, container, false);
 
-        mEditName = (EditText) mRecyclerViewHeader.findViewById(R.id.edit_text_name);
+        mEditName = (AppCompatEditText) mRecyclerViewHeader.findViewById(R.id.edit_text_name);
+        mEditNameBackground = mEditName.getBackground();
 
         // to prevent focused when fragment start and give watcher when user touch
         mEditName.setFocusableInTouchMode(false);
+        mEditNameTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mActionListener.setConverterName(s.toString());
+            }
+        };
         mEditName.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 mEditName.setFocusableInTouchMode(true);
-                mEditName.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        mActionListener.setConverterName(s.toString());
-                    }
-                });
+                mEditName.addTextChangedListener(mEditNameTextWatcher);
                 return false;
             }
         });
@@ -232,6 +239,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         checkNotNull(units);
         mBtnUpdate.setVisibility(View.GONE);
         mTextLoadingError.setVisibility(View.GONE);
+        enableEditText(true);
 
         mAdapter.setUnits(units);
     }
@@ -361,11 +369,13 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mBtnUpdate.setVisibility(View.VISIBLE);
         mTextLoadingError.setText(messageResId);
         mTextLoadingError.setVisibility(View.VISIBLE);
+        enableEditText(false);
     }
 
     void clearEditText() {
         mEditName.clearFocus();
         mEditName.setFocusableInTouchMode(false);
+        mEditName.removeTextChangedListener(mEditNameTextWatcher);
         hideSoftInput();
     }
 
@@ -377,6 +387,19 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             view = new View(mParentActivity);
         }
         mImm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void enableEditText(boolean enable) {
+        mEditName.setFocusable(enable);
+        mEditName.setEnabled(enable);
+        mEditName.setCursorVisible(enable);
+        if (enable) mEditName.setBackgroundDrawable(mEditNameBackground);
+        else mEditName.setBackgroundColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            mEditName.setTextColor(getResources().getColor(R.color.primary_text));
+        } else {
+            mEditName.setTextColor(getResources().getColor(R.color.primary_text, null));
+        }
     }
 
     private class UnitsAdapterWithHeader extends RecyclerView.Adapter<RecyclerView.ViewHolder>
