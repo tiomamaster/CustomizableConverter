@@ -47,6 +47,6 @@
     <string name="app_name">Конвертер</string>
     <string name="copy">КОПИРОВАТЬ</string>
     <string name="title_btn_update">Обновить</string>
-    <string name="retry">Повторить</string>
     <string name="msg_internet_error">Не удалось загрузить курсы вылют. Проверьте выше интернет подключение и повторите попытку.</string>
+    <string name="msg_old_data">Курсы валют возможно устарели. Потяните вниз, чтобы обновить.</string>
 </resources>

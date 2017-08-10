@@ -403,12 +403,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         Snackbar
                 .make(getView(), messageResId, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.retry, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mActionsListener.updateCourses();
-                    }
-                })
                 .show();
     }
 

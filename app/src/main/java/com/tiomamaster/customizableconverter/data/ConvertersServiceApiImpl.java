@@ -34,6 +34,8 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     private CurrencyLoader mCurrencyLoader;
 
+    private Context mContext;
+
     public ConvertersServiceApiImpl(Context c) {
         if (Locale.getDefault().getLanguage().equals(new Locale("ru").getLanguage())) {
             mDbHelper = new ConvertersDbHelper(c, "ru");
@@ -42,6 +44,8 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
             mDbHelper = new ConvertersDbHelper(c, "en");
             mCurrencyLoader = new CurrencyLoader(c, "en");
         }
+
+        mContext = c;
 
         mHandler = new Handler(c.getApplicationContext().getMainLooper());
     }
@@ -102,6 +106,9 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                     callback.onError("There are no converters with given name - " + name);
                     return;
                 }
+
+                Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
+                        Converter.getOnSettingsChangeListener());
 
                 if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
                     updateCourses(callback, converter);
@@ -238,7 +245,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                             converter.getUnits().addAll(result);
                         } else{
                             newConverter[0] = mDbHelper.create();
-                            newConverter[0].setLastUpdateTime(System.currentTimeMillis());
                         }
 
                         // report result

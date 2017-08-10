@@ -47,6 +47,6 @@
     <string name="hint_number">Input number</string>
     <string name="copy">COPY</string>
     <string name="title_btn_update">Update</string>
-    <string name="retry">Retry</string>
     <string name="msg_internet_error">Currency rates not loaded. Check your internet connection and try again.</string>
+    <string name="msg_old_data">Exchange rates may be outdated. Swipe down to refresh.</string>
 </resources>

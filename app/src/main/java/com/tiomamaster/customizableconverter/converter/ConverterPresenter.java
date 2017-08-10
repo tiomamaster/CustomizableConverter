@@ -23,6 +23,8 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
     @VisibleForTesting Converter mCurConverter;
 
+    private static final long ONE_DAY_IN_MILLS = 86400000;
+
     ConverterPresenter(@NonNull ConvertersRepository convertersRepository,
                        @NonNull ConverterContract.View converterView) {
         mConvertersRepository = checkNotNull(convertersRepository, "convertersRepository cannot be null");
@@ -65,8 +67,18 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
                 mCurConverter = converter;
 
-                if (mCurConverter instanceof CurrencyConverter) mConverterView.enableSwipeToRefresh(true);
-                else mConverterView.enableSwipeToRefresh(false);
+                if (mCurConverter instanceof CurrencyConverter) {
+                    mConverterView.enableSwipeToRefresh(true);
+
+                    if (System.currentTimeMillis() -
+                            ((CurrencyConverter) mCurConverter).getLastUpdateTime()
+                            > ONE_DAY_IN_MILLS) {
+                        mConverterView.showSnackBar(R.string.msg_old_data);
+                    }
+                }
+                else {
+                    mConverterView.enableSwipeToRefresh(false);
+                }
 
                 if (mCurConverter instanceof TemperatureConverter) {
                     mConverterView.showConverter(converter.getEnabledUnitsName(),

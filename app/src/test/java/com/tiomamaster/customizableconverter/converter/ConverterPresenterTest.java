@@ -126,6 +126,18 @@ public class ConverterPresenterTest {
     }
 
     @Test
+    public void loadConverter_ShowSnackBar() {
+        when(mCurConverter.getLastUpdateTime()).thenReturn(0L);
+
+        mPresenter.loadConverter(anyString());
+
+        verify(mRepository).getConverter(anyString(), anyBoolean(), mGetConverterCaptor.capture());
+        mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
+
+        verify(mView).showSnackBar(anyInt());
+    }
+
+    @Test
     public void callConvert_ShowResult() {
         String from = "Test";
         double quantity = 100;

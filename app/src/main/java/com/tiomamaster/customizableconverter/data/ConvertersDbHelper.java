@@ -328,6 +328,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    @NonNull
     List<Converter.Unit> updateOrInsertCourses(List<CurrencyConverter.CurrencyUnit> units) {
         SQLiteDatabase db = getWritableDatabase();
 

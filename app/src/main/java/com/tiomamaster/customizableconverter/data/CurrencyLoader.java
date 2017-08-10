@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Loading currency from the http://www.cbr.ru.
@@ -101,13 +100,10 @@ final class CurrencyLoader {
                         }
                     }
                 }
-                TimeUnit.SECONDS.sleep(3);
             } catch (XmlPullParserException e) {
                 return Response.error(new ParseError(e));
             } catch (IOException e) {
                 return Response.error(new ParseError(e));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
 
             return Response.success(units, HttpHeaderParser.parseCacheHeaders(response));
