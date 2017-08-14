@@ -261,6 +261,8 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         if (active) {
             mTextLoading.setVisibility(View.VISIBLE);
             mProgress.setVisibility(View.VISIBLE);
+            mBtnUpdate.setVisibility(View.GONE);
+            mTextLoadingError.setVisibility(View.GONE);
         }
         else {
             mTextLoading.setVisibility(View.GONE);
