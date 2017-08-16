@@ -27,6 +27,8 @@ interface ConverterContract {
         void enableSwipeToRefresh(boolean isEnabled);
 
         void showSnackBar(int messageResId);
+
+        void hideSnackBar();
     }
 
     interface UserActionListener {

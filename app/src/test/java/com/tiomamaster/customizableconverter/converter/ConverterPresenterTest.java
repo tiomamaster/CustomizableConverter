@@ -231,6 +231,7 @@ public class ConverterPresenterTest {
         mGetConverterCaptor.getValue().onConverterLoaded(mCurConverter);
 
         verify(mView).setProgressIndicator(false);
+        verify(mView).hideSnackBar();
 
         verify(mView).showConverter(anyList(), anyInt(), anyString(), eq(false));
 

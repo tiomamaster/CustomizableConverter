@@ -52,7 +52,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.converter.ConverterActivity.REQUEST_CODE_SETTINGS_ACTIVITY;
 import static com.tiomamaster.customizableconverter.converter.ConverterActivity.RESULT_CODE_RESTART_APP;
 
-// TODO: show last update time of currencies
 public class ConverterFragment extends Fragment implements ConverterContract.View {
 
     @VisibleForTesting ConverterContract.UserActionListener mActionsListener;
@@ -78,6 +77,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     private SwipeRefreshLayout mSrl;
 
     private Button mBtnUpdate;
+
+    private Snackbar mSnackbar;
 
     public ConverterFragment() {
     }
@@ -401,9 +402,13 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     public void showSnackBar(int messageResId) {
         if (getView() == null) return;
 
-        Snackbar
-                .make(getView(), messageResId, Snackbar.LENGTH_INDEFINITE)
-                .show();
+        mSnackbar = Snackbar.make(getView(), messageResId, Snackbar.LENGTH_INDEFINITE);
+        mSnackbar.show();
+    }
+
+    @Override
+    public void hideSnackBar() {
+        mSnackbar.dismiss();
     }
 
     void hideSoftInput() {

@@ -139,6 +139,7 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
                 checkNotNull(converter);
 
                 mConverterView.setProgressIndicator(false);
+                mConverterView.hideSnackBar();
 
                 mCurConverter = converter;
 
