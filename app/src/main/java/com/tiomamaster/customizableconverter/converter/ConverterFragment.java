@@ -400,7 +400,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void hideSnackBar() {
-        mSnackbar.dismiss();
+        if (mSnackbar != null) {
+            mSnackbar.dismiss();
+        }
     }
 
     void hideSoftInput() {
