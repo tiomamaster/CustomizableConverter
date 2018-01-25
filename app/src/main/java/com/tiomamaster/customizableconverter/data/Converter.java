@@ -109,8 +109,6 @@ public class Converter implements Cloneable {
     }
 
     public void setName(@NonNull String name) {
-        checkNotNull(name);
-
         mName = name;
     }
 

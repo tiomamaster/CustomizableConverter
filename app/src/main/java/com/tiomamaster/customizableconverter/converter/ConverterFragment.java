@@ -48,7 +48,6 @@ import com.tiomamaster.customizableconverter.settings.SettingsActivity;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.tiomamaster.customizableconverter.converter.ConverterActivity.REQUEST_CODE_SETTINGS_ACTIVITY;
 import static com.tiomamaster.customizableconverter.converter.ConverterActivity.RESULT_CODE_RESTART_APP;
 
@@ -93,9 +92,9 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                              @Nullable Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_converter, container, false);
 
-        mMsg = (TextView) root.findViewById(R.id.text_msg);
+        mMsg = root.findViewById(R.id.text_msg);
 
-        mBtnUpdate = (Button) root.findViewById(R.id.btn_update);
+        mBtnUpdate = root.findViewById(R.id.btn_update);
 
         mBtnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,7 +103,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             }
         });
 
-        mConversionResult = (RecyclerView) root.findViewById(R.id.conversion_result);
+        mConversionResult = root.findViewById(R.id.conversion_result);
         mConversionResult.setLayoutManager(new LinearLayoutManager(getContext()));
         mResultAdapter = new ResultAdapterWithHeader();
         mConversionResult.setAdapter(mResultAdapter);
@@ -133,7 +132,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mConversionResult.setVisibility(View.GONE);
 
-        mSrl = (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
+        mSrl = root.findViewById(R.id.refresh_layout);
         mSrl.setColorSchemeColors(
                 ContextCompat.getColor(getActivity(), R.color.colorPrimary),
                 ContextCompat.getColor(getActivity(), R.color.accent),
@@ -148,7 +147,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
         mRecyclerViewHeader = inflater.inflate(R.layout.rw_converter_header, container, false);
 
-        mSpinnerUnits = (Spinner) mRecyclerViewHeader.findViewById(R.id.spinner_units);
+        mSpinnerUnits = mRecyclerViewHeader.findViewById(R.id.spinner_units);
         // to prevent system calls
         mSpinnerUnits.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -169,11 +168,12 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
                         }
                     });
                 }
+                if (event.getAction() == MotionEvent.ACTION_DOWN) v.performClick();
                 return false;
             }
         });
 
-        mQuantity = (EditText) mRecyclerViewHeader.findViewById(R.id.quantity);
+        mQuantity = mRecyclerViewHeader.findViewById(R.id.quantity);
 
         // to prevent focused when app start and give watcher when user touch
         mQuantity.setFocusableInTouchMode(false);
@@ -222,7 +222,7 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         };
         mQuantity.setFilters(new InputFilter[]{quantityFilter});
 
-        mResultText = (TextView) mRecyclerViewHeader.findViewById(R.id.resultText);
+        mResultText = mRecyclerViewHeader.findViewById(R.id.resultText);
 
         setHasOptionsMenu(true);
         setRetainInstance(true);
@@ -292,7 +292,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void setProgressIndicator(final boolean active) {
-
         if (getView() == null) return;
 
         // make sure setRefreshing() is called after the layout is done with everything else.
@@ -306,8 +305,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void showConvertersTypes(@NonNull List<String> converters, int selection) {
-        checkNotNull(converters);
-
         // inflate spinner using converters types
         mParentActivity.initSpinner(converters, selection);
 
@@ -318,9 +315,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
     @Override
     public void showConverter(@NonNull List<String> units, int lastUnitPos,
                               @NonNull String lastQuantity, boolean signedQuantity) {
-        checkNotNull(units);
-        checkNotNull(lastQuantity);
-
         // set signed edit text for quantity input
         if (signedQuantity) {
             mQuantity.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL |
@@ -357,8 +351,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
 
     @Override
     public void showConversionResult(@NonNull List<Pair<String, String>> result) {
-        checkNotNull(result);
-
         mResultAdapter.setDataSet(result);
 
         mBtnUpdate.setVisibility(View.GONE);
@@ -486,7 +478,6 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
 
         void setDataSet(@NonNull List<Pair<String, String>> newData) {
-            checkNotNull(newData);
             if (mDataSet == null) {
                 mDataSet = newData;
                 notifyItemRangeInserted(1, mDataSet.size());
@@ -512,8 +503,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
             VHItem(View itemView) {
                 super(itemView);
 
-                mUnitName = (TextView) itemView.findViewById(R.id.text_view_name);
-                mResult = (TextView) itemView.findViewById(R.id.text_view_value);
+                mUnitName = itemView.findViewById(R.id.text_view_name);
+                mResult = itemView.findViewById(R.id.text_view_value);
 
                 registerForContextMenu(mResult);
                 mResult.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {

@@ -44,8 +44,6 @@ import com.tiomamaster.customizableconverter.settings.helper.ItemTouchHelperView
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public class EditConverterFragment extends Fragment implements SettingsContract.EditConverterView {
 
     private SettingsContract.EditConverterUal mActionListener;
@@ -106,7 +104,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_with_rw, container, false);
 
-        RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = root.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(mAdapter);
 
@@ -132,7 +130,7 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
         mRecyclerViewHeader = inflater.inflate(R.layout.rw_edit_converter_header, container, false);
 
-        mEditName = (AppCompatEditText) mRecyclerViewHeader.findViewById(R.id.edit_text_name);
+        mEditName = mRecyclerViewHeader.findViewById(R.id.edit_text_name);
         mEditNameBackground = mEditName.getBackground();
 
         // to prevent focused when fragment start and give watcher when user touch
@@ -162,21 +160,21 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             }
         });
 
-        mTextError = (TextView) mRecyclerViewHeader.findViewById(R.id.text_msg_error);
+        mTextError = mRecyclerViewHeader.findViewById(R.id.text_msg_error);
 
-        mTextHint = (TextView) mRecyclerViewHeader.findViewById(R.id.text_hint);
+        mTextHint = mRecyclerViewHeader.findViewById(R.id.text_hint);
 
-        mProgress = (ProgressBar) mRecyclerViewHeader.findViewById(R.id.progress);
-        mTextLoading = (TextView) mRecyclerViewHeader.findViewById(R.id.text_loading);
+        mProgress = mRecyclerViewHeader.findViewById(R.id.progress);
+        mTextLoading = mRecyclerViewHeader.findViewById(R.id.text_loading);
 
-        mBtnUpdate = (Button) mRecyclerViewHeader.findViewById(R.id.btn_update);
+        mBtnUpdate = mRecyclerViewHeader.findViewById(R.id.btn_update);
         mBtnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mActionListener.updateUnits();
             }
         });
-        mTextLoadingError = (TextView) mRecyclerViewHeader.findViewById(R.id.text_msg_loading_error);
+        mTextLoadingError = mRecyclerViewHeader.findViewById(R.id.text_msg_loading_error);
 
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -235,7 +233,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
 
     @Override
     public void showUnits(@NonNull List<Converter.Unit> units) {
-        checkNotNull(units);
         mBtnUpdate.setVisibility(View.GONE);
         mTextLoadingError.setVisibility(View.GONE);
         enableEditText(true);
@@ -493,7 +490,6 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         }
 
         void setUnits(@NonNull List<Converter.Unit> newData) {
-            checkNotNull(newData);
             if (mUnits == null) {
                 mUnits = newData;
                 notifyItemRangeInserted(1, mUnits.size());
@@ -521,12 +517,12 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
             VHItem(View itemView) {
                 super(itemView);
 
-                mUnitName = (TextView) itemView.findViewById(R.id.text_view_name);
-                mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
-                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
+                mUnitName = itemView.findViewById(R.id.text_view_name);
+                mCheck = itemView.findViewById(R.id.check_box_enable);
+                mHandleReorder = itemView.findViewById(R.id.image_view_handle);
 
                 if (editable) {
-                    mUnitValue = (TextView) itemView.findViewById(R.id.text_view_value);
+                    mUnitValue = itemView.findViewById(R.id.text_view_value);
 
                     itemView.setOnClickListener(new View.OnClickListener() {
                         @Override

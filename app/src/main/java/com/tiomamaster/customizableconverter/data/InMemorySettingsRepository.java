@@ -109,7 +109,6 @@ public class InMemorySettingsRepository implements SettingsRepository, SharedPre
 
     @Override
     public void setOnSettingsChangeListener(@NonNull OnSettingsChangeListener listener) {
-        checkNotNull(listener);
         mChangeListeners.put(listener.getClass().getCanonicalName(), listener);
 
         // to initialize settings properties in converters and summaries in fragment

@@ -73,7 +73,7 @@ public class EditUnitDialogFragment extends DialogFragment {
 
         View dialogView = inflater.inflate(R.layout.dialog_edit_unit, null);
 
-        mTextName = (EditText) dialogView.findViewById(R.id.edit_text_name);
+        mTextName = dialogView.findViewById(R.id.edit_text_name);
 
         mTextName.setText(getArguments().getString(ARGUMENT_UNIT_NAME));
 
@@ -94,9 +94,9 @@ public class EditUnitDialogFragment extends DialogFragment {
             }
         });
 
-        mTextError = (TextView) dialogView.findViewById(R.id.text_msg_error);
+        mTextError = dialogView.findViewById(R.id.text_msg_error);
 
-        final EditText value = (EditText) dialogView.findViewById(R.id.edit_text_value);
+        final EditText value = dialogView.findViewById(R.id.edit_text_value);
 
         String valueText = getArguments().getString(ARGUMENT_UNIT_VALUE);
         if (valueText != null) {

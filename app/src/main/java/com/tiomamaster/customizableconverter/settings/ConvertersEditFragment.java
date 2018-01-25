@@ -63,7 +63,7 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_with_rw, container, false);
 
-        RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = root.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(mAdapter);
 
@@ -113,9 +113,6 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
 
     @Override
     public void showAskDialog(@NonNull String name, @NonNull DialogInterface.OnClickListener listener) {
-        checkNotNull(name);
-        checkNotNull(listener);
-
         new AlertDialog.Builder(mParentActivity).setMessage(
                 getString(R.string.msg_delete_converter) + " " + name + "?")
                 .setPositiveButton(android.R.string.ok, listener)
@@ -212,9 +209,9 @@ public class ConvertersEditFragment extends Fragment implements SettingsContract
             VH(View itemView) {
                 super(itemView);
 
-                mName = (TextView) itemView.findViewById(R.id.text_view_name);
-                mHandleReorder = (ImageView) itemView.findViewById(R.id.image_view_handle);
-                mCheck = (CheckBox) itemView.findViewById(R.id.check_box_enable);
+                mName = itemView.findViewById(R.id.text_view_name);
+                mHandleReorder = itemView.findViewById(R.id.image_view_handle);
+                mCheck = itemView.findViewById(R.id.check_box_enable);
 
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

@@ -1,7 +1,6 @@
 package com.tiomamaster.customizableconverter.data;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,8 +14,6 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Concrete implementation of ConvertersServiceApi interface.
@@ -52,75 +49,57 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     @Override
     public void getAllConvertersTypes(@NonNull final LoadConvertersCallback callback) {
-        checkNotNull(callback);
-
-        new AsyncTask<Void, Void, Pair<String, List<Pair<String, Boolean>>>>() {
-            @Override
-            protected Pair<String, List<Pair<String, Boolean>>> doInBackground(Void... params) {
-                Pair<String, List<Pair<String, Boolean>>> result = null;
-                try {
-                    result = sSingleExecutor.submit(new Callable<Pair<String, List<Pair<String, Boolean>>>>() {
+        try {
+            final Pair<String, List<Pair<String, Boolean>>> result =
+                    sSingleExecutor.submit(new Callable<Pair<String, List<Pair<String, Boolean>>>>() {
                         @Override
                         public Pair<String, List<Pair<String, Boolean>>> call() throws Exception {
                             return mDbHelper.getAllConverters();
                         }
                     }).get();
-                } catch (Exception e) {
-                    e.printStackTrace();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onLoaded(result.second, result.first);
                 }
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(Pair<String, List<Pair<String, Boolean>>> result) {
-                callback.onLoaded(result.second, result.first);
-            }
-        }.execute();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void getConverter(@NonNull final String name, @NonNull final LoadConverterCallback callback) {
-        checkNotNull(name);
-        checkNotNull(callback);
-
-        new AsyncTask<Void, Void, Converter>() {
-            @Override
-            protected Converter doInBackground(Void... params) {
-                Converter result = null;
-                try {
-                    result = sSingleExecutor.submit(new Callable<Converter>() {
-                        @Override
-                        public Converter call() throws Exception {
-                            return mDbHelper.create(name);
-                        }
-                    }).get();
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            final Converter result = sSingleExecutor.submit(new Callable<Converter>() {
+                @Override
+                public Converter call() throws Exception {
+                    return mDbHelper.create(name);
                 }
-                return result;
-            }
+            }).get();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (result == null) {
+                        callback.onError("There are no converters with given name - " + name);
+                        return;
+                    }
 
-            @Override
-            protected void onPostExecute(final Converter converter) {
-                if (converter == null) {
-                    callback.onError("There are no converters with given name - " + name);
-                    return;
+                    Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
+                            Converter.getOnSettingsChangeListener());
+
+                    if (result.getUnits().isEmpty() && result instanceof CurrencyConverter) {
+                        updateCourses(callback, result);
+                    } else callback.onLoaded(result);
                 }
-
-                Repositories.getInMemoryRepoInstance(mContext).setOnSettingsChangeListener(
-                        Converter.getOnSettingsChangeListener());
-
-                if (converter.getUnits().isEmpty() && converter instanceof CurrencyConverter) {
-                    updateCourses(callback, converter);
-                } else callback.onLoaded(converter);
-            }
-        }.execute();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void setLastConverter(@NonNull final String name) {
-        checkNotNull(name);
-
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -131,8 +110,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     @Override
     public void setLastUnit(@NonNull final String converterName, final int unitPos) {
-        checkNotNull(converterName);
-
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -143,9 +120,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     @Override
     public void setLastQuantity(@NonNull final String converterName, @NonNull final String quantity) {
-        checkNotNull(converterName);
-        checkNotNull(quantity);
-
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -157,38 +131,26 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     @Override
     public void saveConverter(@NonNull final SaveCallback callback, @NonNull final Converter converter,
                               @NonNull final String oldName) {
-        checkNotNull(callback);
-        checkNotNull(converter);
-        checkNotNull(oldName);
-
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                boolean result = false;
-                try {
-                    result = sSingleExecutor.submit(new Callable<Boolean>() {
-                        @Override
-                        public Boolean call() throws Exception {
-                            return mDbHelper.save(converter, oldName);
-                        }
-                    }).get();
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            final boolean result = sSingleExecutor.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    return mDbHelper.save(converter, oldName);
                 }
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean saved) {
-                callback.onSaved(saved);
-            }
-        }.execute();
+            }).get();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onSaved(result);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void writeConvertersOrder(@NonNull final List<Pair<String, Boolean>> converters) {
-        checkNotNull(converters);
-
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -199,8 +161,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     @Override
     public void writeConverterState(@NonNull final String name, final boolean state) {
-        checkNotNull(name);
-
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -211,8 +171,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
 
     @Override
     public void deleteConverter(@NonNull final String name) {
-        checkNotNull(name);
-
         sSingleExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -224,8 +182,6 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
     @Override
     public void updateCourses(@NonNull final LoadConverterCallback callback,
                               @Nullable final Converter converter) {
-        checkNotNull(callback);
-
         mCurrencyLoader.getFreshCourses(new Response.Listener<List<CurrencyConverter.CurrencyUnit>>() {
             @Override
             public void onResponse(final List<CurrencyConverter.CurrencyUnit> response) {
@@ -243,7 +199,7 @@ public class ConvertersServiceApiImpl implements ConvertersServiceApi {
                             // update converter units
                             converter.getUnits().clear();
                             converter.getUnits().addAll(result);
-                        } else{
+                        } else {
                             newConverter[0] = mDbHelper.create();
                         }
 

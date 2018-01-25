@@ -33,8 +33,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     @Override
     public void getEnabledConvertersTypes(@NonNull final LoadEnabledConvertersTypesCallback callback) {
-        checkNotNull(callback);
-
         if (mCachedConvertersTypes != null) {
             callback.onConvertersTypesLoaded(getEnabledConverters(), mLastPos);
             return;
@@ -55,8 +53,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
 
     @Override
     public void getAllConverterTypes(@NonNull final LoadAllConvertersTypesCallback callback) {
-        checkNotNull(callback);
-
         // simply return cached converters types if they exist
         if (mCachedConvertersTypes != null) {
             callback.onConvertersTypesLoaded(mCachedConvertersTypes);
@@ -78,9 +74,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     @Override
     public void getConverter(@NonNull final String name, final boolean clone,
                              @NonNull final GetConverterCallback callback) {
-        checkNotNull(name);
-        checkNotNull(callback);
-
         mServiceApi.cancelUpdateRequest();
 
         // save last selected converter
@@ -119,10 +112,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     @Override
     public void saveConverter(@NonNull final SaveConverterCallback callback,
                               @NonNull final Converter converter, @NonNull final String oldName) {
-        checkNotNull(callback);
-        checkNotNull(converter);
-        checkNotNull(oldName);
-
         mServiceApi.saveConverter(new ConvertersServiceApi.SaveCallback() {
             @Override
             public void onSaved(boolean saved) {
@@ -198,8 +187,6 @@ class InMemoryConvertersRepository implements ConvertersRepository {
     }
 
     private void cacheConverter(@NonNull Converter converter) {
-        checkNotNull(converter);
-
         if (mCachedConverters == null) mCachedConverters = new HashMap<>();
 
         mCachedConverters.put(converter.getName(), converter);

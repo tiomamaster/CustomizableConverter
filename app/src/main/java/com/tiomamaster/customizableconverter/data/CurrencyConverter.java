@@ -29,12 +29,12 @@ public class CurrencyConverter extends Converter {
         return mLastUpdateTime;
     }
 
-    public void setLastUpdateTime(long t) {
+    void setLastUpdateTime(long t) {
         this.mLastUpdateTime = t;
     }
 
     public static class CurrencyUnit extends Unit {
-        public String charCode;
+        String charCode;
 
         public CurrencyUnit(@NonNull String name, double value, boolean isEnabled, @NonNull String charCode) {
             super(name, value, isEnabled);

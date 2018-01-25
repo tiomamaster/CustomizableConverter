@@ -64,7 +64,7 @@ public class ConverterActivity extends AppCompatActivity {
             initFragment(converterFragment);
         }
 
-        // to prevent system call when starting or screen rotation
+        // prevent system call when activity starting or screen rotation
         mSpinConverterTypes.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -84,6 +84,7 @@ public class ConverterActivity extends AppCompatActivity {
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
+                if (event.getAction() == MotionEvent.ACTION_DOWN) v.performClick();
                 return false;
             }
         });

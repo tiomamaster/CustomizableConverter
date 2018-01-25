@@ -26,11 +26,11 @@
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:singleLine="true" />
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@android:id/summary"

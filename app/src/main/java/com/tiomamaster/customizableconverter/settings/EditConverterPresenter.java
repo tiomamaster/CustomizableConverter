@@ -92,8 +92,6 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void setConverterName(@NonNull String newName) {
-        checkNotNull(newName);
-
         if (newName.isEmpty()) {
             mView.showConverterExistError(false);
             mView.enableSaveConverter(false);
@@ -206,8 +204,6 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void editUnit(@NonNull String name, @Nullable String value) {
-        checkNotNull(name);
-
         mInitialUnitName = mCurUnitName = name;
         isNewUnit = false;
 
@@ -228,8 +224,6 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void setUnitName(@NonNull String newName) {
-        checkNotNull(newName);
-
         mCurUnitName = newName;
 
         if (!mInitialUnitName.toLowerCase().equals(newName.toLowerCase())
@@ -244,8 +238,6 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
 
     @Override
     public void setUnitValue(@NonNull String newValue) {
-        checkNotNull(newValue);
-
         mCurUnitValue = newValue;
 
         if (checkValue() && !mCurUnitName.isEmpty() &&
@@ -393,8 +385,6 @@ class EditConverterPresenter implements SettingsContract.EditConverterUal {
     }
 
     private void success(@NonNull Converter converter) {
-        checkNotNull(converter);
-
         mCurConverter = converter;
 
         mUnits = mCurConverter.getUnits();

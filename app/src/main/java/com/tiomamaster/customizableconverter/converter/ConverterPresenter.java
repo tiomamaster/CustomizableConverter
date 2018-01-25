@@ -38,8 +38,6 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
         mConvertersRepository.getEnabledConvertersTypes(new ConvertersRepository.LoadEnabledConvertersTypesCallback() {
             @Override
             public void onConvertersTypesLoaded(@NonNull List<String> convertersTypes, int position) {
-                checkNotNull(convertersTypes);
-
                 mConverterView.setProgressIndicator(false);
 
                 if (convertersTypes.size() == 0) {
@@ -54,15 +52,11 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
 
     @Override
     public void loadConverter(@NonNull final String name) {
-        checkNotNull(name);
-
         mConverterView.setProgressIndicator(true);
 
         mConvertersRepository.getConverter(name, false, new ConvertersRepository.GetConverterCallback() {
             @Override
             public void onConverterLoaded(@NonNull Converter converter) {
-                checkNotNull(converter);
-
                 mConverterView.setProgressIndicator(false);
 
                 mCurConverter = converter;
@@ -136,8 +130,6 @@ class ConverterPresenter implements ConverterContract.UserActionListener {
         mConvertersRepository.updateCourses(new ConvertersRepository.GetConverterCallback() {
             @Override
             public void onConverterLoaded(@NonNull Converter converter) {
-                checkNotNull(converter);
-
                 mConverterView.setProgressIndicator(false);
                 mConverterView.hideSnackBar();
 

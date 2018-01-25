@@ -33,8 +33,6 @@ import static junit.framework.Assert.assertTrue;
 @LargeTest
 public class ConvertersServiceApiImplTest {
 
-    // adb shell pm clear  com.tiomamaster.customizableconverter.demo
-
     private static final int timeout = 1;
 
     private Context mContext;
@@ -121,6 +119,7 @@ public class ConvertersServiceApiImplTest {
 
             }
         });
+
         TimeUnit.SECONDS.sleep(timeout);
     }
 
