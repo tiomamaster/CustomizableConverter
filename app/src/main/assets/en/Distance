@@ -12,7 +12,7 @@ Yard 0.9144
 Foot 0.3048
 Link 0.201168
 Hand 0.1016
-Inch 0.254
+Inch 0.0254
 Mil 0.0000254
 Nautical mile(int) 1852
 Nautical mile(bri) 1853.184

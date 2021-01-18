@@ -37,8 +37,8 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     ConverterEntry.COLUMN_NAME_NAME + " text unique not null" +
                     " check(" + ConverterEntry.COLUMN_NAME_NAME + " not like ''), " +
                     ConverterEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
-                    ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
-                    ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean default false, " +
+                    ConverterEntry.COLUMN_NAME_IS_ENABLED + " boolean default 'true', " +
+                    ConverterEntry.COLUMN_NAME_IS_LAST_SELECTED + " boolean, " +
                     ConverterEntry.COLUMN_NAME_LAST_SELECTED_UNIT_POS + " integer default 0, " +
                     ConverterEntry.COLUMN_NAME_LAST_QUANTITY_TEXT + " text, " +
                     ConverterEntry.COLUMN_NAME_ERRORS + " text default null, " +
@@ -53,7 +53,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
                     UnitEntry.COLUMN_NAME_VALUE + " double not null " +
                     "check(" + UnitEntry.COLUMN_NAME_VALUE + " > 0), " +
                     UnitEntry.COLUMN_NAME_ORDER_POSITION + " integer not null, " +
-                    UnitEntry.COLUMN_NAME_IS_ENABLED + " boolean default true, " +
+                    UnitEntry.COLUMN_NAME_IS_ENABLED + " boolean default 'true', " +
                     UnitEntry.COLUMN_NAME_CONVERTER_ID + " integer not null, " +
                     UnitEntry.COLUMN_NAME_CHAR_CODE + " text default null, " +
                     "foreign key(" + UnitEntry.COLUMN_NAME_CONVERTER_ID + ") " +
@@ -70,9 +70,9 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
 
     private static final String ENABLE_FK = "PRAGMA foreign_keys = ON;";
 
-    private Context mContext;
+    private final Context mContext;
 
-    private String mDbLang;
+    private final String mDbLang;
 
     private static final byte TEMPERATURE_CONVERTER_TYPE = 1;
     private static final byte CURRENCY_CONVERTER_TYPE = 2;
@@ -159,7 +159,6 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             updateDbFrom2to3(db);
         } else if (oldVersion == 2) {
             updateDbFrom2to3(db);
-
         }
     }
 
@@ -533,7 +532,7 @@ final class ConvertersDbHelper extends SQLiteOpenHelper {
             while ((line = reader.readLine()) != null) {
                 matcher.reset(line);
                 if (matcher.find()) {
-                    Double value = Double.valueOf(matcher.group().trim());
+                    double value = Double.parseDouble(matcher.group().trim());
                     if (value != 0) {
                         String name = matcher.replaceAll("").trim();
                         if (!TextUtils.isEmpty(name)) {

@@ -7,7 +7,6 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
 
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
         applicationId "com.tiomamaster.customizableconverter"
@@ -56,6 +55,11 @@ android {
                 && variant.getFlavors().get(0).name == 'mock') {
             variant.setIgnore(true)
         }
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 
     testOptions {

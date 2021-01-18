@@ -1,5 +1,6 @@
 package com.tiomamaster.customizableconverter.settings;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.preference.Preference;
@@ -98,6 +99,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         for (int i = 0; i < summaries.length; i++) {
             screen.getPreference(i + 1).setSummary(summaries[i]);
         }
+    }
+
+    @Override
+    public void showDialog() {
+        new AlertDialog.Builder(getContext())
+                .setMessage(R.string.msg_restart)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getActivity().finishAffinity())
+                .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     @Override

@@ -49,4 +49,5 @@
     <string name="title_btn_update">Обновить</string>
     <string name="msg_internet_error">Не удалось загрузить курсы валют. Проверьте интернет подключение и повторите попытку.</string>
     <string name="msg_old_data">Курсы валют возможно устарели. Потяните вниз, чтобы обновить.</string>
+    <string name="msg_restart">Чтобы применить эту настройку, пожалуйста перезапустите приложение.</string>
 </resources>

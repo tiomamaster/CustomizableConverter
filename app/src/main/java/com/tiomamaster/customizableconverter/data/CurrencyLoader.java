@@ -25,7 +25,7 @@ import java.util.Locale;
  */
 final class CurrencyLoader {
 
-    private String mUrl;
+    private final String mUrl;
 
     private final RequestQueue mQueue;
 
@@ -34,7 +34,7 @@ final class CurrencyLoader {
     CurrencyLoader(Context context, String locale) {
         String lang = "";
         if (locale.equals("en")) lang = "_eng";
-        mUrl = "http://www.cbr.ru/scripts/XML_daily" + lang + ".asp";
+        mUrl = "https://www.cbr.ru/scripts/XML_daily" + lang + ".asp";
         mQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 

@@ -346,7 +346,8 @@ public class ConverterFragment extends Fragment implements ConverterContract.Vie
         }
 
         // show conversion result
-        mActionsListener.convert(mSpinnerUnits.getSelectedItem().toString(), lastQuantity);
+        Object selectedItem = mSpinnerUnits.getSelectedItem();
+        if (selectedItem != null) mActionsListener.convert(selectedItem.toString(), lastQuantity);
     }
 
     @Override

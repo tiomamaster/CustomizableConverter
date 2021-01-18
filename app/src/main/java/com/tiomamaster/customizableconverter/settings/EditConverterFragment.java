@@ -97,6 +97,8 @@ public class EditConverterFragment extends Fragment implements SettingsContract.
         mParentActivity = (SettingsActivity) getActivity();
 
         mImm = (InputMethodManager) mParentActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        mParentActivity.showFab(false);
     }
 
     @Nullable

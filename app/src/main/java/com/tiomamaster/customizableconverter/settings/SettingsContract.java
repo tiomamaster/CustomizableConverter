@@ -29,6 +29,8 @@ interface SettingsContract {
 
         void showSummaries(String[] summaries);
 
+        void showDialog();
+
         void enableGrSizeOption(boolean enable);
 
         void enableFormattingOptions(boolean enable);
