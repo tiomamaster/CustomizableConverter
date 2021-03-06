@@ -3,7 +3,6 @@ package com.tiomamaster.customizableconverter.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
 
@@ -25,9 +24,9 @@ public class InMemorySettingsRepository implements SettingsRepository, SharedPre
 
     @NonNull private Context mContext;
 
-    private Map<String, OnSettingsChangeListener> mChangeListeners;
+    private final Map<String, OnSettingsChangeListener> mChangeListeners;
 
-    private String mLanguage;
+    private final String mLanguage;
     private boolean isLangChanged;
     private int mGrSize;
     private int mPrecision;
@@ -119,13 +118,8 @@ public class InMemorySettingsRepository implements SettingsRepository, SharedPre
         Locale locale = new Locale(mLanguage);
         Locale.setDefault(locale);
         Configuration config = new Configuration();
-        if (Build.VERSION.SDK_INT >= 17) {
-            config.setLocale(locale);
-            mContext = mContext.createConfigurationContext(config);
-        } else {
-            config.locale = locale;
-            mContext.getResources().updateConfiguration(config, mContext.getResources().getDisplayMetrics());
-        }
+        config.setLocale(locale);
+        mContext = mContext.createConfigurationContext(config);
         return mContext;
     }
 

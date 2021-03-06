@@ -44,10 +44,11 @@
     <string name="no">No</string>
     <string name="cancel">Cancel</string>
     <string name="ok" translatable="false">OK</string>
+    <string name="later">Later</string>
     <string name="hint_number">Input number</string>
     <string name="copy">COPY</string>
     <string name="title_btn_update">Update</string>
     <string name="msg_internet_error">Currency rates not loaded. Check the internet connection and try again.</string>
     <string name="msg_old_data">Exchange rates may be outdated. Swipe down to refresh.</string>
-    <string name="msg_restart">To apply this setting restart the app please.</string>
+    <string name="msg_restart">To apply this setting restart the app please!</string>
 </resources>

@@ -8,9 +8,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 class SettingsPresenter implements SettingsContract.SettingsUal, SettingsRepository.OnSettingsChangeListener {
 
-    @NonNull private SettingsRepository mSettingsRepo;
+    @NonNull private final SettingsRepository mSettingsRepo;
 
-    @NonNull private SettingsContract.SettingsView mSettingsView;
+    @NonNull private final SettingsContract.SettingsView mSettingsView;
 
     SettingsPresenter(@NonNull SettingsRepository settingsRepository,
                       @NonNull SettingsContract.SettingsView settingsView) {
@@ -50,7 +50,7 @@ class SettingsPresenter implements SettingsContract.SettingsUal, SettingsReposit
     @Override
     public void onSettingsChange(int grSize, int maxFrDigits, boolean stForm, boolean defForm,
                                  boolean langChanged) {
-        if (langChanged) mSettingsView.restartApp();
+        if (langChanged) mSettingsView.showDialog();
         mSettingsView.showSummaries(mSettingsRepo.getSummaries());
     }
 }

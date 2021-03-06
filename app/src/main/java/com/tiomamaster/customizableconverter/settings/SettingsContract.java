@@ -34,8 +34,6 @@ interface SettingsContract {
         void enableGrSizeOption(boolean enable);
 
         void enableFormattingOptions(boolean enable);
-
-        void restartApp();
     }
 
     interface SettingsUal extends UserActionListener {

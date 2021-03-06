@@ -73,6 +73,6 @@ public class SettingsPresenterTest {
     public void onSettingsChange_RestartApp() {
         mPresenter.onSettingsChange(0, 0, true, true, true);
 
-        verify(mView).restartApp();
+        verify(mView).showDialog();
     }
 }

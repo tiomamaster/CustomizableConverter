@@ -3,14 +3,12 @@ package com.tiomamaster.customizableconverter.settings;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 import android.view.MenuItem;
 
 import com.tiomamaster.customizableconverter.Injection;
 import com.tiomamaster.customizableconverter.R;
-import com.tiomamaster.customizableconverter.converter.ConverterActivity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,34 +30,25 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         // customize converters click listener
-        getPreferenceScreen().getPreference(0).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                ConvertersEditFragment view = ConvertersEditFragment.newInstance();
-                SettingsContract.UserActionListener presenter = new ConvertersEditPresenter(
-                        Injection.provideConvertersRepository(getContext()), view);
-                mParentActivity.showFragment(view);
-                mParentActivity.setActionListener(presenter);
-                return true;
-            }
+        getPreferenceScreen().getPreference(0).setOnPreferenceClickListener(preference -> {
+            ConvertersEditFragment view = ConvertersEditFragment.newInstance();
+            SettingsContract.UserActionListener presenter = new ConvertersEditPresenter(
+                    Injection.provideConvertersRepository(getContext()), view);
+            mParentActivity.showFragment(view);
+            mParentActivity.setActionListener(presenter);
+            return true;
         });
 
         // standard form click listener
-        getPreferenceScreen().getPreference(4).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                mActionListener.standardOrDefaultClicked();
-                return true;
-            }
+        getPreferenceScreen().getPreference(4).setOnPreferenceClickListener(preference -> {
+            mActionListener.standardOrDefaultClicked();
+            return true;
         });
 
         // default form click listener
-        getPreferenceScreen().getPreference(5).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                mActionListener.standardOrDefaultClicked();
-                return true;
-            }
+        getPreferenceScreen().getPreference(5).setOnPreferenceClickListener(preference -> {
+            mActionListener.standardOrDefaultClicked();
+            return true;
         });
 
         // enable or disable options at startup according to the preferences
@@ -85,10 +74,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mActionListener.handleHomePressed();
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            mActionListener.handleHomePressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -105,8 +93,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
     public void showDialog() {
         new AlertDialog.Builder(getContext())
                 .setMessage(R.string.msg_restart)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> getActivity().finishAffinity())
-                .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> System.exit(0))
+                .setNegativeButton(R.string.later, (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
@@ -130,11 +118,5 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Settin
     @Override
     public void showPreviousView() {
         getActivity().finish();
-    }
-
-    @Override
-    public void restartApp() {
-        mParentActivity.setResult(ConverterActivity.RESULT_CODE_RESTART_APP);
-        mParentActivity.finish();
     }
 }
